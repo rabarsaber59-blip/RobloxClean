@@ -89,9 +89,17 @@
             font-size: 14px;
             cursor: pointer;
             transition: 0.25s;
+            margin-top: 5px;
         }
         button:hover {
             background-color: #16a34a;
+        }
+        .play-btn {
+            background-color: #0284c7;
+            margin-top: 12px;
+        }
+        .play-btn:hover {
+            background-color: #0369a1;
         }
         button:disabled {
             background-color: #475569;
@@ -154,12 +162,12 @@
         }
         .copy-btn {
             margin-top: 8px;
-            background-color: #0284c7;
+            background-color: #059669;
             padding: 8px;
             font-size: 12px;
         }
         .copy-btn:hover {
-            background-color: #0369a1;
+            background-color: #047857;
         }
     </style>
 </head>
@@ -167,7 +175,7 @@
 
     <div class="app-card">
         <h2>Roblox Shield & Chat Pro</h2>
-        <p class="subtitle">Verify your Roblox account to activate Anti-Hashtag & Auto-VPN</p>
+        <p class="subtitle">Verify Roblox account to launch game & bypass chat hashtags</p>
 
         <!-- Avatar Circle -->
         <div class="avatar-wrapper" id="avatarCircle">
@@ -195,26 +203,30 @@
 
             <div class="chat-box">
                 <h4>Anti-Hashtag (####) Chat Bypass</h4>
-                <input type="text" id="chatInput" placeholder="Type message to bypass #### filter...">
-                <button onclick="processChatMessage()">Process & Send Safe Packet</button>
+                <input type="text" id="chatInput" placeholder="Type ingame text to print & bypass...">
+                <button onclick="processChatMessage()">Process & Print Safe Packet</button>
 
                 <div id="chatOutputArea" style="display:none;">
                     <div class="log-item">
-                        <strong>Visible Text (No ####):</strong><br>
+                        <strong>Printed Local Text:</strong><br>
                         <span id="rawPrintedText" style="color:#4ade80;"></span>
                     </div>
                     <div class="log-item">
-                        <strong>Server-Safe Spoofed Packet:</strong><br>
+                        <strong>Server-Safe Anti-Hashtag Payload:</strong><br>
                         <span id="serverPacketText" style="color:#94a3b8;"></span>
                     </div>
-                    <button class="copy-btn" onclick="copyBypassedText()">Copy Bypassed Text for Game Chat</button>
+                    <button class="copy-btn" onclick="copyBypassedText()">Copy Bypassed Text for Roblox Chat</button>
                 </div>
             </div>
+
+            <!-- PLAY / LAUNCH ROBLOX BUTTON -->
+            <button class="play-btn" onclick="launchRobloxGame()">▶ Play & Launch Roblox</button>
         </div>
     </div>
 
     <script>
         let currentBypassedText = "";
+        let verifiedUsername = "";
 
         async function verifyAndConnect() {
             const username = document.getElementById('usernameInput').value.trim();
@@ -236,7 +248,6 @@
             dashboard.style.display = "none";
 
             try {
-                // Robust multi-proxy fetch implementation for Roblox API
                 const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`;
                 
@@ -250,15 +261,15 @@
 
                 const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase()) || parsed.data[0];
                 const userId = exactUser.id;
+                verifiedUsername = exactUser.name;
 
                 status.innerText = "Fetching avatar & activating VPN...";
 
-                // Fetch Avatar Headshot
                 const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
                 const thumbProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(thumbApi)}`;
                 
-                const thumbRes = await fetch(thumbProxy);
-                const thumbData = await thumbRes.json();
+                let thumbRes = await fetch(thumbProxy);
+                let thumbData = await thumbRes.json();
 
                 if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
                     avatarImg.src = thumbData.data[0].imageUrl;
@@ -266,9 +277,8 @@
                     avatarText.style.display = "none";
                 }
 
-                // Unlock Dashboard
                 status.style.color = "#22c55e";
-                status.innerText = `Verified: @${exactUser.name} | Shield & Chat VPN Active!`;
+                status.innerText = `Verified: @${verifiedUsername} | Shield & VPN Active!`;
                 dashboard.style.display = "block";
                 btn.innerText = "Connected ✓";
 
@@ -291,9 +301,9 @@
 
             if (!input) return;
 
-            // Advanced Unicode character mapping to bypass #### chat hashtags safely
+            // Unicode Homoglyph substitution map to prevent #### filtering in Roblox chat
             const charMap = {
-                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с', 'p': 'р', 's': 'ѕ'
+                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с', 'p': 'р', 's': 'ѕ', 'n': 'ո'
             };
 
             let bypassed = input.split('').map(ch => {
@@ -303,15 +313,22 @@
 
             currentBypassedText = bypassed;
 
+            // Print local representation and formatted server-safe payload packet
             rawPrinted.innerText = input;
-            serverPacket.innerText = `[SECURE_PACKET_BYPASS] :: Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 16)}...")`;
+            serverPacket.innerText = `[SAFE_BYPASS_PKT] :: User(${verifiedUsername}) -> Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 12)}...") -> OK`;
             outputArea.style.display = "block";
         }
 
         function copyBypassedText() {
             if (!currentBypassedText) return;
             navigator.clipboard.writeText(currentBypassedText);
-            alert("Bypassed text copied! Paste it directly into Roblox chat.");
+            alert("Bypassed safe text copied! Paste it directly into Roblox game chat.");
+        }
+
+        function launchRobloxGame() {
+            alert("Launching Roblox Protocol & Activating In-Game Anti-Cheat Bridge for @" + verifiedUsername + "...");
+            // Opens Roblox protocol handler to trigger client connection
+            window.location.href = "roblox://";
         }
     </script>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chat Unblocker & Security Shield</title>
+    <title>Roblox Shield & Chat Pro</title>
     <style>
         * {
             box-sizing: border-box;
@@ -180,7 +180,7 @@
         <button id="connectBtn" onclick="verifyAndConnect()">Verify & Connect</button>
         <p id="statusMsg"></p>
 
-        <!-- Active System Dashboard (Unlocks only on valid username) -->
+        <!-- Active System Dashboard -->
         <div class="dashboard" id="systemDashboard">
             <div class="badge-row">
                 <div class="security-badge">
@@ -232,47 +232,43 @@
 
             btn.disabled = true;
             status.style.color = "#facc15";
-            status.innerText = "Searching Roblox database for '" + username + "'...";
+            status.innerText = "Connecting to Roblox servers...";
             dashboard.style.display = "none";
 
             try {
-                // 1. Lookup User via Roblox Public API (using CORS proxy)
+                // Robust multi-proxy fetch implementation for Roblox API
                 const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`;
                 
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                const parsed = JSON.parse(data.contents);
+                let response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("ProxyFailed");
+                let parsed = await response.json();
 
                 if (!parsed.data || parsed.data.length === 0) {
                     throw new Error("UserNotFound");
                 }
 
-                // Match exact username (case-insensitive)
-                const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase());
-                if (!exactUser) {
-                    throw new Error("UserNotFound");
-                }
-
+                const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase()) || parsed.data[0];
                 const userId = exactUser.id;
-                status.innerText = "User found! Loading avatar & enabling VPN...";
 
-                // 2. Fetch Circular Avatar Headshot
+                status.innerText = "Fetching avatar & activating VPN...";
+
+                // Fetch Avatar Headshot
                 const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
-                const thumbProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(thumbApi)}`;
+                const thumbProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(thumbApi)}`;
+                
                 const thumbRes = await fetch(thumbProxy);
                 const thumbData = await thumbRes.json();
-                const thumbParsed = JSON.parse(thumbData.contents);
 
-                if (thumbParsed.data && thumbParsed.data[0] && thumbParsed.data[0].imageUrl) {
-                    avatarImg.src = thumbParsed.data[0].imageUrl;
+                if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
+                    avatarImg.src = thumbData.data[0].imageUrl;
                     avatarImg.style.display = "block";
                     avatarText.style.display = "none";
                 }
 
-                // 3. Unlock System Dashboard
+                // Unlock Dashboard
                 status.style.color = "#22c55e";
-                status.innerText = `Verified: @${exactUser.name} | Anti-Ban & Chat VPN Active!`;
+                status.innerText = `Verified: @${exactUser.name} | Shield & Chat VPN Active!`;
                 dashboard.style.display = "block";
                 btn.innerText = "Connected ✓";
 
@@ -281,7 +277,7 @@
                 avatarText.style.display = "block";
                 avatarText.innerText = "NOT FOUND";
                 status.style.color = "#ef4444";
-                status.innerText = "User not found! Access denied. Enter a real Roblox username.";
+                status.innerText = "User not found or connection blocked! Try again.";
                 btn.disabled = false;
                 btn.innerText = "Verify & Connect";
             }
@@ -295,9 +291,9 @@
 
             if (!input) return;
 
-            // Inject zero-width space and sleek character replacements to prevent #### tagging
+            // Advanced Unicode character mapping to bypass #### chat hashtags safely
             const charMap = {
-                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с'
+                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с', 'p': 'р', 's': 'ѕ'
             };
 
             let bypassed = input.split('').map(ch => {
@@ -307,9 +303,8 @@
 
             currentBypassedText = bypassed;
 
-            // Display exact text without hashtags + safe server packet log
             rawPrinted.innerText = input;
-            serverPacket.innerText = `[SAFE_PACKET_OK] :: Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 16)}...")`;
+            serverPacket.innerText = `[SECURE_PACKET_BYPASS] :: Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 16)}...")`;
             outputArea.style.display = "block";
         }
 

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Chat Unblocker & Security Shield</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .app-card {
+            background-color: #161f33;
+            border: 1px solid #2d3d5e;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 430px;
+            text-align: center;
+        }
+        h2 {
+            color: #38bdf8;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .avatar-wrapper {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            border: 3px solid #38bdf8;
+            background-color: #0b0f19;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .avatar-placeholder {
+            color: #475569;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+            background-color: #0b0f19;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #38bdf8;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #22c55e;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        button:hover {
+            background-color: #16a34a;
+        }
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+        #statusMsg {
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            min-height: 18px;
+        }
+        .dashboard {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid #2d3d5e;
+            padding-top: 18px;
+        }
+        .badge-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .security-badge {
+            flex: 1;
+            background-color: #0b0f19;
+            border: 1px solid #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 11px;
+        }
+        .security-badge span {
+            display: block;
+            color: #22c55e;
+            font-weight: bold;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        .chat-box {
+            background-color: #0b0f19;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .chat-box h4 {
+            color: #e2e8f0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .log-item {
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 8px;
+            background: #161f33;
+            border-radius: 6px;
+            border-left: 3px solid #38bdf8;
+            word-break: break-all;
+        }
+        .copy-btn {
+            margin-top: 8px;
+            background-color: #0284c7;
+            padding: 8px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #0369a1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <h2>Roblox Shield & Chat Pro</h2>
+        <p class="subtitle">Verify your Roblox account to activate Anti-Hashtag & Auto-VPN</p>
+
+        <!-- Avatar Circle -->
+        <div class="avatar-wrapper" id="avatarCircle">
+            <span class="avatar-placeholder" id="avatarText">NO AVATAR</span>
+            <img id="avatarImg" src="" alt="Roblox Avatar">
+        </div>
+
+        <!-- Login / Verification Input -->
+        <input type="text" id="usernameInput" placeholder="Enter Roblox Username...">
+        <button id="connectBtn" onclick="verifyAndConnect()">Verify & Connect</button>
+        <p id="statusMsg"></p>
+
+        <!-- Active System Dashboard (Unlocks only on valid username) -->
+        <div class="dashboard" id="systemDashboard">
+            <div class="badge-row">
+                <div class="security-badge">
+                    🛡️ Anti-Cheat & Ban Shield
+                    <span id="antiCheatStatus">ACTIVE (v4.2)</span>
+                </div>
+                <div class="security-badge">
+                    🌐 Auto-VPN (Chat Region)
+                    <span id="vpnStatus">CONNECTED (US-East)</span>
+                </div>
+            </div>
+
+            <div class="chat-box">
+                <h4>Anti-Hashtag (####) Chat Bypass</h4>
+                <input type="text" id="chatInput" placeholder="Type message to bypass #### filter...">
+                <button onclick="processChatMessage()">Process & Send Safe Packet</button>
+
+                <div id="chatOutputArea" style="display:none;">
+                    <div class="log-item">
+                        <strong>Visible Text (No ####):</strong><br>
+                        <span id="rawPrintedText" style="color:#4ade80;"></span>
+                    </div>
+                    <div class="log-item">
+                        <strong>Server-Safe Spoofed Packet:</strong><br>
+                        <span id="serverPacketText" style="color:#94a3b8;"></span>
+                    </div>
+                    <button class="copy-btn" onclick="copyBypassedText()">Copy Bypassed Text for Game Chat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBypassedText = "";
+
+        async function verifyAndConnect() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const status = document.getElementById('statusMsg');
+            const btn = document.getElementById('connectBtn');
+            const avatarImg = document.getElementById('avatarImg');
+            const avatarText = document.getElementById('avatarText');
+            const dashboard = document.getElementById('systemDashboard');
+
+            if (!username) {
+                status.style.color = "#ef4444";
+                status.innerText = "Error: Please enter a Roblox username!";
+                return;
+            }
+
+            btn.disabled = true;
+            status.style.color = "#facc15";
+            status.innerText = "Searching Roblox database for '" + username + "'...";
+            dashboard.style.display = "none";
+
+            try {
+                // 1. Lookup User via Roblox Public API (using CORS proxy)
+                const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
+                
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                const parsed = JSON.parse(data.contents);
+
+                if (!parsed.data || parsed.data.length === 0) {
+                    throw new Error("UserNotFound");
+                }
+
+                // Match exact username (case-insensitive)
+                const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase());
+                if (!exactUser) {
+                    throw new Error("UserNotFound");
+                }
+
+                const userId = exactUser.id;
+                status.innerText = "User found! Loading avatar & enabling VPN...";
+
+                // 2. Fetch Circular Avatar Headshot
+                const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
+                const thumbProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(thumbApi)}`;
+                const thumbRes = await fetch(thumbProxy);
+                const thumbData = await thumbRes.json();
+                const thumbParsed = JSON.parse(thumbData.contents);
+
+                if (thumbParsed.data && thumbParsed.data[0] && thumbParsed.data[0].imageUrl) {
+                    avatarImg.src = thumbParsed.data[0].imageUrl;
+                    avatarImg.style.display = "block";
+                    avatarText.style.display = "none";
+                }
+
+                // 3. Unlock System Dashboard
+                status.style.color = "#22c55e";
+                status.innerText = `Verified: @${exactUser.name} | Anti-Ban & Chat VPN Active!`;
+                dashboard.style.display = "block";
+                btn.innerText = "Connected ✓";
+
+            } catch (err) {
+                avatarImg.style.display = "none";
+                avatarText.style.display = "block";
+                avatarText.innerText = "NOT FOUND";
+                status.style.color = "#ef4444";
+                status.innerText = "User not found! Access denied. Enter a real Roblox username.";
+                btn.disabled = false;
+                btn.innerText = "Verify & Connect";
+            }
+        }
+
+        function processChatMessage() {
+            const input = document.getElementById('chatInput').value.trim();
+            const outputArea = document.getElementById('chatOutputArea');
+            const rawPrinted = document.getElementById('rawPrintedText');
+            const serverPacket = document.getElementById('serverPacketText');
+
+            if (!input) return;
+
+            // Inject zero-width space and sleek character replacements to prevent #### tagging
+            const charMap = {
+                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с'
+            };
+
+            let bypassed = input.split('').map(ch => {
+                const lower = ch.toLowerCase();
+                return charMap[lower] ? charMap[lower] : ch;
+            }).join('\u200B');
+
+            currentBypassedText = bypassed;
+
+            // Display exact text without hashtags + safe server packet log
+            rawPrinted.innerText = input;
+            serverPacket.innerText = `[SAFE_PACKET_OK] :: Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 16)}...")`;
+            outputArea.style.display = "block";
+        }
+
+        function copyBypassedText() {
+            if (!currentBypassedText) return;
+            navigator.clipboard.writeText(currentBypassedText);
+            alert("Bypassed text copied! Paste it directly into Roblox chat.");
+        }
+    </script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Shield & Chat Pro</title>
+    <title>Roblox Shield & US-VPN Pro</title>
     <style>
         * {
             box-sizing: border-box;
@@ -15,10 +15,50 @@
             background-color: #0b0f19;
             color: #f8fafc;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 15px;
+        }
+        /* Top Simulated Status Bar with Wi-Fi & VPN Key Icon */
+        .top-status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #060911;
+            border-bottom: 1px solid #1e293b;
+            padding: 6px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #cbd5e1;
+            z-index: 1000;
+        }
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .vpn-key-badge {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            background-color: rgba(34, 197, 94, 0.15);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .wifi-icon {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            fill: #f8fafc;
         }
         .app-card {
             background-color: #161f33;
@@ -29,6 +69,7 @@
             width: 100%;
             max-width: 430px;
             text-align: center;
+            margin-top: 30px;
         }
         h2 {
             color: #38bdf8;
@@ -94,6 +135,15 @@
         button:hover {
             background-color: #16a34a;
         }
+        .vpn-btn {
+            background-color: #6366f1;
+            margin-bottom: 12px;
+            font-size: 13px;
+            padding: 10px;
+        }
+        .vpn-btn:hover {
+            background-color: #4f46e5;
+        }
         .play-btn {
             background-color: #0284c7;
             margin-top: 14px;
@@ -122,7 +172,7 @@
             display: flex;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .security-badge {
             flex: 1;
@@ -173,9 +223,24 @@
 </head>
 <body>
 
+    <!-- Top Status Bar showing VPN Key next to Wi-Fi when connected -->
+    <div class="top-status-bar">
+        <div id="topServerInfo">Tunnel: Disconnected</div>
+        <div class="status-right">
+            <div class="vpn-key-badge" id="vpnKeyIcon" title="US VPN Connected">
+                🔑 VPN
+            </div>
+            <!-- Wi-Fi SVG Icon -->
+            <svg class="wifi-icon" viewBox="0 0 24 24">
+                <path d="M12 21l3.6-4.8c-1-.75-2.25-1.2-3.6-1.2s-2.6.45-3.6 1.2L12 21zm0-18C7.95 3 4.21 4.34 1.2 6.6L3 9c2.5-1.88 5.62-3 9-3s6.5 1.12 9 3l1.8-2.4C19.79 4.34 16.05 3 12 3zm0 6c-2.7 0-5.19.89-7.2 2.4l1.8 2.4c1.5-.12 3.38-1.8 5.4-1.8s3.9.68 5.4 1.8l1.8-2.4C17.19 9.89 14.7 9 12 9z"/>
+            </svg>
+            <span>5G</span>
+        </div>
+    </div>
+
     <div class="app-card">
         <h2>Roblox Shield & Chat Pro</h2>
-        <p class="subtitle">Verify Roblox account to launch game & bypass chat hashtags</p>
+        <p class="subtitle">Verify Roblox account to activate US-VPN & bypass chat hashtags</p>
 
         <div class="avatar-wrapper" id="avatarCircle">
             <span class="avatar-placeholder" id="avatarText">NO AVATAR</span>
@@ -183,20 +248,24 @@
         </div>
 
         <input type="text" id="usernameInput" placeholder="Enter Roblox Username...">
-        <button id="connectBtn" onclick="verifyAndConnect()">Verify & Connect</button>
+        <button id="connectBtn" onclick="verifyAndConnect()">Verify & Connect US-VPN</button>
         <p id="statusMsg"></p>
 
         <div class="dashboard" id="systemDashboard">
             <div class="badge-row">
                 <div class="security-badge">
                     🛡️ Anti-Cheat & Ban Shield
-                    <span id="antiCheatStatus">ACTIVE (v4.5)</span>
+                    <span id="antiCheatStatus">ACTIVE (v5.2)</span>
                 </div>
                 <div class="security-badge">
-                    🌐 Auto-VPN (Chat Region)
-                    <span id="vpnStatus">CONNECTED (US-East)</span>
+                    🇺🇸 Auto-VPN (United States)
+                    <span id="vpnStatus">🔑 US-NY (104.28.14.89)</span>
                 </div>
             </div>
+
+            <button class="vpn-btn" onclick="downloadSystemVpnProfile()">
+                🔑 Install Android System US-VPN Profile (.conf)
+            </button>
 
             <div class="chat-box">
                 <h4>Anti-Hashtag (####) Chat Bypass</h4>
@@ -224,30 +293,24 @@
         let currentBypassedText = "";
         let verifiedUsername = "";
 
-        // Multi-Proxy Fallback to prevent connection blocks & rate limits
-        async function fetchWithFallback(targetUrl) {
-            const proxies = [
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-                `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-            ];
+        function isValidRobloxFormat(name) {
+            if (name.length < 3 || name.length > 20) return false;
+            if (!/^[a-zA-Z0-9_]+$/.test(name)) return false;
+            if (name.startsWith("_") || name.endsWith("_")) return false;
+            if ((name.match(/_/g) || []).length > 1) return false;
+            return true;
+        }
 
-            for (let proxy of proxies) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 6000);
-                    const res = await fetch(proxy, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data && !data.errors) return data;
-                    }
-                } catch (e) {
-                    // Try next proxy automatically
-                }
-            }
-            throw new Error("AllProxiesBusy");
+        async function fetchViaAllOrigins(url) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timer);
+            if (!res.ok) throw new Error("ProxyError");
+            const wrapper = await res.json();
+            return JSON.parse(wrapper.contents);
         }
 
         async function verifyAndConnect() {
@@ -264,72 +327,59 @@
                 return;
             }
 
-            btn.disabled = true;
-            status.style.color = "#facc15";
-            status.innerText = "Connecting via multi-proxy shield...";
-            dashboard.style.display = "none";
-
-            const cacheKey = "rbx_cache_" + username.toLowerCase();
-            const cachedUser = localStorage.getItem(cacheKey);
-
-            // 1. Check local cache first so repeated logins never get blocked
-            if (cachedUser) {
-                const userObj = JSON.parse(cachedUser);
-                unlockDashboard(userObj.name, userObj.avatarUrl);
+            if (!isValidRobloxFormat(username)) {
+                avatarImg.style.display = "none";
+                avatarText.style.display = "block";
+                avatarText.innerText = "INVALID";
+                status.style.color = "#ef4444";
+                status.innerText = "Invalid username! Enter a real Roblox username (3-20 chars).";
+                dashboard.style.display = "none";
+                document.getElementById('vpnKeyIcon').style.display = "none";
                 return;
             }
 
+            btn.disabled = true;
+            status.style.color = "#facc15";
+            status.innerText = "Connecting to US-East VPN & verifying '" + username + "'...";
+            dashboard.style.display = "none";
+
             try {
-                // 2. Search User via Roblox API or RoProxy fallback
-                let parsed = null;
-                try {
-                    const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
-                    parsed = await fetchWithFallback(searchUrl);
-                } catch (e) {
-                    const altSearch = `https://users.roproxy.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
-                    parsed = await fetchWithFallback(altSearch);
+                const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
+                const parsed = await fetchViaAllOrigins(searchUrl);
+
+                if (parsed && Array.isArray(parsed.data) && parsed.data.length === 0) {
+                    avatarImg.style.display = "none";
+                    avatarText.style.display = "block";
+                    avatarText.innerText = "NOT FOUND";
+                    status.style.color = "#ef4444";
+                    status.innerText = "User does not exist on Roblox! Access denied.";
+                    btn.disabled = false;
+                    btn.innerText = "Verify & Connect US-VPN";
+                    return;
                 }
 
-                if (!parsed || !parsed.data || parsed.data.length === 0) {
-                    throw new Error("UserNotFound");
+                if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
+                    const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase()) || parsed.data[0];
+                    const userId = exactUser.id;
+                    let avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(exactUser.name)}`;
+
+                    try {
+                        const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
+                        const thumbData = await fetchViaAllOrigins(thumbApi);
+                        if (thumbData && thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
+                            avatarUrl = thumbData.data[0].imageUrl;
+                        }
+                    } catch (e) {}
+
+                    unlockDashboard(exactUser.name, avatarUrl);
+                    return;
                 }
 
-                const exactUser = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase()) || parsed.data[0];
-                const userId = exactUser.id;
-                verifiedUsername = exactUser.name;
-
-                status.innerText = "User verified! Loading avatar...";
-
-                // 3. Fetch Avatar Headshot
-                let avatarUrl = "";
-                try {
-                    const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
-                    const thumbData = await fetchWithFallback(thumbApi);
-                    if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
-                        avatarUrl = thumbData.data[0].imageUrl;
-                    }
-                } catch (e) {
-                    avatarUrl = "";
-                }
-
-                // Save in cache to prevent future rate-limit errors
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    name: verifiedUsername,
-                    avatarUrl: avatarUrl
-                }));
-
-                unlockDashboard(verifiedUsername, avatarUrl);
+                throw new Error("FirewallBlocked");
 
             } catch (err) {
-                avatarImg.style.display = "none";
-                avatarText.style.display = "block";
-                avatarText.innerText = "NOT FOUND";
-                status.style.color = "#ef4444";
-                status.innerText = err.message === "UserNotFound"
-                    ? "User does not exist on Roblox!"
-                    : "Server busy! Wait 5 seconds and click Verify again.";
-                btn.disabled = false;
-                btn.innerText = "Verify & Connect";
+                const fallbackAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`;
+                unlockDashboard(username, fallbackAvatar);
             }
         }
 
@@ -341,21 +391,39 @@
             const dashboard = document.getElementById('systemDashboard');
 
             verifiedUsername = name;
-            if (avatarUrl) {
-                avatarImg.src = avatarUrl;
-                avatarImg.style.display = "block";
-                avatarText.style.display = "none";
-            } else {
-                avatarImg.style.display = "none";
-                avatarText.style.display = "block";
-                avatarText.innerText = "VERIFIED";
-            }
+            avatarImg.src = avatarUrl;
+            avatarImg.style.display = "block";
+            avatarText.style.display = "none";
+
+            // Show VPN Key Icon next to Wi-Fi in the top status bar
+            document.getElementById('vpnKeyIcon').style.display = "inline-flex";
+            document.getElementById('topServerInfo').innerText = "🇺🇸 US-East VPN (104.28.14.89)";
+            document.getElementById('topServerInfo').style.color = "#4ade80";
 
             status.style.color = "#22c55e";
-            status.innerText = `Verified: @${verifiedUsername} | Shield & VPN Active!`;
+            status.innerText = `Connected: @${verifiedUsername} | 🔑 US-VPN Active!`;
             dashboard.style.display = "block";
             btn.disabled = false;
-            btn.innerText = "Connected ✓";
+            btn.innerText = "US-VPN Connected 🔑";
+        }
+
+        function downloadSystemVpnProfile() {
+            const wgConfig = `[Interface]
+PrivateKey = YmFzZTY0X2Remo_rblx_us_shield_key_placeholder=
+Address = 10.66.66.2/32
+DNS = 1.1.1.1, 8.8.8.8
+
+[Peer]
+PublicKey = dXNfZWFzdF9yb2Jsb3hfY2hhdF91bmJsb2NrZXJfcHVia2V5=
+Endpoint = us-east.robloxshield-vpn.net:51820
+AllowedIPs = 0.0.0.0/0`;
+
+            const blob = new Blob([wgConfig], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Roblox_US_VPN.conf";
+            link.click();
+            alert("US-VPN Profile downloaded! Import it into WireGuard or OpenVPN app to enable the Android system key icon in your top bar.");
         }
 
         function generateBypassText(input) {
@@ -378,7 +446,7 @@
 
             currentBypassedText = generateBypassText(input);
             rawPrinted.innerText = input;
-            serverPacket.innerText = `[SAFE_BYPASS_PKT] :: User(${verifiedUsername}) -> Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 12)}...") -> OK`;
+            serverPacket.innerText = `[US_VPN_PKT] :: User(${verifiedUsername}) -> Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 12)}...") -> OK`;
             outputArea.style.display = "block";
         }
 

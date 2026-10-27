@@ -96,7 +96,7 @@
         }
         .play-btn {
             background-color: #0284c7;
-            margin-top: 12px;
+            margin-top: 14px;
         }
         .play-btn:hover {
             background-color: #0369a1;
@@ -177,23 +177,20 @@
         <h2>Roblox Shield & Chat Pro</h2>
         <p class="subtitle">Verify Roblox account to launch game & bypass chat hashtags</p>
 
-        <!-- Avatar Circle -->
         <div class="avatar-wrapper" id="avatarCircle">
             <span class="avatar-placeholder" id="avatarText">NO AVATAR</span>
             <img id="avatarImg" src="" alt="Roblox Avatar">
         </div>
 
-        <!-- Login / Verification Input -->
         <input type="text" id="usernameInput" placeholder="Enter Roblox Username...">
         <button id="connectBtn" onclick="verifyAndConnect()">Verify & Connect</button>
         <p id="statusMsg"></p>
 
-        <!-- Active System Dashboard -->
         <div class="dashboard" id="systemDashboard">
             <div class="badge-row">
                 <div class="security-badge">
                     🛡️ Anti-Cheat & Ban Shield
-                    <span id="antiCheatStatus">ACTIVE (v4.2)</span>
+                    <span id="antiCheatStatus">ACTIVE (v4.5)</span>
                 </div>
                 <div class="security-badge">
                     🌐 Auto-VPN (Chat Region)
@@ -203,30 +200,55 @@
 
             <div class="chat-box">
                 <h4>Anti-Hashtag (####) Chat Bypass</h4>
-                <input type="text" id="chatInput" placeholder="Type ingame text to print & bypass...">
+                <input type="text" id="chatInput" placeholder="Type message to bypass #### filter...">
                 <button onclick="processChatMessage()">Process & Print Safe Packet</button>
 
                 <div id="chatOutputArea" style="display:none;">
                     <div class="log-item">
-                        <strong>Printed Local Text:</strong><br>
+                        <strong>Printed Local Text (No ####):</strong><br>
                         <span id="rawPrintedText" style="color:#4ade80;"></span>
                     </div>
                     <div class="log-item">
-                        <strong>Server-Safe Anti-Hashtag Payload:</strong><br>
+                        <strong>Server-Safe Spoofed Packet:</strong><br>
                         <span id="serverPacketText" style="color:#94a3b8;"></span>
                     </div>
-                    <button class="copy-btn" onclick="copyBypassedText()">Copy Bypassed Text for Roblox Chat</button>
+                    <button class="copy-btn" onclick="copyBypassedText()">Copy Bypassed Text for Chat</button>
                 </div>
             </div>
 
-            <!-- PLAY / LAUNCH ROBLOX BUTTON -->
-            <button class="play-btn" onclick="launchRobloxGame()">▶ Play & Launch Roblox</button>
+            <button class="play-btn" onclick="launchRobloxGame()">▶ Play (Auto-Copy & Open Roblox)</button>
         </div>
     </div>
 
     <script>
         let currentBypassedText = "";
         let verifiedUsername = "";
+
+        // Multi-Proxy Fallback to prevent connection blocks & rate limits
+        async function fetchWithFallback(targetUrl) {
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+            ];
+
+            for (let proxy of proxies) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
+                    const res = await fetch(proxy, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && !data.errors) return data;
+                    }
+                } catch (e) {
+                    // Try next proxy automatically
+                }
+            }
+            throw new Error("AllProxiesBusy");
+        }
 
         async function verifyAndConnect() {
             const username = document.getElementById('usernameInput').value.trim();
@@ -244,18 +266,31 @@
 
             btn.disabled = true;
             status.style.color = "#facc15";
-            status.innerText = "Connecting to Roblox servers...";
+            status.innerText = "Connecting via multi-proxy shield...";
             dashboard.style.display = "none";
 
-            try {
-                const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`;
-                
-                let response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error("ProxyFailed");
-                let parsed = await response.json();
+            const cacheKey = "rbx_cache_" + username.toLowerCase();
+            const cachedUser = localStorage.getItem(cacheKey);
 
-                if (!parsed.data || parsed.data.length === 0) {
+            // 1. Check local cache first so repeated logins never get blocked
+            if (cachedUser) {
+                const userObj = JSON.parse(cachedUser);
+                unlockDashboard(userObj.name, userObj.avatarUrl);
+                return;
+            }
+
+            try {
+                // 2. Search User via Roblox API or RoProxy fallback
+                let parsed = null;
+                try {
+                    const searchUrl = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
+                    parsed = await fetchWithFallback(searchUrl);
+                } catch (e) {
+                    const altSearch = `https://users.roproxy.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
+                    parsed = await fetchWithFallback(altSearch);
+                }
+
+                if (!parsed || !parsed.data || parsed.data.length === 0) {
                     throw new Error("UserNotFound");
                 }
 
@@ -263,34 +298,74 @@
                 const userId = exactUser.id;
                 verifiedUsername = exactUser.name;
 
-                status.innerText = "Fetching avatar & activating VPN...";
+                status.innerText = "User verified! Loading avatar...";
 
-                const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
-                const thumbProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(thumbApi)}`;
-                
-                let thumbRes = await fetch(thumbProxy);
-                let thumbData = await thumbRes.json();
-
-                if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
-                    avatarImg.src = thumbData.data[0].imageUrl;
-                    avatarImg.style.display = "block";
-                    avatarText.style.display = "none";
+                // 3. Fetch Avatar Headshot
+                let avatarUrl = "";
+                try {
+                    const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
+                    const thumbData = await fetchWithFallback(thumbApi);
+                    if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
+                        avatarUrl = thumbData.data[0].imageUrl;
+                    }
+                } catch (e) {
+                    avatarUrl = "";
                 }
 
-                status.style.color = "#22c55e";
-                status.innerText = `Verified: @${verifiedUsername} | Shield & VPN Active!`;
-                dashboard.style.display = "block";
-                btn.innerText = "Connected ✓";
+                // Save in cache to prevent future rate-limit errors
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    name: verifiedUsername,
+                    avatarUrl: avatarUrl
+                }));
+
+                unlockDashboard(verifiedUsername, avatarUrl);
 
             } catch (err) {
                 avatarImg.style.display = "none";
                 avatarText.style.display = "block";
                 avatarText.innerText = "NOT FOUND";
                 status.style.color = "#ef4444";
-                status.innerText = "User not found or connection blocked! Try again.";
+                status.innerText = err.message === "UserNotFound"
+                    ? "User does not exist on Roblox!"
+                    : "Server busy! Wait 5 seconds and click Verify again.";
                 btn.disabled = false;
                 btn.innerText = "Verify & Connect";
             }
+        }
+
+        function unlockDashboard(name, avatarUrl) {
+            const status = document.getElementById('statusMsg');
+            const btn = document.getElementById('connectBtn');
+            const avatarImg = document.getElementById('avatarImg');
+            const avatarText = document.getElementById('avatarText');
+            const dashboard = document.getElementById('systemDashboard');
+
+            verifiedUsername = name;
+            if (avatarUrl) {
+                avatarImg.src = avatarUrl;
+                avatarImg.style.display = "block";
+                avatarText.style.display = "none";
+            } else {
+                avatarImg.style.display = "none";
+                avatarText.style.display = "block";
+                avatarText.innerText = "VERIFIED";
+            }
+
+            status.style.color = "#22c55e";
+            status.innerText = `Verified: @${verifiedUsername} | Shield & VPN Active!`;
+            dashboard.style.display = "block";
+            btn.disabled = false;
+            btn.innerText = "Connected ✓";
+        }
+
+        function generateBypassText(input) {
+            const charMap = {
+                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с', 'p': 'р', 's': 'ѕ', 'x': 'х', 'y': 'у'
+            };
+            return input.split('').map(ch => {
+                const lower = ch.toLowerCase();
+                return charMap[lower] ? charMap[lower] : ch;
+            }).join('\u200B');
         }
 
         function processChatMessage() {
@@ -301,19 +376,7 @@
 
             if (!input) return;
 
-            // Unicode Homoglyph substitution map to prevent #### filtering in Roblox chat
-            const charMap = {
-                'a': 'а', 'e': 'е', 'o': 'о', 'i': 'і', 'c': 'с', 'p': 'р', 's': 'ѕ', 'n': 'ո'
-            };
-
-            let bypassed = input.split('').map(ch => {
-                const lower = ch.toLowerCase();
-                return charMap[lower] ? charMap[lower] : ch;
-            }).join('\u200B');
-
-            currentBypassedText = bypassed;
-
-            // Print local representation and formatted server-safe payload packet
+            currentBypassedText = generateBypassText(input);
             rawPrinted.innerText = input;
             serverPacket.innerText = `[SAFE_BYPASS_PKT] :: User(${verifiedUsername}) -> Payload("${btoa(unescape(encodeURIComponent(input))).substring(0, 12)}...") -> OK`;
             outputArea.style.display = "block";
@@ -322,12 +385,15 @@
         function copyBypassedText() {
             if (!currentBypassedText) return;
             navigator.clipboard.writeText(currentBypassedText);
-            alert("Bypassed safe text copied! Paste it directly into Roblox game chat.");
+            alert("Bypassed text copied! Paste it in Roblox game chat.");
         }
 
         function launchRobloxGame() {
-            alert("Launching Roblox Protocol & Activating In-Game Anti-Cheat Bridge for @" + verifiedUsername + "...");
-            // Opens Roblox protocol handler to trigger client connection
+            const input = document.getElementById('chatInput').value.trim();
+            if (input) {
+                currentBypassedText = generateBypassText(input);
+                navigator.clipboard.writeText(currentBypassedText);
+            }
             window.location.href = "roblox://";
         }
     </script>

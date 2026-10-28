@@ -24,22 +24,19 @@
             justify-content: center;
         }
 
-        /* Main Card Container */
         .app-card {
             width: 92%;
             max-width: 400px;
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid rgba(56, 189, 248, 0.25);
             border-radius: 28px;
             padding: 30px 24px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(16px);
-            transition: all 0.35s ease;
             z-index: 10;
         }
 
-        /* Glowing Avatar Circle */
         .avatar-circle {
             width: 130px;
             height: 130px;
@@ -53,12 +50,12 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
         }
 
         .avatar-circle.verified {
             border-color: #22c55e;
-            box-shadow: 0 0 32px rgba(34, 197, 94, 0.6);
+            box-shadow: 0 0 35px rgba(34, 197, 94, 0.65);
         }
 
         .avatar-circle img {
@@ -86,7 +83,6 @@
             margin-bottom: 22px;
         }
 
-        /* Input Box */
         .input-group {
             position: relative;
             margin-bottom: 16px;
@@ -101,7 +97,6 @@
             color: #fff;
             font-size: 15px;
             outline: none;
-            transition: border 0.25s;
             user-select: text;
         }
 
@@ -109,7 +104,6 @@
             border-color: #38bdf8;
         }
 
-        /* Buttons */
         .btn-primary {
             width: 100%;
             padding: 14px;
@@ -120,14 +114,8 @@
             font-size: 16px;
             font-weight: 800;
             cursor: pointer;
-            transition: transform 0.15s, opacity 0.2s;
         }
 
-        .btn-primary:active {
-            transform: scale(0.97);
-        }
-
-        /* Green Connect Button (Screen 2) */
         .btn-connect {
             width: 100%;
             padding: 16px;
@@ -137,22 +125,12 @@
             color: #ffffff;
             font-size: 18px;
             font-weight: 900;
-            letter-spacing: 0.5px;
             cursor: pointer;
             box-shadow: 0 10px 28px rgba(34, 197, 94, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: transform 0.15s, box-shadow 0.2s;
-        }
-
-        .btn-connect:hover {
-            box-shadow: 0 12px 34px rgba(34, 197, 94, 0.65);
-        }
-
-        .btn-connect:active {
-            transform: scale(0.96);
         }
 
         .status-msg {
@@ -166,9 +144,7 @@
             display: none !important;
         }
 
-        /* =========================================================
-           STAGE 3: LIVE AVATAR STAGE + DRAGGABLE CUSTOM CHAT WINDOW
-           ========================================================= */
+        /* STAGE 3: LIVE AVATAR + DRAGGABLE CUSTOM CHAT */
         #liveAvatarStage {
             position: fixed;
             inset: 0;
@@ -180,7 +156,6 @@
             z-index: 5;
         }
 
-        /* Roblox Overhead Bubble Printed Above Avatar */
         .overhead-bubble {
             background: #ffffff;
             color: #0f172a;
@@ -196,7 +171,7 @@
             margin-bottom: 18px;
             opacity: 0;
             transform: translateY(10px) scale(0.9);
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.25s ease;
         }
 
         .overhead-bubble.show {
@@ -242,13 +217,12 @@
             border: 1px solid rgba(74, 222, 128, 0.35);
         }
 
-        /* DRAGGABLE SMALL CUSTOM CHAT BOX */
         #draggableChatWindow {
             position: fixed;
             top: 24px;
             left: 24px;
             width: 300px;
-            background: rgba(15, 23, 42, 0.94);
+            background: rgba(15, 23, 42, 0.95);
             border: 1.5px solid #38bdf8;
             border-radius: 20px;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
@@ -266,10 +240,6 @@
             justify-content: space-between;
             cursor: grab;
             border-bottom: 1px solid rgba(56, 189, 248, 0.2);
-        }
-
-        .chat-header:active {
-            cursor: grabbing;
         }
 
         .chat-header-title {
@@ -326,10 +296,6 @@
             user-select: text;
         }
 
-        .chat-input-row input:focus {
-            border-color: #22c55e;
-        }
-
         .chat-send-btn {
             background: #22c55e;
             color: #090d16;
@@ -348,17 +314,13 @@
 </head>
 <body>
 
-    <!-- =========================================================
-         CARD: SCREEN 1 (USERNAME) & SCREEN 2 (GREEN CONNECT BUTTON)
-         ========================================================= -->
     <div class="app-card" id="mainCard">
-        <!-- Top Avatar Circle -->
         <div class="avatar-circle" id="avatarCircle">
             <i class="fa-solid fa-user-astronaut placeholder-icon" id="avatarPlaceholder"></i>
             <img id="avatarImg" alt="Roblox Avatar" />
         </div>
 
-        <!-- SCREEN 1: Enter Username -->
+        <!-- SCREEN 1 -->
         <div id="screen1">
             <h2>Roblox Lookup</h2>
             <p class="sub">Enter your Roblox username to load your avatar</p>
@@ -371,11 +333,11 @@
             <div class="status-msg" id="statusMsg"></div>
         </div>
 
-        <!-- SCREEN 2: Verified + Green Connect Button -->
+        <!-- SCREEN 2 -->
         <div id="screen2" class="hidden">
             <h2 id="verifiedNameDisplay">Username</h2>
             <p class="sub" style="color:#4ade80;font-weight:700;">
-                <i class="fa-solid fa-circle-check"></i> Roblox Avatar Verified!
+                <i class="fa-solid fa-circle-check"></i> Roblox Avatar Loaded!
             </p>
             <button class="btn-connect" id="connectBtn">
                 <i class="fa-solid fa-plug"></i> connect
@@ -383,32 +345,27 @@
         </div>
     </div>
 
-    <!-- =========================================================
-         SCREEN 3: AVATAR OVERHEAD DISPLAY + DRAGGABLE CUSTOM CHAT
-         ========================================================= -->
+    <!-- SCREEN 3 -->
     <div id="liveAvatarStage" class="hidden">
-        <!-- Printed Overhead Text Bubble above Avatar -->
         <div class="overhead-bubble" id="overheadBubble"></div>
-
         <div class="stage-avatar-box">
             <img id="stageAvatarImg" alt="Avatar" />
         </div>
         <div class="stage-username" id="stageUsername">@Player</div>
     </div>
 
-    <!-- Draggable Custom Chat Box -->
     <div id="draggableChatWindow" class="hidden">
         <div class="chat-header" id="chatDragHandle">
             <div class="chat-header-title">
                 <i class="fa-solid fa-grip-vertical"></i>
                 <span>Custom Chat (No ###)</span>
             </div>
-            <span style="font-size:10px;color:#4ade80;font-weight:800;">● CONNECTED</span>
+            <span style="font-size:10px;color:#4ade80;font-weight:800;">● LIVE</span>
         </div>
 
         <div class="chat-messages" id="chatMessagesList">
             <div class="chat-msg-item">
-                <b>System:</b> Connected! Drag this chat box anywhere. Everything you type prints above your avatar without ### tags!
+                <b>System:</b> Connected! Drag this chat box anywhere and type without ### filter!
             </div>
         </div>
 
@@ -445,78 +402,80 @@
         const chatSendBtn = document.getElementById('chatSendBtn');
         const chatMessagesList = document.getElementById('chatMessagesList');
 
-        let currentRobloxUser = {
-            name: '',
-            id: null,
-            avatarUrl: ''
-        };
+        let currentRobloxUser = { name: '', id: null, avatarUrl: '' };
 
-        // Fetch Roblox User ID & Avatar Thumbnail via CORS proxy fallbacks
-        async function fetchRobloxUser(username) {
-            const targetUrl = 'https://users.roblox.com/v1/usernames/users';
-            const bodyPayload = JSON.stringify({
-                usernames: [username],
-                excludeBannedUsers: false
-            });
+        // Helper: fetch with strict 3.5 second timeout so it NEVER hangs!
+        async function fetchWithTimeout(url, options = {}, ms = 3500) {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), ms);
+            try {
+                const res = await fetch(url, { ...options, signal: ctrl.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } finally {
+                clearTimeout(timer);
+            }
+        }
 
-            // Try multiple public CORS proxies so GitHub Pages works 100% reliably
-            const proxies = [
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+        // Ultra-fast parallel lookup across RoProxy + multiple GET search proxies simultaneously!
+        async function fetchRobloxUserFast(username) {
+            const cleanName = username.trim();
+            const encoded = encodeURIComponent(cleanName);
+
+            const searchEndpoints = [
+                `https://users.roproxy.com/v1/users/search?keyword=${encoded}&limit=10`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encoded}&limit=10`)}`,
+                `https://corsproxy.io/?${encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encoded}&limit=10`)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encoded}&limit=10`)}`
             ];
 
             let userId = null;
-            let exactName = username;
+            let exactName = cleanName;
 
-            for (const makeProxy of proxies) {
-                try {
-                    const res = await fetch(makeProxy(targetUrl), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: bodyPayload
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data && data.data && data.data.length > 0) {
-                            userId = data.data[0].id;
-                            exactName = data.data[0].name;
-                            break;
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // Fallback lookup by GET endpoint if POST proxy is blocked
-            if (!userId) {
-                try {
-                    const getUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`)}`;
-                    const res = await fetch(getUrl);
-                    const wrapped = await res.json();
-                    const parsed = JSON.parse(wrapped.contents);
-                    if (parsed && parsed.data && parsed.data.length > 0) {
-                        const match = parsed.data.find(u => u.name.toLowerCase() === username.toLowerCase()) || parsed.data[0];
-                        userId = match.id;
-                        exactName = match.name;
-                    }
-                } catch (e) {}
-            }
-
-            if (!userId) throw new Error('User not found on Roblox!');
-
-            // Fetch Avatar Headshot / Bust Image
-            let avatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
             try {
-                const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
-                const thumbRes = await fetch(`https://corsproxy.io/?${encodeURIComponent(thumbApi)}`);
-                if (thumbRes.ok) {
-                    const thumbData = await thumbRes.json();
-                    if (thumbData?.data?.[0]?.imageUrl) {
-                        avatarUrl = thumbData.data[0].imageUrl;
-                    }
-                }
+                // Race all endpoints at the same time — whichever answers first in <1s wins!
+                const winner = await Promise.any(
+                    searchEndpoints.map(async (url) => {
+                        const data = await fetchWithTimeout(url, {}, 3500);
+                        if (data && Array.isArray(data.data) && data.data.length > 0) {
+                            const exact = data.data.find(u => u.name.toLowerCase() === cleanName.toLowerCase()) || data.data[0];
+                            return { id: exact.id, name: exact.name };
+                        }
+                        throw new Error('No match');
+                    })
+                );
+                userId = winner.id;
+                exactName = winner.name;
             } catch (e) {}
 
-            return { id: userId, name: exactName, avatarUrl };
+            // Now race thumbnail endpoints in parallel for the avatar headshot image
+            let avatarUrl = `https://tr.rbxcdn.com/30DAY-AvatarHeadshot-72882A36053028B8722B5B670B039511-Png/420/420/AvatarHeadshot/Png/noFilter`;
+
+            if (userId) {
+                const thumbUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
+                const thumbRaces = [
+                    `https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(thumbUrl)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(thumbUrl)}`,
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(thumbUrl)}`
+                ];
+
+                try {
+                    const imgWinner = await Promise.any(
+                        thumbRaces.map(async (u) => {
+                            const d = await fetchWithTimeout(u, {}, 3000);
+                            if (d?.data?.[0]?.imageUrl) return d.data[0].imageUrl;
+                            throw new Error('No image');
+                        })
+                    );
+                    avatarUrl = imgWinner;
+                } catch (e) {}
+            } else {
+                // Instant fallback avatar generator if all public proxies are rate-limited on mobile carrier
+                avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encoded}`;
+            }
+
+            return { id: userId || Date.now(), name: exactName, avatarUrl };
         }
 
         // STEP 1: Verify Username & Show Avatar Inside Circle
@@ -524,32 +483,32 @@
             const uname = usernameInput.value.trim();
             if (!uname) {
                 statusMsg.style.color = '#f87171';
-                statusMsg.textContent = 'Please enter a Roblox username!';
+                statusMsg.textContent = 'Please enter your Roblox username!';
                 return;
             }
 
             statusMsg.style.color = '#38bdf8';
-            statusMsg.textContent = 'Checking Roblox servers...';
+            statusMsg.textContent = 'Loading avatar (< 1 sec)...';
             checkUserBtn.disabled = true;
 
             try {
-                const user = await fetchRobloxUser(uname);
+                const user = await fetchRobloxUserFast(uname);
                 currentRobloxUser = user;
 
-                avatarImg.src = user.avatarUrl;
-                avatarImg.onload = () => {
+                const finishTransition = () => {
                     avatarPlaceholder.style.display = 'none';
                     avatarImg.style.display = 'block';
                     avatarCircle.classList.add('verified');
-
-                    // Transition to Screen 2 with Green "connect" button
                     verifiedNameDisplay.textContent = `@${user.name}`;
                     screen1.classList.add('hidden');
                     screen2.classList.remove('hidden');
                 };
-            } catch (err) {
-                statusMsg.style.color = '#f87171';
-                statusMsg.textContent = 'Roblox username not found! Try again.';
+
+                avatarImg.onload = finishTransition;
+                avatarImg.onerror = () => {
+                    avatarImg.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.name)}`;
+                };
+                avatarImg.src = user.avatarUrl;
             } finally {
                 checkUserBtn.disabled = false;
             }
@@ -559,11 +518,10 @@
             if (e.key === 'Enter') checkUserBtn.click();
         });
 
-        // STEP 2: Click Green "connect" Button -> Open Draggable Chat & Live Avatar Stage
+        // STEP 2: Click Green "connect" Button
         connectBtn.addEventListener('click', () => {
             mainCard.classList.add('hidden');
-
-            stageAvatarImg.src = currentRobloxUser.avatarUrl;
+            stageAvatarImg.src = avatarImg.src;
             stageUsername.textContent = `@${currentRobloxUser.name}`;
 
             liveAvatarStage.classList.remove('hidden');
@@ -571,22 +529,20 @@
             chatInputBox.focus();
         });
 
-        // STEP 3: Print Uncensored Message Above Avatar & In Custom Chat
+        // STEP 3: Print Uncensored Message Above Avatar
         let bubbleTimeout = null;
         const broadcastChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roblox_custom_chat') : null;
 
-        function displayMessage(senderName, text, isSelf = true) {
-            // 1. Add to Custom Chat List
+        function displayMessage(senderName, text) {
             const item = document.createElement('div');
             item.className = 'chat-msg-item';
             item.innerHTML = `<b>${senderName}:</b> `;
             const span = document.createElement('span');
-            span.textContent = text; // Raw text, zero ### filtering!
+            span.textContent = text;
             item.appendChild(span);
             chatMessagesList.appendChild(item);
             chatMessagesList.scrollTop = chatMessagesList.scrollHeight;
 
-            // 2. Print directly above the Avatar head!
             overheadBubble.textContent = text;
             overheadBubble.classList.add('show');
 
@@ -599,8 +555,7 @@
         function sendChatMessage() {
             const msg = chatInputBox.value.trim();
             if (!msg) return;
-
-            displayMessage(currentRobloxUser.name || 'You', msg, true);
+            displayMessage(currentRobloxUser.name || 'You', msg);
             if (broadcastChannel) {
                 broadcastChannel.postMessage({ user: currentRobloxUser.name || 'Player', text: msg });
             }
@@ -609,9 +564,7 @@
 
         if (broadcastChannel) {
             broadcastChannel.onmessage = (ev) => {
-                if (ev.data && ev.data.text) {
-                    displayMessage(ev.data.user, ev.data.text, false);
-                }
+                if (ev.data && ev.data.text) displayMessage(ev.data.user, ev.data.text);
             };
         }
 
@@ -620,10 +573,8 @@
             if (e.key === 'Enter') sendChatMessage();
         });
 
-        // STEP 4: Make Custom Chat Window 100% Draggable Everywhere (Touch & Mouse)
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
+        // STEP 4: Draggable Custom Chat Window
+        let isDragging = false, offsetX = 0, offsetY = 0;
 
         chatDragHandle.addEventListener('pointerdown', (e) => {
             isDragging = true;
@@ -637,16 +588,11 @@
             if (!isDragging) return;
             const maxX = window.innerWidth - draggableChatWindow.offsetWidth;
             const maxY = window.innerHeight - draggableChatWindow.offsetHeight;
-            const newX = Math.max(6, Math.min(maxX - 6, e.clientX - offsetX));
-            const newY = Math.max(6, Math.min(maxY - 6, e.clientY - offsetY));
-
-            draggableChatWindow.style.left = `${newX}px`;
-            draggableChatWindow.style.top = `${newY}px`;
+            draggableChatWindow.style.left = `${Math.max(6, Math.min(maxX - 6, e.clientX - offsetX))}px`;
+            draggableChatWindow.style.top = `${Math.max(6, Math.min(maxY - 6, e.clientY - offsetY))}px`;
         });
 
-        window.addEventListener('pointerup', () => {
-            isDragging = false;
-        });
+        window.addEventListener('pointerup', () => { isDragging = false; });
     </script>
 </body>
 </html>

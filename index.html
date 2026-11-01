@@ -1,144 +1,150 @@
 <!DOCTYPE html>
-<html lang="ku" dir="rtl" class="dark">
+<html lang="en" dir="ltr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Maker AI Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Web Maker AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&display=swap');
-        body { font-family: 'Vazirmatn', sans-serif; background-color: #0b0b0e; color: #f3f4f6; overflow: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #09090c; 
+            color: #f3f4f6; 
+            overflow: hidden; 
+            height: 100dvh; 
+            width: 100vw; 
+        }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #121216; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        .glass { background: rgba(20, 20, 26, 0.9); backdrop-filter: blur(12px); }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .animate-glow { animation: pulseGlow 2s infinite ease-in-out; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col select-none">
+<body class="flex flex-col select-none relative">
 
-    <!-- 1. Welcome & API Setup Modal -->
-    <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
+    <!-- 1. 4-Second Welcome Splash Screen -->
+    <div id="splashScreen" class="fixed inset-0 z-50 bg-[#09090c] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-3xl flex items-center justify-center mb-5 text-4xl border border-blue-500/30 shadow-2xl shadow-blue-500/20 animate-glow">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold text-white tracking-wide mb-2">Welcome to Web Maker AI</h1>
+        <p class="text-gray-400 text-sm">Build & deploy full websites in seconds</p>
+        <div class="mt-8 w-48 h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div id="splashProgress" class="h-full bg-blue-500 transition-all duration-[4000ms] ease-linear w-0"></div>
+        </div>
+    </div>
+
+    <!-- 2. Clean API Setup Modal -->
+    <div id="setupModal" class="fixed inset-0 z-40 bg-black/95 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl border border-blue-500/30">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-white">بەخێربێیت بۆ Web Maker AI</h1>
-                <p class="text-gray-400 text-sm mt-1">کلیلی زیرەکی دەستکرد داخڵ بکە بۆ دەستپێکردن</p>
+                <h2 class="text-2xl font-bold text-white">API Configuration</h2>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">مۆدێلی زیرەکی دەستکرد هەڵبژێرە</label>
-                    <select id="aiProvider" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
-                        <option value="gemini">Google Gemini (پێشنیارکراو - خێراترین)</option>
+                    <label class="block text-xs text-gray-400 mb-1">AI Provider</label>
+                    <select id="aiProvider" onchange="updateKeyLink()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
+                        <option value="gemini">Google Gemini (3.8 Flash)</option>
                         <option value="openai">OpenAI (GPT-4o)</option>
                         <option value="claude">Anthropic Claude 3.5</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">API Key (کلیلی تایبەتی خۆت)</label>
-                    <input type="password" id="apiKeyInput" placeholder="AIzaSy... / sk-..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none dir-ltr text-left">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs text-gray-400">API Key</label>
+                        <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                            <span>Get API Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                    <input type="password" id="apiKeyInput" placeholder="Paste your API key here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
                 </div>
 
                 <div class="pt-2 border-t border-gray-800">
-                    <label class="block text-xs text-gray-400 mb-1">GitHub Token (ئارەزوومەندانە - بۆ دروستکردنی لینکی ڕاستەقینە)</label>
-                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none dir-ltr text-left">
-                    <p class="text-[11px] text-gray-500 mt-1">ئەگەر دەتەوێت لینک بۆ خەڵک بنێریت، تۆکنێکی گیتهەب (بە دەسەڵاتی gist) لێرە دابنێ.</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs text-gray-400">GitHub Token (For Live Share Links)</label>
+                        <a href="https://github.com/settings/tokens/new?scopes=gist&description=WebMakerAI" target="_blank" class="text-xs text-gray-400 hover:text-white underline">Get Token</a>
+                    </div>
+                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
                 </div>
 
-                <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-600/30">
-                    خەزنکردن و دەستپێکردن
+                <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-600/30 mt-2">
+                    Continue
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 2. Website Requirements Wizard Modal -->
+    <!-- 3. Custom Open-Ended Questions Wizard Modal -->
     <div id="wizardModal" class="fixed inset-0 z-40 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-clipboard-question text-blue-500 ml-2"></i>زانیارییەکانی وێبسایتە نوێیەکەت</h2>
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-sliders text-blue-500 mr-2"></i>Website Specifications</h2>
                 <button onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-gray-300 mb-1">١. ناوی وێبسایت یان براندەکەت چییە؟</label>
-                    <input type="text" id="wName" placeholder="نموونە: کافتریای ڕۆژ، ستۆدیۆی ئاپێکس..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
+                    <label class="block text-xs text-gray-300 mb-1">1. Website or Brand Name</label>
+                    <input type="text" id="wName" placeholder="Type your brand or project name..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-300 mb-1">٢. وێبسایتەکە تایبەتە بە چ بوارێک؟</label>
-                    <select id="wType" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
-                        <option value="فرۆشگای ئۆنلاین (E-Commerce)">فرۆشگای ئۆنلاین و فرۆشتنی کاڵا</option>
-                        <option value="پۆرتفۆلیۆی کەسی (Personal Portfolio)">پۆرتفۆلیۆ و ناساندنی کەسی</option>
-                        <option value="کۆمپانیا و خزمەتگوزاری (Business/Agency)">کۆمپانیا و خزمەتگوزاری بازرگانی</option>
-                        <option value="ڕێستورانت و کافێ (Restaurant/Cafe)">ڕێستورانت و کافتریا (مێنۆی خواردن)</option>
-                        <option value="پلاتفۆرمی یاری و تەکنەلۆجیا (Gaming/Tech)">پلاتفۆرمی یاری و تەکنەلۆجیا</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm text-gray-300 mb-1">٣. ستایل و ڕەنگ</label>
-                        <select id="wStyle" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none">
-                            <option value="تاریک و مۆدێرن (Dark & Cyberpunk/Modern)">تاریک و مۆدێرن</option>
-                            <option value="سپی و سادە (Clean & Minimal Light)">ڕووناک و سادە</option>
-                            <option value="ڕەنگاوڕەنگ و زیندوو (Vibrant & Gradient)">ڕەنگاوڕەنگ و گەش</option>
-                            <option value="فەرمی و کلاسیک (Luxury Gold & Black)">شاهانە (ڕەش و ئاڵتوونی)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-300 mb-1">٤. زمانی وێبسایت</label>
-                        <select id="wLang" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none">
-                            <option value="کوردی (سۆرانی - پێویستە ڕاست-بۆ-چەپ RTL بێت)">کوردی (سۆرانی)</option>
-                            <option value="ئینگلیزی (English - LTR)">ئینگلیزی</option>
-                            <option value="عەرەبی (Arabic - RTL)">عەرەبی</option>
-                        </select>
-                    </div>
+                    <label class="block text-xs text-gray-300 mb-1">2. Website Purpose & Niche</label>
+                    <input type="text" id="wType" placeholder="Write your idea (e.g., Online Sneaker Store, Gaming Clan, Coffee Shop)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-300 mb-1">٥. چ بەشێکی گرنگی تێدابێت؟ (ووردەکاری بنووسە)</label>
-                    <textarea id="wDetails" rows="3" placeholder="نموونە: بەشی سەرەکی سەرنجڕاکێش بێت، خشتەی نرخەکان، فۆڕمی پەیوەندی، دوگمەی کڕین بە وەتسئەپ..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500"></textarea>
+                    <label class="block text-xs text-gray-300 mb-1">3. Visual Style, Colors & Vibe</label>
+                    <input type="text" id="wStyle" placeholder="Describe the look (e.g., Dark cyberpunk with neon blue, Minimalist white & gold)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">4. Website Language</label>
+                    <input type="text" id="wLang" placeholder="Type desired language (e.g., English, Kurdish, Arabic)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">5. Your Vision, Features & Custom Requirements</label>
+                    <textarea id="wDetails" rows="3" placeholder="Write everything you want AI to include (e.g., Hero banner, pricing cards, working contact form, animations, specific text)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm"></textarea>
                 </div>
 
                 <button onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
-                    <i class="fa-solid fa-bolt ml-1"></i> دروستکردنی وێبسایتەکە بە AI
+                    <i class="fa-solid fa-bolt mr-1"></i> Build Website Now
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 3. Top Header Bar -->
-    <header class="h-14 bg-[#121216] border-b border-gray-800/80 px-4 flex items-center justify-between z-20">
-        <!-- 3 Dots / Menu Button & Project Title -->
+    <!-- 4. Top Header Bar -->
+    <header class="h-14 bg-[#121216] border-b border-gray-800/80 px-4 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition" title="مێنۆ و پڕۆژەکان">
+            <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition">
                 <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
             </button>
             <div>
-                <h1 id="currentProjectTitle" class="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-xs">پڕۆژەی بێ ناو</h1>
-                <span id="saveStatus" class="text-[10px] text-green-400 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> ئۆتۆماتیکی خەزنکراوە</span>
+                <h1 id="currentProjectTitle" class="font-bold text-sm text-white truncate max-w-[140px] sm:max-w-xs">Untitled Project</h1>
+                <span id="saveStatus" class="text-[10px] text-green-400 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Auto-saved</span>
             </div>
         </div>
 
-        <!-- View Controls (Responsive & Code Switch) -->
-        <div class="flex items-center gap-2 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
-            <button onclick="setViewport('100%')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="کۆمپیوتەر"><i class="fa-solid fa-desktop"></i></button>
-            <button onclick="setViewport('390px')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="مۆبایل"><i class="fa-solid fa-mobile-screen"></i></button>
-            <button onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code ml-1"></i>کۆد</button>
+        <div class="flex items-center gap-1.5 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
+            <button onclick="setViewport('100%')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
+            <button onclick="setViewport('390px')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
+            <button onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
         </div>
 
-        <!-- Quick New Project Button -->
-        <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">سایتی نوێ</span>
+        <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Site</span>
         </button>
     </header>
 
-    <!-- 4. Sidebar Drawer (3 Dots Menu - Gemini Style) -->
+    <!-- 5. 3-Dots Sidebar Drawer -->
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
-    <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 bg-[#121217] border-l border-gray-800 z-40 transform translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-gray-800">
                 <span class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-500"></i> Web Maker AI</span>
@@ -146,82 +152,74 @@
             </div>
 
             <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-[#1e1e26] hover:bg-gray-800 border border-gray-700 text-white py-3 px-4 rounded-xl flex items-center gap-3 font-semibold text-sm transition">
-                <i class="fa-solid fa-plus text-blue-400"></i> دروستکردنی وێبسایتی نوێ
+                <i class="fa-solid fa-plus text-blue-400"></i> Create New Website
             </button>
 
             <div class="mt-6">
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">وێبسایتە دروستکراوەکانت</h3>
-                <div id="projectList" class="space-y-1.5 max-h-[45vh] overflow-y-auto pr-1">
-                    <!-- Projects injected via JS -->
-                </div>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Your Saved Websites</h3>
+                <div id="projectList" class="space-y-1.5 max-h-[42vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <!-- Important Actions & Settings inside 3-Dots Menu -->
         <div class="border-t border-gray-800 pt-4 space-y-2">
             <button onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 py-2.5 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition">
-                <span><i class="fa-solid fa-globe ml-2"></i>بڵاوکردنەوە و وەرگرتنی لینک</span>
+                <span><i class="fa-solid fa-globe mr-2"></i>Publish & Get Link</span>
                 <i class="fa-solid fa-share-nodes"></i>
             </button>
 
             <div id="liveLinkBox" class="hidden bg-[#1a1a22] p-2.5 rounded-xl border border-gray-700 text-xs">
-                <p class="text-gray-400 mb-1">لینکی ڕاستەقینەی سایتەکەت:</p>
+                <p class="text-gray-400 mb-1">Live Shareable Website URL:</p>
                 <div class="flex items-center gap-1">
-                    <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-400 p-1.5 rounded border border-gray-800 outline-none dir-ltr text-left text-[11px]">
+                    <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-400 p-1.5 rounded border border-gray-800 outline-none text-[11px]">
                     <button onclick="copyLiveLink()" class="bg-blue-600 text-white px-2.5 py-1.5 rounded hover:bg-blue-500"><i class="fa-solid fa-copy"></i></button>
                 </div>
             </div>
 
             <button onclick="downloadHTML()" class="w-full bg-[#1e1e26] hover:bg-gray-800 text-gray-200 py-2.5 px-4 rounded-xl flex items-center gap-3 text-sm transition">
-                <i class="fa-solid fa-download text-purple-400"></i> دابەزاندنی فایلی سایت (HTML)
+                <i class="fa-solid fa-download text-purple-400"></i> Download HTML File
             </button>
 
             <button onclick="openSettings(); toggleSidebar();" class="w-full bg-[#1e1e26] hover:bg-gray-800 text-gray-200 py-2.5 px-4 rounded-xl flex items-center gap-3 text-sm transition">
-                <i class="fa-solid fa-gear text-gray-400"></i> ڕێکخستنەکان (API & Settings)
+                <i class="fa-solid fa-gear text-gray-400"></i> Settings & API Keys
             </button>
         </div>
     </aside>
 
-    <!-- 5. Main Workspace (Preview & Code) -->
-    <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden">
+    <!-- 6. Main Workspace (Preview & Code) -->
+    <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden pb-24">
         
-        <!-- Empty State -->
         <div id="emptyState" class="text-center p-6 max-w-md">
             <div class="w-20 h-20 bg-gray-900 border border-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl text-blue-500 shadow-inner">
                 <i class="fa-solid fa-code"></i>
             </div>
-            <h2 class="text-xl font-bold text-white mb-2">ئامادەیە بۆ دروستکردن</h2>
-            <p class="text-gray-400 text-sm mb-6">پەنجە بنێ بە دوگمەی خوارەوە بۆ وەڵامدانەوەی پرسیارەکان، یان ڕاستەوخۆ لە چاتەکەی خوارەوە بنووسە چ وێبسایتێکت دەوێت.</p>
+            <h2 class="text-xl font-bold text-white mb-2">Ready to Build</h2>
+            <p class="text-gray-400 text-sm mb-6">Answer a few custom questions or type directly in the chat bar below to generate your website.</p>
             <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-600/20 transition">
-                دەستپێکردن بە پرسیارەکان (Wizard)
+                Start Website Wizard
             </button>
         </div>
 
-        <!-- Live Website Iframe -->
         <div id="iframeContainer" class="w-full h-full flex items-center justify-center p-0 transition-all duration-300 hidden">
-            <iframe id="previewFrame" class="w-full h-full bg-white transition-all duration-300 shadow-2xl" sandbox="allow-scripts allow-modals allow-forms allow-Same-origin"></iframe>
+            <iframe id="previewFrame" class="w-full h-full bg-white transition-all duration-300 shadow-2xl" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
         </div>
 
-        <!-- Raw Code Viewer/Editor -->
-        <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden dir-ltr text-left" spellcheck="false"></textarea>
+        <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
 
-        <!-- Loading Overlay -->
         <div id="loadingOverlay" class="absolute inset-0 bg-black/80 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden">
             <div class="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-white font-bold text-base animate-pulse">زیرەکی دەستکرد خەریکی کۆدنووسین و دیزاینکردنە...</p>
-            <p class="text-gray-400 text-xs mt-1">تکایە چەند چرکەیەک چاوەڕێ بکە</p>
+            <p class="text-white font-bold text-base animate-pulse">AI is generating your website...</p>
         </div>
     </main>
 
-    <!-- 6. Bottom AI Chat Bar (For Editing & Creating) -->
-    <footer class="p-3 bg-[#121216] border-t border-gray-800/80 z-20">
-        <div class="max-w-4xl mx-auto flex items-center gap-2 bg-[#1c1c24] border border-gray-700/80 rounded-2xl p-1.5 pr-4 focus-within:border-blue-500 transition shadow-lg">
-            <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="لێرەوە دەستکاری بکە (نموونە: ڕەنگی دوگمەکان بکە بە سوور، یان بەشی نرخەکان زیاد بکە)..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-500">
-            <button onclick="sendChatPrompt()" id="sendBtn" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shrink-0">
-                <i class="fa-solid fa-paper-plane"></i>
+    <!-- 7. Elevated Floating AI Chat Bar (Moved Up for Mobile Comfort) -->
+    <div class="fixed bottom-6 left-0 right-0 px-4 z-30 pointer-events-none">
+        <div class="max-w-3xl mx-auto flex items-center gap-2 bg-[#181820]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-2 pl-4 shadow-2xl pointer-events-auto focus-within:border-blue-500 transition">
+            <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell AI what to build or edit..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400">
+            <button onclick="sendChatPrompt()" id="sendBtn" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shrink-0 shadow-md">
+                <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
         </div>
-    </footer>
+    </div>
 
     <!-- Application Logic -->
     <script>
@@ -229,19 +227,34 @@
         let currentProjectId = localStorage.getItem('wm_current_id') || null;
         let isCodeView = false;
 
-        const SYSTEM_PROMPT = `You are an elite, world-class Full-Stack Web Developer and UI/UX Designer.
-Your task is to generate or modify a COMPLETE, working, single-file HTML website based on the user's request.
+        const SYSTEM_PROMPT = `You are an elite Full-Stack Web Developer and UI/UX Designer.
+Generate or update a COMPLETE, working, single-file HTML website strictly following the user's opinions, preferences, and instructions.
 STRICT RULES:
 1. Return ONLY valid raw HTML5 code starting with <!DOCTYPE html> and ending with </html>.
-2. NEVER wrap code in markdown backticks (\`\`\`html) or write any explanations before or after the code.
-3. Include Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome icons (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
-4. If the language requested is Kurdish or Arabic, set dir="rtl" and include Google Font 'Vazirmatn'.
-5. Make the design extremely modern, responsive, interactive (include working JavaScript for tabs, modals, or cart if needed), with rich UI components, gradients, and smooth hover effects.`;
+2. NEVER wrap code in markdown backticks or write explanations.
+3. Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
+4. Make the design modern, responsive, and interactive with working JavaScript.`;
 
         window.onload = () => {
+            // Start 4-second splash screen animation
+            setTimeout(() => {
+                document.getElementById('splashProgress').style.width = '100%';
+            }, 50);
+
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.classList.add('opacity-0');
+                setTimeout(() => {
+                    splash.classList.add('hidden');
+                    checkAuthAndInit();
+                }, 500);
+            }, 4000);
+        };
+
+        function checkAuthAndInit() {
             const apiKey = localStorage.getItem('wm_api_key');
             if (!apiKey) {
-                document.getElementById('setupModal').classList.remove('hidden');
+                openSettings();
             }
             renderProjectList();
             if (currentProjectId && projects.find(p => p.id === currentProjectId)) {
@@ -249,12 +262,21 @@ STRICT RULES:
             } else if (projects.length > 0) {
                 loadProject(projects[0].id);
             }
-        };
+        }
+
+        function updateKeyLink() {
+            const provider = document.getElementById('aiProvider').value;
+            const linkBtn = document.getElementById('getApiKeyBtn');
+            if (provider === 'gemini') linkBtn.href = 'https://aistudio.google.com/app/apikey';
+            else if (provider === 'openai') linkBtn.href = 'https://platform.openai.com/api-keys';
+            else if (provider === 'claude') linkBtn.href = 'https://console.anthropic.com/settings/keys';
+        }
 
         function openSettings() {
             document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
             document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
             document.getElementById('githubTokenInput').value = localStorage.getItem('wm_gh_token') || '';
+            updateKeyLink();
             document.getElementById('setupModal').classList.remove('hidden');
         }
 
@@ -264,7 +286,7 @@ STRICT RULES:
             const ghToken = document.getElementById('githubTokenInput').value.trim();
 
             if (!key) {
-                alert('تکایە کلیلی API داخڵ بکە بۆ ئەوەی سیستەمەکە کار بکات!');
+                alert('Please enter your API Key to continue.');
                 return;
             }
             localStorage.setItem('wm_provider', provider);
@@ -280,7 +302,7 @@ STRICT RULES:
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebarOverlay');
-            sb.classList.toggle('translate-x-full');
+            sb.classList.toggle('-translate-x-full');
             ov.classList.toggle('hidden');
         }
 
@@ -288,27 +310,30 @@ STRICT RULES:
         function closeWizard() { document.getElementById('wizardModal').classList.add('hidden'); }
 
         async function startWizardGeneration() {
-            const name = document.getElementById('wName').value.trim() || 'پڕۆژەی نوێ';
-            const type = document.getElementById('wType').value;
-            const style = document.getElementById('wStyle').value;
-            const lang = document.getElementById('wLang').value;
-            const details = document.getElementById('wDetails').value.trim();
+            const name = document.getElementById('wName').value.trim() || 'My Website';
+            const type = document.getElementById('wType').value.trim() || 'General Website';
+            const style = document.getElementById('wStyle').value.trim() || 'Modern and Clean';
+            const lang = document.getElementById('wLang').value.trim() || 'English';
+            const details = document.getElementById('wDetails').value.trim() || 'Complete landing page with all key sections.';
 
             closeWizard();
 
-            const fullPrompt = `Create a complete, professional website with these exact requirements:
-- Website/Brand Name: ${name}
-- Category/Niche: ${type}
-- Visual Style & Theme: ${style}
-- Language: ${lang}
-- Specific Sections & Features requested: ${details || 'Include Hero section, features/services, pricing/items, testimonials, and contact footer.'}`;
+            const userSpecs = `Brand Name: ${name} | Niche/Purpose: ${type} | Visual Style: ${style} | Language: ${lang} | User Vision & Details: ${details}`;
+
+            const fullPrompt = `Build a complete, professional website strictly following the user's custom specifications and opinions:
+- Brand/Website Name: ${name}
+- Purpose / Niche: ${type}
+- Preferred Visual Style & Colors: ${style}
+- Website Language: ${lang}
+- User's Specific Vision & Features: ${details}`;
 
             const newProj = {
                 id: 'proj_' + Date.now(),
                 name: name,
+                specs: userSpecs,
                 code: '',
                 liveUrl: '',
-                updatedAt: new Date().toLocaleTimeString('ku-IQ')
+                updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
             projects.unshift(newProj);
@@ -316,7 +341,7 @@ STRICT RULES:
             saveToStorage();
             renderProjectList();
 
-            await generateWithAI(fullPrompt, '');
+            await generateWithAI(fullPrompt, '', userSpecs);
         }
 
         async function sendChatPrompt() {
@@ -329,20 +354,47 @@ STRICT RULES:
             if (!currentProjectId || projects.length === 0) {
                 const newProj = {
                     id: 'proj_' + Date.now(),
-                    name: text.substring(0, 22),
+                    name: text.substring(0, 24),
+                    specs: text,
                     code: '',
                     liveUrl: '',
-                    updatedAt: new Date().toLocaleTimeString('ku-IQ')
+                    updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };
                 projects.unshift(newProj);
                 currentProjectId = newProj.id;
             }
 
             const currentProj = projects.find(p => p.id === currentProjectId);
-            await generateWithAI(text, currentProj.code);
+            await generateWithAI(text, currentProj.code, currentProj.specs || '');
         }
 
-        async function generateWithAI(userPrompt, existingCode) {
+        async function callGeminiAPI(apiKey, promptText) {
+            const modelsToTry = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+            let lastError = '';
+
+            for (const modelName of modelsToTry) {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                            contents: [{ parts: [{ text: promptText }] }]
+                        })
+                    });
+                    const data = await res.json();
+                    if (!data.error && data.candidates && data.candidates[0].content.parts[0].text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                    lastError = data.error ? data.error.message : 'Unknown error';
+                } catch (e) {
+                    lastError = e.message;
+                }
+            }
+            throw new Error(lastError);
+        }
+
+        async function generateWithAI(userPrompt, existingCode, userSpecs) {
             const provider = localStorage.getItem('wm_provider') || 'gemini';
             const apiKey = localStorage.getItem('wm_api_key');
 
@@ -352,25 +404,14 @@ STRICT RULES:
 
             let finalPrompt = userPrompt;
             if (existingCode && existingCode.length > 50) {
-                finalPrompt = `Here is the current HTML code of the website:\n\n${existingCode}\n\nUSER EDIT REQUEST: "${userPrompt}"\n\nModify the existing code to fulfill the user's request while keeping the rest of the website intact. Return the FULL updated HTML code.`;
+                finalPrompt = `Original User Vision & Preferences: [${userSpecs}]\n\nCurrent HTML Code:\n${existingCode}\n\nNew User Edit / Opinion: "${userPrompt}"\n\nUpdate the website according to the user's new instruction while respecting their original vision. Return ONLY the full updated HTML code.`;
             }
 
             try {
                 let rawResponse = '';
 
                 if (provider === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                            contents: [{ parts: [{ text: finalPrompt }] }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.candidates[0].content.parts[0].text;
-
+                    rawResponse = await callGeminiAPI(apiKey, finalPrompt);
                 } else if (provider === 'openai') {
                     const res = await fetch('https://api.openai.com/v1/chat/completions', {
                         method: 'POST',
@@ -411,19 +452,18 @@ STRICT RULES:
                     rawResponse = data.content[0].text;
                 }
 
-                // Clean Markdown tags if AI accidentally includes them
                 const cleanHTML = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
 
                 const proj = projects.find(p => p.id === currentProjectId);
                 if (proj) {
                     proj.code = cleanHTML;
-                    proj.updatedAt = new Date().toLocaleTimeString('ku-IQ');
+                    proj.updatedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     saveToStorage();
                     loadProject(proj.id);
                 }
 
             } catch (err) {
-                alert('هەڵەیەک ڕوویدا لە کاتی پەیوەندی بە AI:\n' + err.message);
+                alert('AI Connection Error:\n' + err.message);
             } finally {
                 document.getElementById('loadingOverlay').classList.add('hidden');
             }
@@ -497,8 +537,8 @@ STRICT RULES:
         function saveToStorage() {
             localStorage.setItem('wm_projects', JSON.stringify(projects));
             const st = document.getElementById('saveStatus');
-            st.innerHTML = '<i class="fa-solid fa-sync fa-spin"></i> خەزن دەکرێت...';
-            setTimeout(() => { st.innerHTML = '<i class="fa-solid fa-check-circle"></i> ئۆتۆماتیکی خەزنکراوە'; }, 600);
+            st.innerHTML = '<i class="fa-solid fa-sync fa-spin"></i> Saving...';
+            setTimeout(() => { st.innerHTML = '<i class="fa-solid fa-check-circle"></i> Auto-saved'; }, 600);
         }
 
         function setViewport(width) {
@@ -514,17 +554,17 @@ STRICT RULES:
             if (isCodeView) {
                 editor.classList.remove('hidden');
                 iframeCont.classList.add('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-eye ml-1"></i>پێشبینین';
+                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
             } else {
                 editor.classList.add('hidden');
                 iframeCont.classList.remove('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-code ml-1"></i>کۆد';
+                btn.innerHTML = '<i class="fa-solid fa-code mr-1"></i>Code';
             }
         }
 
         function downloadHTML() {
             const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) { alert('هیچ وێبسایتێک دروست نەکراوە بۆ دابەزاندن!'); return; }
+            if (!proj || !proj.code) { alert('No website generated yet!'); return; }
             const blob = new Blob([proj.code], { type: 'text/html' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -534,17 +574,17 @@ STRICT RULES:
 
         async function publishWebsite() {
             const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) { alert('سەرەتا وێبسایتێک دروست بکە پاشان بڵاوی بکەرەوە!'); return; }
+            if (!proj || !proj.code) { alert('Build a website first before publishing!'); return; }
 
             const ghToken = localStorage.getItem('wm_gh_token');
             if (!ghToken) {
-                alert('بۆ ئەوەی لینکێکی جیهانی و ڕاستەقینە دروست بێت کە بۆ خەڵکی بنێریت، تکایە لە بەشی ڕێکخستنەکان (Settings) تۆکنی GitHub زیاد بکە.');
+                alert('Please enter a GitHub Token in Settings to generate a live shareable link.');
                 openSettings();
                 return;
             }
 
             const btn = document.getElementById('publishBtn');
-            btn.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin ml-2"></i>خەریکی دروستکردنی لینکە...</span>';
+            btn.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin mr-2"></i>Publishing...</span>';
 
             try {
                 const res = await fetch('https://api.github.com/gists', {
@@ -572,12 +612,12 @@ STRICT RULES:
 
                 document.getElementById('liveLinkBox').classList.remove('hidden');
                 document.getElementById('liveUrlInput').value = liveShareUrl;
-                alert('پیرۆزە! لینکی ڕاستەقینەی وێبسایتەکەت ئامادەیە و دەتوانیت بۆ هەموو کەسێکی بنێریت.');
+                alert('Published! Your shareable link is ready.');
 
             } catch (err) {
-                alert('کێشەیەک لە GitHub Token هەیە:\n' + err.message);
+                alert('GitHub Publish Error:\n' + err.message);
             } finally {
-                btn.innerHTML = '<span><i class="fa-solid fa-globe ml-2"></i>بڵاوکردنەوە و وەرگرتنی لینک</span><i class="fa-solid fa-share-nodes"></i>';
+                btn.innerHTML = '<span><i class="fa-solid fa-globe mr-2"></i>Publish & Get Link</span><i class="fa-solid fa-share-nodes"></i>';
             }
         }
 
@@ -585,7 +625,7 @@ STRICT RULES:
             const input = document.getElementById('liveUrlInput');
             input.select();
             navigator.clipboard.writeText(input.value);
-            alert('لینکەکە کۆپی کرا!');
+            alert('Link copied to clipboard!');
         }
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Web Maker AI</title>
+    <title>Web Maker AI Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -19,107 +19,102 @@
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #121216; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-        .animate-glow { animation: pulseGlow 2s infinite ease-in-out; }
     </style>
 </head>
 <body class="flex flex-col select-none relative">
 
-    <!-- 1. 4-Second Welcome Splash Screen -->
-    <div id="splashScreen" class="fixed inset-0 z-50 bg-[#09090c] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-3xl flex items-center justify-center mb-5 text-4xl border border-blue-500/30 shadow-2xl shadow-blue-500/20 animate-glow">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-        <h1 class="text-3xl font-extrabold text-white tracking-wide mb-2">Welcome to Web Maker AI</h1>
-        <p class="text-gray-400 text-sm">Build & deploy full websites in seconds</p>
-        <div class="mt-8 w-48 h-1 bg-gray-800 rounded-full overflow-hidden">
-            <div id="splashProgress" class="h-full bg-blue-500 transition-all duration-[4000ms] ease-linear w-0"></div>
-        </div>
-    </div>
-
-    <!-- 2. Clean API Setup Modal -->
-    <div id="setupModal" class="fixed inset-0 z-40 bg-black/95 flex items-center justify-center p-4 hidden">
+    <!-- API Setup Modal -->
+    <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-white">API Configuration</h2>
-            </div>
-
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">API & Services Setup</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">AI Provider</label>
-                    <select id="aiProvider" onchange="updateKeyLink()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
-                        <option value="gemini">Google Gemini (3.8 Flash)</option>
-                        <option value="openai">OpenAI (GPT-4o)</option>
-                        <option value="claude">Anthropic Claude 3.5</option>
-                    </select>
-                </div>
-
-                <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label class="text-xs text-gray-400">API Key</label>
-                        <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
-                            <span>Get API Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
+                        <label class="text-xs text-gray-400">Gemini API Key</label>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-400 hover:underline">Get API Key</a>
                     </div>
-                    <input type="password" id="apiKeyInput" placeholder="Paste your API key here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
+                    <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none">
                 </div>
 
-                <div class="pt-2 border-t border-gray-800">
+                <div class="pt-3 border-t border-gray-800">
                     <div class="flex justify-between items-center mb-1">
-                        <label class="text-xs text-gray-400">GitHub Token (For Live Share Links)</label>
-                        <a href="https://github.com/settings/tokens/new?scopes=gist&description=WebMakerAI" target="_blank" class="text-xs text-gray-400 hover:text-white underline">Get Token</a>
+                        <label class="text-xs text-yellow-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> GitHub Classic Token</label>
+                        <a href="https://github.com/settings/tokens/new?scopes=gist&description=WebMakerAI_Token" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded hover:bg-emerald-600/30 transition">Create Token</a>
                     </div>
-                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none">
+                    <p class="text-[10px] text-gray-400 mb-2">Must be a "Classic Token" with the <b>gist</b> scope checked. Fine-grained tokens will cause publishing errors!</p>
+                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none">
                 </div>
 
-                <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-600/30 mt-2">
-                    Continue
+                <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
+                    Save & Continue
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 3. Custom Open-Ended Questions Wizard Modal -->
+    <!-- Wizard Modal (Now with Image/Product Upload) -->
     <div id="wizardModal" class="fixed inset-0 z-40 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-sliders text-blue-500 mr-2"></i>Website Specifications</h2>
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i>Website Builder</h2>
                 <button onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs text-gray-300 mb-1">1. Website or Brand Name</label>
-                    <input type="text" id="wName" placeholder="Type your brand or project name..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
+                    <label class="block text-xs text-gray-300 mb-1">Brand Name & Purpose</label>
+                    <input type="text" id="wName" placeholder="e.g., Apple Store, Shoe Shop..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-300 mb-1">2. Website Purpose & Niche</label>
-                    <input type="text" id="wType" placeholder="Write your idea (e.g., Online Sneaker Store, Gaming Clan, Coffee Shop)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-300 mb-1">3. Visual Style, Colors & Vibe</label>
-                    <input type="text" id="wStyle" placeholder="Describe the look (e.g., Dark cyberpunk with neon blue, Minimalist white & gold)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-300 mb-1">4. Website Language</label>
-                    <input type="text" id="wLang" placeholder="Type desired language (e.g., English, Kurdish, Arabic)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-300 mb-1">5. Your Vision, Features & Custom Requirements</label>
-                    <textarea id="wDetails" rows="3" placeholder="Write everything you want AI to include (e.g., Hero banner, pricing cards, working contact form, animations, specific text)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none focus:border-blue-500 text-sm"></textarea>
+                    <label class="block text-xs text-gray-300 mb-1">Visual Style & Details</label>
+                    <textarea id="wDetails" rows="2" placeholder="e.g., Modern dark mode, pricing tables..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm"></textarea>
                 </div>
 
-                <button onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
-                    <i class="fa-solid fa-bolt mr-1"></i> Build Website Now
+                <!-- Products Section -->
+                <div class="bg-[#181820] p-3 rounded-xl border border-gray-800">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-box-open mr-1"></i>Add Products (Images & Prices)</label>
+                        <button onclick="addProductRow()" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] px-2 py-1 rounded"><i class="fa-solid fa-plus"></i> Add Item</button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mb-2">Upload real images. AI will place them perfectly in the website.</p>
+                    <div id="productsContainer" class="space-y-2"></div>
+                </div>
+
+                <button onclick="startWizardGeneration()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
+                    Build Website Now
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 4. Top Header Bar -->
+    <!-- Monetization / Ads Modal -->
+    <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-yellow-400"><i class="fa-solid fa-sack-dollar mr-2"></i>Monetize Website</h2>
+                <button onclick="document.getElementById('monetizeModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">Select Strategy</label>
+                    <select id="monetizeType" onchange="toggleAdInput()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
+                        <option value="ads">Inject Ad Code (Unity / Adsterra)</option>
+                        <option value="premium">Make Website Premium (Paywall)</option>
+                    </select>
+                </div>
+                <div id="adCodeWrapper">
+                    <label class="block text-xs text-gray-300 mb-1">Your Ad Script Code</label>
+                    <textarea id="adCodeInput" rows="4" placeholder="Paste <script> tag from Adsterra or Unity here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-green-400 font-mono text-[10px] outline-none"></textarea>
+                </div>
+                <button onclick="applyMonetization()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                    Apply to Website
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Header -->
     <header class="h-14 bg-[#121216] border-b border-gray-800/80 px-4 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-3">
             <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition">
@@ -127,505 +122,313 @@
             </button>
             <div>
                 <h1 id="currentProjectTitle" class="font-bold text-sm text-white truncate max-w-[140px] sm:max-w-xs">Untitled Project</h1>
-                <span id="saveStatus" class="text-[10px] text-green-400 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Auto-saved</span>
             </div>
         </div>
-
         <div class="flex items-center gap-1.5 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
-            <button onclick="setViewport('100%')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
-            <button onclick="setViewport('390px')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
-            <button onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
+            <button onclick="setViewport('100%')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition"><i class="fa-solid fa-desktop"></i></button>
+            <button onclick="setViewport('390px')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition"><i class="fa-solid fa-mobile-screen"></i></button>
         </div>
-
-        <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Site</span>
-        </button>
     </header>
 
-    <!-- 5. 3-Dots Sidebar Drawer -->
+    <!-- Sidebar -->
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
-    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-                <span class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-500"></i> Web Maker AI</span>
-                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white w-8 h-8"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <span class="font-bold text-lg text-white"><i class="fa-solid fa-layer-group text-blue-500 mr-2"></i>Web Maker</span>
+                <button onclick="toggleSidebar()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-[#1e1e26] hover:bg-gray-800 border border-gray-700 text-white py-3 px-4 rounded-xl flex items-center gap-3 font-semibold text-sm transition">
-                <i class="fa-solid fa-plus text-blue-400"></i> Create New Website
+            <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-[#1e1e26] border border-gray-700 text-white py-2.5 rounded-xl text-sm font-semibold transition">
+                <i class="fa-solid fa-plus text-blue-400 mr-2"></i> New Website
             </button>
-
-            <div class="mt-6">
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Your Saved Websites</h3>
-                <div id="projectList" class="space-y-1.5 max-h-[42vh] overflow-y-auto pr-1"></div>
-            </div>
+            <div class="mt-4"><div id="projectList" class="space-y-1.5 max-h-[40vh] overflow-y-auto"></div></div>
         </div>
 
         <div class="border-t border-gray-800 pt-4 space-y-2">
-            <button onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 py-2.5 px-4 rounded-xl flex items-center justify-between text-sm font-semibold transition">
-                <span><i class="fa-solid fa-globe mr-2"></i>Publish & Get Link</span>
-                <i class="fa-solid fa-share-nodes"></i>
+            <!-- NEW MONETIZATION BUTTON -->
+            <button onclick="openMonetizeModal(); toggleSidebar();" class="w-full bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-dollar-sign"></i> Monetize (Ads / Premium)
             </button>
 
-            <div id="liveLinkBox" class="hidden bg-[#1a1a22] p-2.5 rounded-xl border border-gray-700 text-xs">
-                <p class="text-gray-400 mb-1">Live Shareable Website URL:</p>
+            <button onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-globe"></i> Publish Live Link
+            </button>
+            <div id="liveLinkBox" class="hidden bg-[#1a1a22] p-2 rounded-xl border border-gray-700 mt-2">
                 <div class="flex items-center gap-1">
-                    <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-400 p-1.5 rounded border border-gray-800 outline-none text-[11px]">
-                    <button onclick="copyLiveLink()" class="bg-blue-600 text-white px-2.5 py-1.5 rounded hover:bg-blue-500"><i class="fa-solid fa-copy"></i></button>
+                    <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-400 p-1.5 rounded text-[10px] outline-none">
+                    <button onclick="copyLiveLink()" class="bg-blue-600 text-white px-2 py-1.5 rounded"><i class="fa-solid fa-copy"></i></button>
                 </div>
             </div>
-
-            <button onclick="downloadHTML()" class="w-full bg-[#1e1e26] hover:bg-gray-800 text-gray-200 py-2.5 px-4 rounded-xl flex items-center gap-3 text-sm transition">
-                <i class="fa-solid fa-download text-purple-400"></i> Download HTML File
-            </button>
-
-            <button onclick="openSettings(); toggleSidebar();" class="w-full bg-[#1e1e26] hover:bg-gray-800 text-gray-200 py-2.5 px-4 rounded-xl flex items-center gap-3 text-sm transition">
-                <i class="fa-solid fa-gear text-gray-400"></i> Settings & API Keys
-            </button>
+            <button onclick="openSettings(); toggleSidebar();" class="w-full bg-[#1e1e26] text-gray-300 py-2.5 rounded-xl text-sm mt-2"><i class="fa-solid fa-gear mr-2"></i> Settings</button>
         </div>
     </aside>
 
-    <!-- 6. Main Workspace (Preview & Code) -->
-    <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden pb-24">
+    <!-- Main Workspace -->
+    <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden pb-20">
+        <div id="iframeContainer" class="w-full h-full hidden">
+            <!-- allow-popups added for Adsterra/Unity scripts to work correctly -->
+            <iframe id="previewFrame" class="w-full h-full bg-white transition-all shadow-2xl" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>
         
-        <div id="emptyState" class="text-center p-6 max-w-md">
-            <div class="w-20 h-20 bg-gray-900 border border-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl text-blue-500 shadow-inner">
-                <i class="fa-solid fa-code"></i>
-            </div>
-            <h2 class="text-xl font-bold text-white mb-2">Ready to Build</h2>
-            <p class="text-gray-400 text-sm mb-6">Answer a few custom questions or type directly in the chat bar below to generate your website.</p>
-            <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-600/20 transition">
-                Start Website Wizard
-            </button>
-        </div>
-
-        <div id="iframeContainer" class="w-full h-full flex items-center justify-center p-0 transition-all duration-300 hidden">
-            <iframe id="previewFrame" class="w-full h-full bg-white transition-all duration-300 shadow-2xl" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
-        </div>
-
-        <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
-
-        <div id="loadingOverlay" class="absolute inset-0 bg-black/80 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden">
-            <div class="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-white font-bold text-base animate-pulse">AI is generating your website...</p>
+        <div id="loadingOverlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p id="loadingText" class="text-white font-bold animate-pulse">AI is coding your website...</p>
         </div>
     </main>
 
-    <!-- 7. Elevated Floating AI Chat Bar (Moved Up for Mobile Comfort) -->
-    <div class="fixed bottom-6 left-0 right-0 px-4 z-30 pointer-events-none">
-        <div class="max-w-3xl mx-auto flex items-center gap-2 bg-[#181820]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-2 pl-4 shadow-2xl pointer-events-auto focus-within:border-blue-500 transition">
-            <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell AI what to build or edit..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400">
-            <button onclick="sendChatPrompt()" id="sendBtn" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shrink-0 shadow-md">
-                <i class="fa-solid fa-paper-plane text-sm"></i>
-            </button>
+    <!-- Floating AI Chat Bar -->
+    <div class="fixed bottom-4 left-0 right-0 px-4 z-30">
+        <div class="max-w-2xl mx-auto flex items-center gap-2 bg-[#181820]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-1.5 pl-4 shadow-2xl">
+            <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell AI to modify design, add content..." class="w-full bg-transparent text-white text-sm outline-none">
+            <button onclick="sendChatPrompt()" class="bg-blue-600 text-white w-10 h-10 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- Application Logic -->
+    <!-- App Logic -->
     <script>
         let projects = JSON.parse(localStorage.getItem('wm_projects') || '[]');
         let currentProjectId = localStorage.getItem('wm_current_id') || null;
-        let isCodeView = false;
-
-        const SYSTEM_PROMPT = `You are an elite Full-Stack Web Developer and UI/UX Designer.
-Generate or update a COMPLETE, working, single-file HTML website strictly following the user's opinions, preferences, and instructions.
-STRICT RULES:
-1. Return ONLY valid raw HTML5 code starting with <!DOCTYPE html> and ending with </html>.
-2. NEVER wrap code in markdown backticks or write explanations.
-3. Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
-4. Make the design modern, responsive, and interactive with working JavaScript.`;
+        
+        // Product Management Array
+        let currentProducts = [];
 
         window.onload = () => {
-            // Start 4-second splash screen animation
-            setTimeout(() => {
-                document.getElementById('splashProgress').style.width = '100%';
-            }, 50);
-
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                splash.classList.add('opacity-0');
-                setTimeout(() => {
-                    splash.classList.add('hidden');
-                    checkAuthAndInit();
-                }, 500);
-            }, 4000);
+            if (!localStorage.getItem('wm_api_key')) document.getElementById('setupModal').classList.remove('hidden');
+            renderProjectList();
+            if (currentProjectId && projects.find(p => p.id === currentProjectId)) loadProject(currentProjectId);
+            else if (projects.length > 0) loadProject(projects[0].id);
         };
 
-        function checkAuthAndInit() {
-            const apiKey = localStorage.getItem('wm_api_key');
-            if (!apiKey) {
-                openSettings();
-            }
-            renderProjectList();
-            if (currentProjectId && projects.find(p => p.id === currentProjectId)) {
-                loadProject(currentProjectId);
-            } else if (projects.length > 0) {
-                loadProject(projects[0].id);
-            }
-        }
-
-        function updateKeyLink() {
-            const provider = document.getElementById('aiProvider').value;
-            const linkBtn = document.getElementById('getApiKeyBtn');
-            if (provider === 'gemini') linkBtn.href = 'https://aistudio.google.com/app/apikey';
-            else if (provider === 'openai') linkBtn.href = 'https://platform.openai.com/api-keys';
-            else if (provider === 'claude') linkBtn.href = 'https://console.anthropic.com/settings/keys';
-        }
-
-        function openSettings() {
-            document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
-            document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
-            document.getElementById('githubTokenInput').value = localStorage.getItem('wm_gh_token') || '';
-            updateKeyLink();
-            document.getElementById('setupModal').classList.remove('hidden');
-        }
-
+        function openSettings() { document.getElementById('setupModal').classList.remove('hidden'); }
         function saveSettings() {
-            const provider = document.getElementById('aiProvider').value;
             const key = document.getElementById('apiKeyInput').value.trim();
-            const ghToken = document.getElementById('githubTokenInput').value.trim();
-
-            if (!key) {
-                alert('Please enter your API Key to continue.');
-                return;
-            }
-            localStorage.setItem('wm_provider', provider);
+            if (!key) { alert('API Key required!'); return; }
             localStorage.setItem('wm_api_key', key);
-            localStorage.setItem('wm_gh_token', ghToken);
+            localStorage.setItem('wm_gh_token', document.getElementById('githubTokenInput').value.trim());
             document.getElementById('setupModal').classList.add('hidden');
-
-            if (projects.length === 0) {
-                openWizard();
-            }
+            if (projects.length === 0) openWizard();
         }
 
         function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('sidebarOverlay');
-            sb.classList.toggle('-translate-x-full');
-            ov.classList.toggle('hidden');
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        function openWizard() { document.getElementById('wizardModal').classList.remove('hidden'); }
+        /* --- PRODUCT UPLOAD LOGIC --- */
+        function openWizard() { 
+            document.getElementById('productsContainer').innerHTML = ''; 
+            currentProducts = [];
+            document.getElementById('wizardModal').classList.remove('hidden'); 
+        }
         function closeWizard() { document.getElementById('wizardModal').classList.add('hidden'); }
 
-        async function startWizardGeneration() {
-            const name = document.getElementById('wName').value.trim() || 'My Website';
-            const type = document.getElementById('wType').value.trim() || 'General Website';
-            const style = document.getElementById('wStyle').value.trim() || 'Modern and Clean';
-            const lang = document.getElementById('wLang').value.trim() || 'English';
-            const details = document.getElementById('wDetails').value.trim() || 'Complete landing page with all key sections.';
+        function addProductRow() {
+            const id = Date.now();
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center bg-[#22222d] p-2 rounded-lg border border-gray-700";
+            div.innerHTML = `
+                <input type="text" id="pn_${id}" placeholder="Name" class="w-1/3 bg-black/50 text-white text-[11px] p-1.5 rounded outline-none">
+                <input type="text" id="pp_${id}" placeholder="Price ($)" class="w-1/4 bg-black/50 text-white text-[11px] p-1.5 rounded outline-none">
+                <input type="file" accept="image/*" onchange="encodeImg(this, ${id})" class="w-1/3 text-[9px] text-gray-400 file:bg-gray-700 file:border-0 file:rounded file:text-white file:px-2 file:py-1">
+            `;
+            document.getElementById('productsContainer').appendChild(div);
+            currentProducts.push({ id: id, name: '', price: '', b64: '' });
+        }
 
+        function encodeImg(input, id) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const prod = currentProducts.find(p => p.id === id);
+                if(prod) prod.b64 = reader.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        async function startWizardGeneration() {
+            const name = document.getElementById('wName').value.trim() || 'My Web Store';
+            const details = document.getElementById('wDetails').value.trim();
             closeWizard();
 
-            const userSpecs = `Brand Name: ${name} | Niche/Purpose: ${type} | Visual Style: ${style} | Language: ${lang} | User Vision & Details: ${details}`;
+            let fullPrompt = `Create a complete, modern, single-file HTML website for "${name}". Details: ${details}. 
+            Use Tailwind CSS and FontAwesome. Make it beautiful and responsive.`;
 
-            const fullPrompt = `Build a complete, professional website strictly following the user's custom specifications and opinions:
-- Brand/Website Name: ${name}
-- Purpose / Niche: ${type}
-- Preferred Visual Style & Colors: ${style}
-- Website Language: ${lang}
-- User's Specific Vision & Features: ${details}`;
+            // Inject Product Logic for AI to format
+            currentProducts.forEach(p => {
+                p.name = document.getElementById(`pn_${p.id}`).value || 'Item';
+                p.price = document.getElementById(`pp_${p.id}`).value || '$0';
+            });
+            const validProducts = currentProducts.filter(p => p.b64 !== '');
+
+            if (validProducts.length > 0) {
+                fullPrompt += `\n\nCRITICAL: The user is selling products. You MUST create a product grid. Use these exact details for each item:\n`;
+                validProducts.forEach((p, index) => {
+                    fullPrompt += `- Product ${index+1}: Name: "${p.name}", Price: "${p.price}", Image URL to use exactly: "RAW_IMG_TARGET_${index}"\n`;
+                });
+                fullPrompt += `IMPORTANT: Do NOT use fake image URLs for the products. You MUST set the img src exactly to "RAW_IMG_TARGET_x". I will replace them programmatically later.`;
+            }
 
             const newProj = {
                 id: 'proj_' + Date.now(),
-                name: name,
-                specs: userSpecs,
-                code: '',
-                liveUrl: '',
-                updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                name: name, code: '', liveUrl: '',
+                products: validProducts // Save B64s here
             };
-
             projects.unshift(newProj);
             currentProjectId = newProj.id;
             saveToStorage();
             renderProjectList();
 
-            await generateWithAI(fullPrompt, '', userSpecs);
+            await generateWithAI(fullPrompt, null, newProj);
         }
 
+        /* --- MONETIZATION LOGIC --- */
+        function openMonetizeModal() {
+            const proj = projects.find(p => p.id === currentProjectId);
+            if(!proj || !proj.code) return alert("Build a website first!");
+            document.getElementById('monetizeModal').classList.remove('hidden');
+        }
+        function toggleAdInput() {
+            const type = document.getElementById('monetizeType').value;
+            document.getElementById('adCodeWrapper').style.display = type === 'ads' ? 'block' : 'none';
+        }
+
+        async function applyMonetization() {
+            document.getElementById('monetizeModal').classList.add('hidden');
+            const type = document.getElementById('monetizeType').value;
+            const code = document.getElementById('adCodeInput').value;
+            const proj = projects.find(p => p.id === currentProjectId);
+            
+            document.getElementById('loadingText').innerText = "Applying Monetization & Ads...";
+            
+            let mPrompt = "";
+            if (type === 'premium') {
+                mPrompt = "The user wants to make this a Premium Website. Add a beautiful Premium Paywall overlay blocking some content, with a 'Subscribe Now' button. Keep all existing design perfect.";
+            } else {
+                if(!code) return alert("Please paste the ad code first.");
+                mPrompt = `The user wants to monetize this site with an Ad network (like Unity or Adsterra). \n\nInject this EXACT raw script code into the appropriate location in the HTML (head or body as fit): \n\n${code}\n\nEnsure the design does not break and return the full updated HTML.`;
+            }
+            await generateWithAI(mPrompt, proj.code, proj);
+        }
+
+        /* --- CHAT AND AI CORE --- */
         async function sendChatPrompt() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
+            const text = document.getElementById('chatInput').value.trim();
             if (!text) return;
-
-            input.value = '';
-
-            if (!currentProjectId || projects.length === 0) {
-                const newProj = {
-                    id: 'proj_' + Date.now(),
-                    name: text.substring(0, 24),
-                    specs: text,
-                    code: '',
-                    liveUrl: '',
-                    updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                };
-                projects.unshift(newProj);
-                currentProjectId = newProj.id;
-            }
-
-            const currentProj = projects.find(p => p.id === currentProjectId);
-            await generateWithAI(text, currentProj.code, currentProj.specs || '');
+            document.getElementById('chatInput').value = '';
+            const proj = projects.find(p => p.id === currentProjectId);
+            if (!proj) return;
+            document.getElementById('loadingText').innerText = "AI is updating design...";
+            await generateWithAI(`User wants to edit the site: "${text}". Update the HTML to reflect this. Keep existing products and ads intact.`, proj.code, proj);
         }
 
-        async function callGeminiAPI(apiKey, promptText) {
-            const modelsToTry = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-            let lastError = '';
-
-            for (const modelName of modelsToTry) {
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                            contents: [{ parts: [{ text: promptText }] }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (!data.error && data.candidates && data.candidates[0].content.parts[0].text) {
-                        return data.candidates[0].content.parts[0].text;
-                    }
-                    lastError = data.error ? data.error.message : 'Unknown error';
-                } catch (e) {
-                    lastError = e.message;
-                }
-            }
-            throw new Error(lastError);
-        }
-
-        async function generateWithAI(userPrompt, existingCode, userSpecs) {
-            const provider = localStorage.getItem('wm_provider') || 'gemini';
+        async function generateWithAI(prompt, existingCode, projectObj) {
             const apiKey = localStorage.getItem('wm_api_key');
-
-            if (!apiKey) { openSettings(); return; }
-
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
-            let finalPrompt = userPrompt;
-            if (existingCode && existingCode.length > 50) {
-                finalPrompt = `Original User Vision & Preferences: [${userSpecs}]\n\nCurrent HTML Code:\n${existingCode}\n\nNew User Edit / Opinion: "${userPrompt}"\n\nUpdate the website according to the user's new instruction while respecting their original vision. Return ONLY the full updated HTML code.`;
-            }
+            let finalPrompt = prompt;
+            if (existingCode) finalPrompt = `Current HTML:\n${existingCode}\n\nRequest: ${prompt}\n\nReturn the FULL updated HTML only. Do not wrap in markdown.`;
 
             try {
-                let rawResponse = '';
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: "You are a web developer. Return raw HTML5 code starting with <!DOCTYPE html>. No markdown ticks." }] },
+                        contents: [{ parts: [{ text: finalPrompt }] }]
+                    })
+                });
+                const data = await res.json();
+                if(data.error) throw new Error(data.error.message);
+                
+                let rawCode = data.candidates[0].content.parts[0].text.replace(/```html/gi, '').replace(/```/g, '').trim();
 
-                if (provider === 'gemini') {
-                    rawResponse = await callGeminiAPI(apiKey, finalPrompt);
-                } else if (provider === 'openai') {
-                    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: 'gpt-4o-mini',
-                            messages: [
-                                { role: 'system', content: SYSTEM_PROMPT },
-                                { role: 'user', content: finalPrompt }
-                            ]
-                        })
+                // Post-Processing: Inject Real Images Base64 back into HTML
+                if (projectObj.products && projectObj.products.length > 0) {
+                    projectObj.products.forEach((p, index) => {
+                        // Replace the AI target string with the massive Base64 string
+                        rawCode = rawCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
                     });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.choices[0].message.content;
-
-                } else if (provider === 'claude') {
-                    const res = await fetch('https://api.anthropic.com/v1/messages', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': apiKey,
-                            'anthropic-version': '2023-06-01',
-                            'anthropic-dangerous-direct-browser-access': 'true'
-                        },
-                        body: JSON.stringify({
-                            model: 'claude-3-5-sonnet-20240620',
-                            max_tokens: 8000,
-                            system: SYSTEM_PROMPT,
-                            messages: [{ role: 'user', content: finalPrompt }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.content[0].text;
                 }
 
-                const cleanHTML = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
-
-                const proj = projects.find(p => p.id === currentProjectId);
-                if (proj) {
-                    proj.code = cleanHTML;
-                    proj.updatedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    saveToStorage();
-                    loadProject(proj.id);
-                }
-
+                projectObj.code = rawCode;
+                saveToStorage();
+                loadProject(projectObj.id);
             } catch (err) {
-                alert('AI Connection Error:\n' + err.message);
+                alert('AI Error: ' + err.message);
             } finally {
                 document.getElementById('loadingOverlay').classList.add('hidden');
             }
         }
 
+        /* --- UI RENDER & PUBLISH --- */
         function loadProject(id) {
             const proj = projects.find(p => p.id === id);
             if (!proj) return;
-
-            currentProjectId = proj.id;
+            currentProjectId = id;
             localStorage.setItem('wm_current_id', id);
-
             document.getElementById('currentProjectTitle').innerText = proj.name;
-
+            
             if (proj.code) {
-                document.getElementById('emptyState').classList.add('hidden');
                 document.getElementById('iframeContainer').classList.remove('hidden');
                 document.getElementById('previewFrame').srcdoc = proj.code;
-                document.getElementById('codeEditor').value = proj.code;
-            } else {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('iframeContainer').classList.add('hidden');
             }
-
             if (proj.liveUrl) {
                 document.getElementById('liveLinkBox').classList.remove('hidden');
                 document.getElementById('liveUrlInput').value = proj.liveUrl;
             } else {
                 document.getElementById('liveLinkBox').classList.add('hidden');
             }
-
             renderProjectList();
-        }
-
-        function manualCodeUpdate() {
-            const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj) return;
-            proj.code = document.getElementById('codeEditor').value;
-            document.getElementById('previewFrame').srcdoc = proj.code;
-            saveToStorage();
         }
 
         function renderProjectList() {
             const list = document.getElementById('projectList');
             list.innerHTML = '';
             projects.forEach(p => {
-                const activeClass = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-blue-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300 hover:bg-gray-800';
-                list.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${activeClass} cursor-pointer transition" onclick="loadProject('${p.id}'); toggleSidebar();">
-                        <div class="truncate pr-2">
-                            <div class="font-semibold text-sm truncate">${p.name}</div>
-                            <div class="text-[10px] text-gray-500">${p.updatedAt}</div>
-                        </div>
-                        <button onclick="event.stopPropagation(); deleteProject('${p.id}')" class="text-gray-500 hover:text-red-400 px-2 py-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                    </div>
-                `;
+                const active = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-blue-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300';
+                list.innerHTML += `<div class="p-2.5 rounded-xl border ${active} cursor-pointer mb-1 text-sm font-semibold truncate" onclick="loadProject('${p.id}'); toggleSidebar();">${p.name}</div>`;
             });
         }
-
-        function deleteProject(id) {
-            projects = projects.filter(p => p.id !== id);
-            if (currentProjectId === id) {
-                currentProjectId = projects.length > 0 ? projects[0].id : null;
-            }
-            saveToStorage();
-            renderProjectList();
-            if (currentProjectId) loadProject(currentProjectId);
-            else location.reload();
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('wm_projects', JSON.stringify(projects));
-            const st = document.getElementById('saveStatus');
-            st.innerHTML = '<i class="fa-solid fa-sync fa-spin"></i> Saving...';
-            setTimeout(() => { st.innerHTML = '<i class="fa-solid fa-check-circle"></i> Auto-saved'; }, 600);
-        }
-
-        function setViewport(width) {
-            document.getElementById('previewFrame').style.width = width;
-        }
-
-        function toggleCodeView() {
-            isCodeView = !isCodeView;
-            const editor = document.getElementById('codeEditor');
-            const iframeCont = document.getElementById('iframeContainer');
-            const btn = document.getElementById('codeBtn');
-
-            if (isCodeView) {
-                editor.classList.remove('hidden');
-                iframeCont.classList.add('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
-            } else {
-                editor.classList.add('hidden');
-                iframeCont.classList.remove('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-code mr-1"></i>Code';
-            }
-        }
-
-        function downloadHTML() {
-            const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) { alert('No website generated yet!'); return; }
-            const blob = new Blob([proj.code], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${proj.name.replace(/\s+/g, '_')}.html`;
-            a.click();
-        }
+        function saveToStorage() { localStorage.setItem('wm_projects', JSON.stringify(projects)); }
+        function setViewport(w) { document.getElementById('previewFrame').style.width = w; }
 
         async function publishWebsite() {
             const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) { alert('Build a website first before publishing!'); return; }
-
+            if (!proj || !proj.code) return alert('Build a website first!');
             const ghToken = localStorage.getItem('wm_gh_token');
-            if (!ghToken) {
-                alert('Please enter a GitHub Token in Settings to generate a live shareable link.');
-                openSettings();
-                return;
-            }
+            if (!ghToken) return openSettings();
 
-            const btn = document.getElementById('publishBtn');
-            btn.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin mr-2"></i>Publishing...</span>';
+            document.getElementById('loadingText').innerText = "Publishing to Global Server...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
 
             try {
                 const res = await fetch('https://api.github.com/gists', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${ghToken}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github+json' },
                     body: JSON.stringify({
-                        description: `Created with Web Maker AI: ${proj.name}`,
-                        public: true,
+                        description: `Created with Web Maker AI: ${proj.name}`, public: true,
                         files: { "index.html": { content: proj.code } }
                     })
                 });
-
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
-
-                const rawUrl = data.files['index.html'].raw_url;
-                const liveShareUrl = `https://htmlpreview.github.io/?${rawUrl}`;
-
+                
+                const liveShareUrl = `https://htmlpreview.github.io/?${data.files['index.html'].raw_url}`;
                 proj.liveUrl = liveShareUrl;
                 saveToStorage();
-
-                document.getElementById('liveLinkBox').classList.remove('hidden');
-                document.getElementById('liveUrlInput').value = liveShareUrl;
-                alert('Published! Your shareable link is ready.');
-
+                loadProject(proj.id);
+                alert('Published successfully! (Note: Real Ads only work properly on this published live link)');
             } catch (err) {
-                alert('GitHub Publish Error:\n' + err.message);
+                alert('GitHub Publish Error:\n' + err.message + '\n\nMake sure you are using a CLASSIC Token with "gist" permissions!');
             } finally {
-                btn.innerHTML = '<span><i class="fa-solid fa-globe mr-2"></i>Publish & Get Link</span><i class="fa-solid fa-share-nodes"></i>';
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('sidebar').classList.remove('-translate-x-full'); // Auto-open sidebar to show link
             }
         }
-
         function copyLiveLink() {
             const input = document.getElementById('liveUrlInput');
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            alert('Link copied to clipboard!');
+            input.select(); navigator.clipboard.writeText(input.value); alert('Link copied!');
         }
     </script>
 </body>

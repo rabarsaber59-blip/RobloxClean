@@ -23,7 +23,7 @@
 </head>
 <body class="flex flex-col select-none relative">
 
-    <!-- 1. API & Settings Modal (Auto-Saves Immediately) -->
+    <!-- 1. API سەپلىمە كۆزنىكى -->
     <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
@@ -35,7 +35,7 @@
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">AI Provider</label>
                     <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                        <option value="gemini">Google Gemini (gemini-3.8-flash)</option>
+                        <option value="gemini">Google Gemini (Auto-Fallback Enabled)</option>
                         <option value="openai">OpenAI (GPT-4o)</option>
                         <option value="claude">Anthropic Claude 3.5</option>
                     </select>
@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <!-- 2. Website Specifications & Product Upload Wizard -->
+    <!-- 2. تور بېكەت قۇرۇش ۋە مەھسۇلات قوشۇش كۆزنىكى -->
     <div id="wizardModal" class="fixed inset-0 z-40 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
@@ -100,7 +100,6 @@
                     <textarea id="wDetails" rows="2" placeholder="Write everything you want AI to build (e.g., Hero banner, shopping cart, contact form, animations)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm"></textarea>
                 </div>
 
-                <!-- Products Upload Section -->
                 <div class="bg-[#181820] p-3 rounded-xl border border-gray-800">
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-camera mr-1"></i>Upload Products (Images & Prices)</label>
@@ -116,7 +115,7 @@
         </div>
     </div>
 
-    <!-- 3. Always-Open Monetize Modal (Ads & Custom Premium Paywall) -->
+    <!-- 3. ئېلان ۋە Premium كىرىم كۆزنىكى -->
     <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
@@ -133,7 +132,6 @@
                     </select>
                 </div>
 
-                <!-- MODE A: ADS (Adsterra & Unity Links + Code Paste) -->
                 <div id="adCodeWrapper" class="space-y-3">
                     <div>
                         <label class="block text-xs text-gray-400 mb-1.5">1. Get Your Ad Code From Network:</label>
@@ -152,11 +150,10 @@
                             <label class="text-xs text-gray-300">2. Paste Ad Script / Unit Code:</label>
                             <button onclick="pasteAdClipboard()" class="text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-0.5 rounded border border-gray-700"><i class="fa-solid fa-paste mr-1"></i>Paste</button>
                         </div>
-                        <textarea id="adCodeInput" rows="4" placeholder="Paste your <script> code from Adsterra or Unity Ads here (you can paste one or both together)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none focus:border-yellow-500"></textarea>
+                        <textarea id="adCodeInput" rows="4" placeholder="Paste your <script> code from Adsterra or Unity Ads here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none focus:border-yellow-500"></textarea>
                     </div>
                 </div>
 
-                <!-- MODE B: PREMIUM (Custom Payment Requirements) -->
                 <div id="premiumWrapper" class="space-y-3 hidden">
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">1. Subscription or Access Price</label>
@@ -164,11 +161,11 @@
                     </div>
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">2. What Payment Info Should Users Enter?</label>
-                        <input type="text" id="premMethods" placeholder="e.g., Credit Card / Keycard Number, FastPay / FIB Number, PayPal, Phone & Receipt..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-yellow-500 text-sm">
+                        <input type="text" id="premMethods" placeholder="e.g., Card Number, FastPay / FIB Number, PayPal, Phone..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-yellow-500 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">3. Payment Instructions & Locked Benefits</label>
-                        <textarea id="premDetails" rows="3" placeholder="e.g., Lock the store/content until they fill out the payment form. Show my wallet number 0750xxxxxxx and ask for transaction ID or VIP unlock code..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-yellow-500 text-sm"></textarea>
+                        <textarea id="premDetails" rows="3" placeholder="e.g., Lock the store until they fill out the payment form..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-yellow-500 text-sm"></textarea>
                     </div>
                 </div>
 
@@ -179,7 +176,7 @@
         </div>
     </div>
 
-    <!-- 4. Top Header Bar -->
+    <!-- 4. ئۈستى قورال بالدىقى -->
     <header class="h-14 bg-[#121216] border-b border-gray-800/80 px-4 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-3">
             <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition">
@@ -198,7 +195,7 @@
         </div>
     </header>
 
-    <!-- 5. Sidebar Drawer (3-Dots Menu) -->
+    <!-- 5. يان تىزىملىك -->
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
     <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
         <div>
@@ -245,7 +242,7 @@
         </div>
     </aside>
 
-    <!-- 6. Main Workspace -->
+    <!-- 6. ئاساسىي كۆزنەك -->
     <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden pb-20">
         <div id="emptyState" class="text-center p-6 max-w-md">
             <div class="w-16 h-16 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl text-blue-500">
@@ -264,13 +261,14 @@
 
         <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
         
-        <div id="loadingOverlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden">
+        <div id="loadingOverlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden px-6 text-center">
             <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p id="loadingText" class="text-white font-bold text-sm animate-pulse">AI is building your website...</p>
+            <p id="loadingSubText" class="text-gray-400 text-xs mt-1.5"></p>
         </div>
     </main>
 
-    <!-- 7. Elevated Floating AI Chat Bar -->
+    <!-- 7. سۆھبەت ۋە تەھرىرلەش بالدىقى -->
     <div class="fixed bottom-5 left-0 right-0 px-4 z-30 pointer-events-none">
         <div class="max-w-2xl mx-auto flex items-center gap-2 bg-[#181820]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-1.5 pl-4 shadow-2xl pointer-events-auto focus-within:border-blue-500 transition">
             <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell AI to modify design, add content, or build..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400">
@@ -278,7 +276,6 @@
         </div>
     </div>
 
-    <!-- Application Logic -->
     <script>
         let projects = JSON.parse(localStorage.getItem('wm_projects') || '[]');
         let currentProjectId = localStorage.getItem('wm_current_id') || null;
@@ -292,22 +289,10 @@ Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and 
 Make the design modern, responsive, interactive, and complete.`;
 
         window.onload = () => {
-            // Clean up any old non-English default project titles automatically
-            let cleaned = false;
-            projects.forEach(p => {
-                if (p.name === 'پڕۆژەی نوێ' || p.name === 'پڕۆژەی بێ ناو') {
-                    p.name = 'New Website';
-                    cleaned = true;
-                }
-            });
-            if (cleaned) saveToStorage();
-
             populateSettingsInputs();
-
             if (!localStorage.getItem('wm_api_key')) {
                 openSettings();
             }
-
             renderProjectList();
             if (currentProjectId && projects.find(p => p.id === currentProjectId)) {
                 loadProject(currentProjectId);
@@ -316,7 +301,6 @@ Make the design modern, responsive, interactive, and complete.`;
             }
         };
 
-        /* --- AUTO-SAVE API KEYS IMMEDIATELY --- */
         function populateSettingsInputs() {
             document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
             document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
@@ -365,7 +349,6 @@ Make the design modern, responsive, interactive, and complete.`;
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        /* --- WIZARD & PRODUCT UPLOAD --- */
         function openWizard() { 
             document.getElementById('productsContainer').innerHTML = ''; 
             currentProducts = [];
@@ -444,7 +427,6 @@ Make the design modern, responsive, interactive, and complete.`;
             await generateWithAI(fullPrompt, null, newProj);
         }
 
-        /* --- ALWAYS-OPEN MONETIZATION (ADS & PREMIUM) --- */
         function openMonetizeModal() {
             document.getElementById('monetizeModal').classList.remove('hidden');
         }
@@ -468,9 +450,8 @@ Make the design modern, responsive, interactive, and complete.`;
             const type = document.getElementById('monetizeType').value;
             let proj = projects.find(p => p.id === currentProjectId);
 
-            // If no project exists yet, create one automatically so Monetize NEVER fails
             if (!proj) {
-                proj = { id: 'proj_' + Date.now(), name: 'Monetized Website', code: '', liveUrl: [], products: [] };
+                proj = { id: 'proj_' + Date.now(), name: 'Monetized Website', code: '', liveUrl: '', products: [] };
                 projects.unshift(proj);
                 currentProjectId = proj.id;
             }
@@ -486,9 +467,9 @@ Make the design modern, responsive, interactive, and complete.`;
                 document.getElementById('loadingText').innerText = "AI is injecting your Ad Codes...";
 
                 if (proj.code && proj.code.length > 50) {
-                    mPrompt = `Inject the following Ad Network script/code (Adsterra / Unity Ads) into this website cleanly (inside <head> or dedicated ad banner containers in <body>) without breaking the layout:\n\n${code}\n\nReturn the FULL updated HTML code.`;
+                    mPrompt = `Inject the following Ad Network script/code into this website cleanly without breaking the layout:\n\n${code}\n\nReturn the FULL updated HTML code.`;
                 } else {
-                    mPrompt = `Create a complete, modern website and integrate the following Ad Network code (Adsterra / Unity Ads) directly into the layout:\n\n${code}\n\nReturn the FULL HTML code.`;
+                    mPrompt = `Create a complete, modern website and integrate the following Ad Network code directly into the layout:\n\n${code}\n\nReturn the FULL HTML code.`;
                 }
             } else {
                 const price = document.getElementById('premPrice').value.trim() || '$9.99';
@@ -500,9 +481,9 @@ Make the design modern, responsive, interactive, and complete.`;
 
                 const premSpec = `Make this website a PREMIUM website with an interactive Payment / VIP Unlock Modal & Paywall:
 - Subscription / Unlock Price: ${price}
-- Required Payment Fields from Visitor: ${methods} (Create real input fields for these exact payment requirements)
+- Required Payment Fields from Visitor: ${methods}
 - Rules & Instructions: ${details}
-- Include a working interactive checkout form and unlock simulation so visitors must fill out these payment requirements.`;
+- Include a working interactive checkout form and unlock simulation.`;
 
                 if (proj.code && proj.code.length > 50) {
                     mPrompt = `${premSpec}\n\nIntegrate this Premium Payment system into the existing website and return the FULL updated HTML.`;
@@ -514,7 +495,6 @@ Make the design modern, responsive, interactive, and complete.`;
             await generateWithAI(mPrompt, proj.code, proj);
         }
 
-        /* --- CHAT & MULTI-PROVIDER AI ENGINE (GEMINI 3.8 FLASH) --- */
         async function sendChatPrompt() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -530,6 +510,84 @@ Make the design modern, responsive, interactive, and complete.`;
 
             document.getElementById('loadingText').innerText = "AI is updating your website...";
             await generateWithAI(text, proj.code, proj);
+        }
+
+        const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
+        // يۇقىرى بېسىم كۆرۈلگەندە ئاپتوماتىك قايتا سىناش ۋە زاپاس مودېلغا ئالمىشىش فۇنكسىيەسى
+        async function callGeminiWithRetryAndFallback(apiKey, finalPrompt) {
+            const subText = document.getElementById('loadingSubText');
+            subText.innerText = '';
+
+            // 1. ئاچقۇچ قوللايدىغان بارلىق مودېللارنى ئاپتوماتىك تەكشۈرۈش
+            let candidateModels = ['gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                const listData = await listRes.json();
+                if (listData.models) {
+                    const available = listData.models
+                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                        .map(m => m.name.replace('models/', ''))
+                        .filter(name => name.includes('gemini'));
+                    if (available.length > 0) {
+                        // gemini-3.8-flash نى بىرىنچى ئورۇنغا قويۇپ، قالغان ئاكتىپ مودېللارنى زاپاسقا تىزىش
+                        candidateModels = [...new Set(['gemini-3.8-flash', ...available])];
+                    }
+                }
+            } catch (e) {}
+
+            let lastError = 'Unknown error';
+
+            for (let mIndex = 0; mIndex < candidateModels.length; mIndex++) {
+                const modelName = candidateModels[mIndex];
+
+                // ھەر بىر مودېلنى 2 قېتىمغىچە سىناش
+                for (let attempt = 1; attempt <= 2; attempt++) {
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                contents: [{ parts: [{ text: finalPrompt }] }]
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (!data.error && data.candidates && data.candidates[0].content.parts[0].text) {
+                            subText.innerText = '';
+                            return data.candidates[0].content.parts[0].text;
+                        }
+
+                        lastError = data.error ? data.error.message : 'Empty response';
+
+                        // ئەگەر مودېل ئالدىراش بولسا (High Demand / Overloaded / 503 / 429)
+                        const isBusy = lastError.toLowerCase().includes('high demand') ||
+                                       lastError.toLowerCase().includes('overloaded') ||
+                                       res.status === 503 || res.status === 429;
+
+                        if (isBusy) {
+                            subText.innerText = `Server busy on ${modelName}, retrying automatically (${attempt}/2)...`;
+                            await sleep(2200);
+                            continue;
+                        } else {
+                            // ئەگەر مودېل قوللىمىسا دەرھال كېيىنكى زاپاس مودېلغا ئۆتۈش
+                            break;
+                        }
+                    } catch (err) {
+                        lastError = err.message;
+                        await sleep(1500);
+                    }
+                }
+
+                if (mIndex + 1 < candidateModels.length) {
+                    subText.innerText = `Switching to backup model (${candidateModels[mIndex + 1]})...`;
+                }
+            }
+
+            subText.innerText = '';
+            throw new Error(lastError);
         }
 
         async function generateWithAI(prompt, existingCode, projectObj) {
@@ -552,18 +610,7 @@ Make the design modern, responsive, interactive, and complete.`;
                 let rawResponse = '';
 
                 if (provider === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                            contents: [{ parts: [{ text: finalPrompt }] }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.candidates[0].content.parts[0].text;
-
+                    rawResponse = await callGeminiWithRetryAndFallback(apiKey, finalPrompt);
                 } else if (provider === 'openai') {
                     const res = await fetch('https://api.openai.com/v1/chat/completions', {
                         method: 'POST',
@@ -622,7 +669,6 @@ Make the design modern, responsive, interactive, and complete.`;
             }
         }
 
-        /* --- WORKSPACE, CODE VIEW & PUBLISHING --- */
         function loadProject(id) {
             const proj = projects.find(p => p.id === id);
             if (!proj) return;

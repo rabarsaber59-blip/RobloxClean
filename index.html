@@ -3,31 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Web Maker AI Pro</title>
+    <title>ZenoWeb - AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800;900&display=swap');
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #09090c; 
+            background-color: #07070a; 
             color: #f3f4f6; 
             overflow: hidden; 
             height: 100dvh; 
             width: 100vw; 
         }
+        .font-zeno { font-family: 'Orbitron', sans-serif; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #121216; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+
+        /* PS5 Startup Ambient Styles */
+        .ps5-bg {
+            background: radial-gradient(circle at 50% 35%, rgba(0, 112, 209, 0.35) 0%, rgba(0, 40, 110, 0.18) 40%, #030306 80%);
+        }
+        .ps5-beam {
+            position: absolute;
+            width: 160%;
+            height: 280px;
+            background: linear-gradient(90deg, transparent, rgba(0, 162, 255, 0.18), rgba(255, 195, 90, 0.12), rgba(0, 112, 209, 0.2), transparent);
+            filter: blur(45px);
+            transform: rotate(-18deg);
+            animation: beamSweep 5s ease-in-out infinite alternate;
+        }
+        @keyframes beamSweep {
+            0% { transform: rotate(-18deg) translateY(-30px) scale(0.95); opacity: 0.6; }
+            100% { transform: rotate(-12deg) translateY(30px) scale(1.1); opacity: 1; }
+        }
+        @keyframes ps5LogoFloat {
+            0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px rgba(0, 170, 255, 0.6)); }
+            50% { transform: translateY(-8px) scale(1.04); filter: drop-shadow(0 0 45px rgba(255, 200, 100, 0.75)); }
+        }
+        @keyframes textReveal {
+            0% { opacity: 0; letter-spacing: 0.5em; transform: translateY(15px); }
+            100% { opacity: 1; letter-spacing: 0.18em; transform: translateY(0); }
+        }
+        .animate-ps5-logo { animation: ps5LogoFloat 3.5s ease-in-out infinite; }
+        .animate-ps5-text { animation: textReveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="flex flex-col select-none relative">
 
-    <!-- 1. API سەپلىمە كۆزنىكى -->
+    <!-- 0. PS5-STYLE STARTUP SPLASH SCREEN -->
+    <div id="ps5Splash" onclick="skipSplash()" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden transition-opacity duration-1000 cursor-pointer">
+        <!-- Floating Golden & Blue Particles Canvas -->
+        <canvas id="ps5Canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+        
+        <!-- Light Beams -->
+        <div class="ps5-beam top-1/4"></div>
+        <div class="ps5-beam bottom-1/3" style="animation-delay: -2.5s;"></div>
+
+        <!-- Center Content -->
+        <div class="relative z-10 flex flex-col items-center px-6 text-center">
+            <!-- Custom ZenoWeb Emblem Logo (Large) -->
+            <div class="animate-ps5-logo mb-8 relative">
+                <div class="absolute -inset-4 rounded-full bg-blue-500/20 blur-2xl"></div>
+                <svg class="w-28 h-28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="zenoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00f2fe"/>
+                            <stop offset="50%" stop-color="#0072ff"/>
+                            <stop offset="100%" stop-color="#f5af19"/>
+                        </linearGradient>
+                        <linearGradient id="zenoCore" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#60a5fa"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Outer Hexagonal PS5 Ring -->
+                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="url(#zenoGrad)" stroke-width="3.5" fill="rgba(10, 18, 36, 0.75)"/>
+                    <polygon points="60,14 100,37 100,83 60,106 20,83 20,37" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+                    <!-- Stylized 'Z' & Web Nexus -->
+                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoCore)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Glowing Nodes -->
+                    <circle cx="36" cy="40" r="5" fill="#00f2fe"/>
+                    <circle cx="84" cy="40" r="5" fill="#ffffff"/>
+                    <circle cx="42" cy="80" r="5" fill="#ffffff"/>
+                    <circle cx="84" cy="80" r="5" fill="#f5af19"/>
+                </svg>
+            </div>
+
+            <!-- PS5 Typography Welcome -->
+            <p class="text-xs uppercase tracking-[0.45em] text-blue-300/80 mb-2 font-semibold">Next-Gen AI Studio</p>
+            <h1 class="font-zeno text-2xl sm:text-4xl font-extrabold text-white animate-ps5-text bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-amber-200">
+                WELCOME TO ZENOWEB
+            </h1>
+
+            <!-- Sleek PS5 Breathing Line Loader -->
+            <div class="mt-8 w-56 h-[2px] bg-white/10 rounded-full overflow-hidden relative">
+                <div id="ps5Progress" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-0 transition-all duration-[4200ms] ease-out shadow-[0_0_12px_#00f2fe]"></div>
+            </div>
+            <span class="text-[10px] text-gray-400/70 tracking-widest uppercase mt-3">Initializing Neural Engine...</span>
+        </div>
+    </div>
+
+    <!-- 1. API & Settings Modal (Auto-Saves Immediately) -->
     <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-key text-blue-500 mr-2"></i>API & Settings</h2>
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-blue-500"></i> ZenoWeb Settings
+                </h2>
                 <span id="keySaveBadge" class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Auto-Saved</span>
             </div>
 
@@ -54,7 +139,7 @@
                 <div class="pt-3 border-t border-gray-800">
                     <div class="flex justify-between items-center mb-1">
                         <label class="text-xs text-yellow-400 font-semibold">GitHub Classic Token (For Live Links)</label>
-                        <a href="https://github.com/settings/tokens/new?scopes=gist&description=WebMakerAI_Token" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg hover:bg-emerald-600/30 transition font-semibold">
+                        <a href="https://github.com/settings/tokens/new?scopes=gist&description=ZenoWeb_Token" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg hover:bg-emerald-600/30 transition font-semibold">
                             Get Token <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                         </a>
                     </div>
@@ -68,7 +153,7 @@
         </div>
     </div>
 
-    <!-- 2. تور بېكەت قۇرۇش ۋە مەھسۇلات قوشۇش كۆزنىكى -->
+    <!-- 2. Website Specifications & Product Upload Wizard -->
     <div id="wizardModal" class="fixed inset-0 z-40 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
@@ -79,16 +164,16 @@
             <div class="space-y-3.5">
                 <div>
                     <label class="block text-xs text-gray-300 mb-1">1. Brand or Website Name</label>
-                    <input type="text" id="wName" placeholder="e.g., Rabar Shop, Apex Gaming, Luxury Cafe..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
+                    <input type="text" id="wName" placeholder="e.g., Rabar Shop, Zeno Store, Luxury Cafe..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-300 mb-1">2. Website Niche & Purpose</label>
-                    <input type="text" id="wType" placeholder="e.g., Online Store, Portfolio, SaaS Platform..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
+                    <input type="text" id="wType" placeholder="e.g., Online Store, Portfolio, Gaming Platform..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">3. Style & Colors</label>
-                        <input type="text" id="wStyle" placeholder="e.g., Dark Green & Modern" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
+                        <input type="text" id="wStyle" placeholder="e.g., Dark Blue & Neon" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">4. Language</label>
@@ -115,7 +200,7 @@
         </div>
     </div>
 
-    <!-- 3. ئېلان ۋە Premium كىرىم كۆزنىكى -->
+    <!-- 3. Always-Open Monetize Modal (Ads & Custom Premium Paywall) -->
     <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
         <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
@@ -176,36 +261,54 @@
         </div>
     </div>
 
-    <!-- 4. ئۈستى قورال بالدىقى -->
-    <header class="h-14 bg-[#121216] border-b border-gray-800/80 px-4 flex items-center justify-between z-20 shrink-0">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition">
-                <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+    <!-- 4. Top Header Bar with ZenoWeb Custom Logo -->
+    <header class="h-14 bg-[#101016] border-b border-gray-800/80 px-3.5 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center gap-2.5">
+            <button onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition border border-gray-700/60">
+                <i class="fa-solid fa-ellipsis-vertical text-base"></i>
             </button>
-            <div>
-                <h1 id="currentProjectTitle" class="font-bold text-sm text-white truncate max-w-[130px] sm:max-w-xs">New Project</h1>
-                <span id="saveStatus" class="text-[10px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Auto-saved</span>
+            
+            <!-- ZenoWeb Brand Logo in Header -->
+            <div class="flex items-center gap-2 pr-2 border-r border-gray-800">
+                <svg class="w-7 h-7 shrink-0" viewBox="0 0 120 120" fill="none">
+                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
+                    <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                </svg>
+                <span class="font-zeno font-bold text-sm tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-cyan-400 hidden xs:inline">ZENOWEB</span>
+            </div>
+
+            <div class="pl-1">
+                <h1 id="currentProjectTitle" class="font-semibold text-xs text-gray-200 truncate max-w-[110px] sm:max-w-xs">New Project</h1>
+                <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Saved</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-1.5 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
-            <button onclick="setViewport('100%')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
-            <button onclick="setViewport('390px')" class="px-2.5 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
-            <button onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
+        <div class="flex items-center gap-1 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
+            <button onclick="setViewport('100%')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
+            <button onclick="setViewport('390px')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
+            <button onclick="toggleCodeView()" id="codeBtn" class="px-2 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
         </div>
     </header>
 
-    <!-- 5. يان تىزىملىك -->
+    <!-- 5. Sidebar Drawer (3-Dots Menu) -->
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
     <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-                <span class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-500"></i> Web Maker</span>
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-8 h-8" viewBox="0 0 120 120" fill="none">
+                        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
+                        <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                    </svg>
+                    <span class="font-zeno font-bold text-base text-white tracking-wider">ZENOWEB</span>
+                </div>
                 <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-[#1e1e26] hover:bg-gray-800 border border-gray-700 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus text-blue-400"></i> New Website
+            <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/40 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-cyan-400"></i> New Website
             </button>
 
             <div class="mt-5">
@@ -242,16 +345,20 @@
         </div>
     </aside>
 
-    <!-- 6. ئاساسىي كۆزنەك -->
-    <main class="flex-1 relative bg-[#09090c] flex flex-col items-center justify-center overflow-hidden pb-20">
+    <!-- 6. Main Workspace -->
+    <main class="flex-1 relative bg-[#07070a] flex flex-col items-center justify-center overflow-hidden pb-24">
         <div id="emptyState" class="text-center p-6 max-w-md">
-            <div class="w-16 h-16 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl text-blue-500">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <div class="w-20 h-20 bg-blue-950/30 border border-blue-500/30 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(0,150,255,0.15)]">
+                <svg class="w-12 h-12" viewBox="0 0 120 120" fill="none">
+                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="5" fill="#0b1329"/>
+                    <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                </svg>
             </div>
-            <h2 class="text-lg font-bold text-white mb-2">Ready to Create</h2>
-            <p class="text-gray-400 text-xs mb-5">Click below to configure your website, add products, or use the chat bar to build right away.</p>
-            <button onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition">
-                Open Website Builder
+            <h2 class="font-zeno text-lg font-bold text-white mb-2 tracking-wide">ZENOWEB STUDIO</h2>
+            <p class="text-gray-400 text-xs mb-5">Configure a new website with the wizard, or send text & photos in the AI chat bar below.</p>
+            <button onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-blue-600/20 transition">
+                Launch Website Wizard
             </button>
         </div>
 
@@ -262,17 +369,37 @@
         <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
         
         <div id="loadingOverlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden px-6 text-center">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p id="loadingText" class="text-white font-bold text-sm animate-pulse">AI is building your website...</p>
+            <div class="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p id="loadingText" class="text-white font-bold text-sm animate-pulse">ZenoWeb AI is building your website...</p>
             <p id="loadingSubText" class="text-gray-400 text-xs mt-1.5"></p>
         </div>
     </main>
 
-    <!-- 7. سۆھبەت ۋە تەھرىرلەش بالدىقى -->
-    <div class="fixed bottom-5 left-0 right-0 px-4 z-30 pointer-events-none">
-        <div class="max-w-2xl mx-auto flex items-center gap-2 bg-[#181820]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-1.5 pl-4 shadow-2xl pointer-events-auto focus-within:border-blue-500 transition">
-            <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell AI to modify design, add content, or build..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400">
-            <button onclick="sendChatPrompt()" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+    <!-- 7. Elevated Floating AI Chat Bar with Image Upload -->
+    <div class="fixed bottom-4 left-0 right-0 px-3 sm:px-4 z-30 pointer-events-none">
+        <div class="max-w-2xl mx-auto pointer-events-auto">
+            
+            <!-- Attached Chat Images Preview Strip -->
+            <div id="chatImgPreviewBar" class="hidden flex items-center gap-2 mb-2 bg-[#16161e]/95 backdrop-blur-md p-2 rounded-xl border border-gray-700/80 overflow-x-auto">
+                <!-- Thumbnails injected dynamically -->
+            </div>
+
+            <!-- Chat Input & Buttons -->
+            <div class="flex items-center gap-1.5 bg-[#181822]/95 backdrop-blur-md border border-gray-700/90 rounded-2xl p-1.5 pl-2 shadow-2xl focus-within:border-cyan-500 transition">
+                <!-- Hidden File Input for Chat Images -->
+                <input type="file" id="chatImageInput" accept="image/*" multiple onchange="handleChatImages(this)" class="hidden">
+                
+                <!-- Image Upload Button Inside Chat Bar -->
+                <button onclick="document.getElementById('chatImageInput').click()" class="w-9 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 text-cyan-400 flex items-center justify-center shrink-0 transition" title="Upload Image to AI">
+                    <i class="fa-solid fa-image text-sm"></i>
+                </button>
+
+                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Ask ZenoWeb AI to build, edit, or use your photo..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400 px-1.5">
+                
+                <button onclick="sendChatPrompt()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md transition">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -280,19 +407,76 @@
         let projects = JSON.parse(localStorage.getItem('wm_projects') || '[]');
         let currentProjectId = localStorage.getItem('wm_current_id') || null;
         let currentProducts = [];
+        let pendingChatImages = []; // Stores images attached in the chat bar
         let isCodeView = false;
+        let splashFinished = false;
 
-        const SYSTEM_PROMPT = `You are an elite Full-Stack Web Developer and UI/UX Designer.
+        const SYSTEM_PROMPT = `You are ZenoWeb AI, an elite Full-Stack Web Developer and UI/UX Designer.
 Return ONLY valid raw HTML5 code starting with <!DOCTYPE html> and ending with </html>.
 NEVER wrap code in markdown backticks (\`\`\`html) or write any explanations.
 Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
 Make the design modern, responsive, interactive, and complete.`;
 
-        window.onload = () => {
-            populateSettingsInputs();
-            if (!localStorage.getItem('wm_api_key')) {
-                openSettings();
+        /* --- PS5 PARTICLE ENGINE & STARTUP --- */
+        function initPS5Particles() {
+            const canvas = document.getElementById('ps5Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = Array.from({ length: 55 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2.2 + 0.5,
+                dx: (Math.random() - 0.5) * 0.6,
+                dy: -Math.random() * 0.8 - 0.2,
+                color: Math.random() > 0.35 ? 'rgba(0, 210, 255, 0.75)' : 'rgba(255, 195, 90, 0.8)'
+            }));
+
+            function animate() {
+                if (splashFinished) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = p.color;
+                    ctx.fill();
+                    p.x += p.dx;
+                    p.y += p.dy;
+                    if (p.y < 0) p.y = canvas.height;
+                    if (p.x < 0) p.x = canvas.width;
+                    if (p.x > canvas.width) p.x = 0;
+                });
+                requestAnimationFrame(animate);
             }
+            animate();
+        }
+
+        function skipSplash() {
+            if (splashFinished) return;
+            splashFinished = true;
+            const splash = document.getElementById('ps5Splash');
+            splash.classList.add('opacity-0');
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                if (!localStorage.getItem('wm_api_key')) {
+                    openSettings();
+                }
+            }, 900);
+        }
+
+        window.onload = () => {
+            initPS5Particles();
+            setTimeout(() => {
+                const prog = document.getElementById('ps5Progress');
+                if (prog) prog.style.width = '100%';
+            }, 80);
+            setTimeout(skipSplash, 4300);
+
+            populateSettingsInputs();
             renderProjectList();
             if (currentProjectId && projects.find(p => p.id === currentProjectId)) {
                 loadProject(currentProjectId);
@@ -301,6 +485,7 @@ Make the design modern, responsive, interactive, and complete.`;
             }
         };
 
+        /* --- SETTINGS & AUTO-SAVE --- */
         function populateSettingsInputs() {
             document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
             document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
@@ -349,6 +534,71 @@ Make the design modern, responsive, interactive, and complete.`;
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
+        /* --- IMAGE COMPRESSION HELPER --- */
+        function compressImageFile(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 800;
+                    let w = img.width, h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+                        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.82));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* --- CHAT IMAGE UPLOAD LOGIC --- */
+        function handleChatImages(input) {
+            const files = Array.from(input.files);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                compressImageFile(file, (b64Data) => {
+                    pendingChatImages.push({
+                        id: 'cimg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        b64: b64Data
+                    });
+                    renderChatImagePreviews();
+                });
+            });
+            input.value = '';
+        }
+
+        function renderChatImagePreviews() {
+            const bar = document.getElementById('chatImgPreviewBar');
+            if (pendingChatImages.length === 0) {
+                bar.classList.add('hidden');
+                bar.innerHTML = '';
+                return;
+            }
+            bar.classList.remove('hidden');
+            bar.innerHTML = pendingChatImages.map((img, idx) => `
+                <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0 group">
+                    <img src="${img.b64}" class="w-full h-full object-cover">
+                    <button onclick="removeChatImage(${idx})" class="absolute top-0 right-0 bg-black/80 text-red-400 w-5 h-5 flex items-center justify-center rounded-bl-lg text-[10px]">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `).join('') + `<span class="text-[11px] text-cyan-400 font-semibold px-2">${pendingChatImages.length} photo(s) ready to send</span>`;
+        }
+
+        function removeChatImage(index) {
+            pendingChatImages.splice(index, 1);
+            renderChatImagePreviews();
+        }
+
+        /* --- WIZARD & PRODUCT UPLOAD --- */
         function openWizard() { 
             document.getElementById('productsContainer').innerHTML = ''; 
             currentProducts = [];
@@ -372,12 +622,10 @@ Make the design modern, responsive, interactive, and complete.`;
         function encodeImg(input, id) {
             const file = input.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onloadend = function() {
+            compressImageFile(file, (b64Data) => {
                 const prod = currentProducts.find(p => p.id === id);
-                if (prod) prod.b64 = reader.result;
-            };
-            reader.readAsDataURL(file);
+                if (prod) prod.b64 = b64Data;
+            });
         }
 
         async function startWizardGeneration() {
@@ -416,17 +664,19 @@ Make the design modern, responsive, interactive, and complete.`;
                 name: name,
                 code: '',
                 liveUrl: '',
-                products: validProducts
+                products: validProducts,
+                chatImages: []
             };
             projects.unshift(newProj);
             currentProjectId = newProj.id;
             saveToStorage();
             renderProjectList();
 
-            document.getElementById('loadingText').innerText = "AI is building your website...";
-            await generateWithAI(fullPrompt, null, newProj);
+            document.getElementById('loadingText').innerText = "ZenoWeb AI is building your website...";
+            await generateWithAI(fullPrompt, null, newProj, []);
         }
 
+        /* --- MONETIZATION --- */
         function openMonetizeModal() {
             document.getElementById('monetizeModal').classList.remove('hidden');
         }
@@ -451,7 +701,7 @@ Make the design modern, responsive, interactive, and complete.`;
             let proj = projects.find(p => p.id === currentProjectId);
 
             if (!proj) {
-                proj = { id: 'proj_' + Date.now(), name: 'Monetized Website', code: '', liveUrl: '', products: [] };
+                proj = { id: 'proj_' + Date.now(), name: 'Monetized Website', code: '', liveUrl: '', products: [], chatImages: [] };
                 projects.unshift(proj);
                 currentProjectId = proj.id;
             }
@@ -492,35 +742,49 @@ Make the design modern, responsive, interactive, and complete.`;
                 }
             }
 
-            await generateWithAI(mPrompt, proj.code, proj);
+            await generateWithAI(mPrompt, proj.code, proj, []);
         }
 
+        /* --- CHAT SEND WITH IMAGES --- */
         async function sendChatPrompt() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
-            if (!text) return;
+            if (!text && pendingChatImages.length === 0) return;
             input.value = '';
 
             let proj = projects.find(p => p.id === currentProjectId);
             if (!proj) {
-                proj = { id: 'proj_' + Date.now(), name: text.substring(0, 22), code: '', liveUrl: '', products: [] };
+                proj = { id: 'proj_' + Date.now(), name: (text || 'Image Website').substring(0, 22), code: '', liveUrl: '', products: [], chatImages: [] };
                 projects.unshift(proj);
                 currentProjectId = proj.id;
             }
+            if (!proj.chatImages) proj.chatImages = [];
 
-            document.getElementById('loadingText').innerText = "AI is updating your website...";
-            await generateWithAI(text, proj.code, proj);
+            const attachedNow = [...pendingChatImages];
+            pendingChatImages = [];
+            renderChatImagePreviews();
+
+            let userInstruction = text || "Use the attached image(s) in the website.";
+            if (attachedNow.length > 0) {
+                userInstruction += `\n\nCRITICAL IMAGE INSTRUCTION: The user attached ${attachedNow.length} image(s) to this message. You can visually see them. To display or embed these exact user image(s) inside the HTML (as products, banners, logos, or gallery items), you MUST set the <img src="..."> attribute to these exact placeholder strings:\n`;
+                attachedNow.forEach(imgObj => {
+                    proj.chatImages.push(imgObj);
+                    userInstruction += `- Use src="CHAT_IMG_${imgObj.id}" for this uploaded photo.\n`;
+                });
+                userInstruction += `Never alter the string "CHAT_IMG_..." in the img src attribute!`;
+            }
+
+            document.getElementById('loadingText').innerText = "ZenoWeb AI is updating your website...";
+            await generateWithAI(userInstruction, proj.code, proj, attachedNow);
         }
 
         const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-        // يۇقىرى بېسىم كۆرۈلگەندە ئاپتوماتىك قايتا سىناش ۋە زاپاس مودېلغا ئالمىشىش فۇنكسىيەسى
-        async function callGeminiWithRetryAndFallback(apiKey, finalPrompt) {
+        async function callGeminiWithRetryAndFallback(apiKey, finalPrompt, attachedImages) {
             const subText = document.getElementById('loadingSubText');
             subText.innerText = '';
 
-            // 1. ئاچقۇچ قوللايدىغان بارلىق مودېللارنى ئاپتوماتىك تەكشۈرۈش
-            let candidateModels = ['gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+            let candidateModels = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'];
             try {
                 const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
                 const listData = await listRes.json();
@@ -530,18 +794,29 @@ Make the design modern, responsive, interactive, and complete.`;
                         .map(m => m.name.replace('models/', ''))
                         .filter(name => name.includes('gemini'));
                     if (available.length > 0) {
-                        // gemini-3.8-flash نى بىرىنچى ئورۇنغا قويۇپ، قالغان ئاكتىپ مودېللارنى زاپاسقا تىزىش
                         candidateModels = [...new Set(['gemini-3.8-flash', ...available])];
                     }
                 }
             } catch (e) {}
+
+            // Build multimodal parts (text + inline images if any)
+            const userParts = [{ text: finalPrompt }];
+            if (attachedImages && attachedImages.length > 0) {
+                attachedImages.forEach(img => {
+                    const base64Clean = img.b64.split(',')[1];
+                    const mimeMatch = img.b64.match(/data:(.*?);/);
+                    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+                    userParts.push({
+                        inline_data: { mime_type: mimeType, data: base64Clean }
+                    });
+                });
+            }
 
             let lastError = 'Unknown error';
 
             for (let mIndex = 0; mIndex < candidateModels.length; mIndex++) {
                 const modelName = candidateModels[mIndex];
 
-                // ھەر بىر مودېلنى 2 قېتىمغىچە سىناش
                 for (let attempt = 1; attempt <= 2; attempt++) {
                     try {
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
@@ -549,7 +824,7 @@ Make the design modern, responsive, interactive, and complete.`;
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                                contents: [{ parts: [{ text: finalPrompt }] }]
+                                contents: [{ parts: userParts }]
                             })
                         });
 
@@ -561,18 +836,15 @@ Make the design modern, responsive, interactive, and complete.`;
                         }
 
                         lastError = data.error ? data.error.message : 'Empty response';
-
-                        // ئەگەر مودېل ئالدىراش بولسا (High Demand / Overloaded / 503 / 429)
                         const isBusy = lastError.toLowerCase().includes('high demand') ||
                                        lastError.toLowerCase().includes('overloaded') ||
                                        res.status === 503 || res.status === 429;
 
                         if (isBusy) {
-                            subText.innerText = `Server busy on ${modelName}, retrying automatically (${attempt}/2)...`;
+                            subText.innerText = `Server busy on ${modelName}, retrying (${attempt}/2)...`;
                             await sleep(2200);
                             continue;
                         } else {
-                            // ئەگەر مودېل قوللىمىسا دەرھال كېيىنكى زاپاس مودېلغا ئۆتۈش
                             break;
                         }
                     } catch (err) {
@@ -590,7 +862,7 @@ Make the design modern, responsive, interactive, and complete.`;
             throw new Error(lastError);
         }
 
-        async function generateWithAI(prompt, existingCode, projectObj) {
+        async function generateWithAI(prompt, existingCode, projectObj, attachedImages = []) {
             const provider = localStorage.getItem('wm_provider') || 'gemini';
             const apiKey = localStorage.getItem('wm_api_key');
 
@@ -601,17 +873,34 @@ Make the design modern, responsive, interactive, and complete.`;
 
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
+            // Replace already-injected Base64 strings back to placeholders before sending to AI to save tokens
+            let cleanExisting = existingCode || '';
+            if (cleanExisting && projectObj.products) {
+                projectObj.products.forEach((p, idx) => {
+                    if (p.b64) cleanExisting = cleanExisting.split(p.b64).join(`RAW_IMG_TARGET_${idx}`);
+                });
+            }
+            if (cleanExisting && projectObj.chatImages) {
+                projectObj.chatImages.forEach(img => {
+                    if (img.b64) cleanExisting = cleanExisting.split(img.b64).join(`CHAT_IMG_${img.id}`);
+                });
+            }
+
             let finalPrompt = prompt;
-            if (existingCode && existingCode.length > 50) {
-                finalPrompt = `Current Website HTML:\n${existingCode}\n\nUser Instruction: "${prompt}"\n\nApply the changes while keeping existing products, images, and scripts intact. Return ONLY the full updated HTML code.`;
+            if (cleanExisting && cleanExisting.length > 50) {
+                finalPrompt = `Current Website HTML:\n${cleanExisting}\n\nUser Instruction: "${prompt}"\n\nApply the changes while keeping existing products, images, and scripts intact. Return ONLY the full updated HTML code.`;
             }
 
             try {
                 let rawResponse = '';
 
                 if (provider === 'gemini') {
-                    rawResponse = await callGeminiWithRetryAndFallback(apiKey, finalPrompt);
+                    rawResponse = await callGeminiWithRetryAndFallback(apiKey, finalPrompt, attachedImages);
                 } else if (provider === 'openai') {
+                    const contentArray = [{ type: 'text', text: finalPrompt }];
+                    attachedImages.forEach(img => {
+                        contentArray.push({ type: 'image_url', image_url: { url: img.b64 } });
+                    });
                     const res = await fetch('https://api.openai.com/v1/chat/completions', {
                         method: 'POST',
                         headers: {
@@ -622,7 +911,7 @@ Make the design modern, responsive, interactive, and complete.`;
                             model: 'gpt-4o-mini',
                             messages: [
                                 { role: 'system', content: SYSTEM_PROMPT },
-                                { role: 'user', content: finalPrompt }
+                                { role: 'user', content: contentArray }
                             ]
                         })
                     });
@@ -653,9 +942,17 @@ Make the design modern, responsive, interactive, and complete.`;
 
                 let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
 
+                // Re-inject Wizard Product Images
                 if (projectObj.products && projectObj.products.length > 0) {
                     projectObj.products.forEach((p, index) => {
                         cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
+                    });
+                }
+
+                // Re-inject Chat Uploaded Images
+                if (projectObj.chatImages && projectObj.chatImages.length > 0) {
+                    projectObj.chatImages.forEach(img => {
+                        cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
                     });
                 }
 
@@ -699,7 +996,7 @@ Make the design modern, responsive, interactive, and complete.`;
             const list = document.getElementById('projectList');
             list.innerHTML = '';
             projects.forEach(p => {
-                const active = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-blue-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300';
+                const active = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-cyan-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300';
                 list.innerHTML += `
                     <div class="flex items-center justify-between p-2.5 rounded-xl border ${active} cursor-pointer transition" onclick="loadProject('${p.id}'); toggleSidebar();">
                         <span class="text-xs font-semibold truncate pr-2">${p.name}</span>
@@ -755,7 +1052,13 @@ Make the design modern, responsive, interactive, and complete.`;
             a.click();
         }
 
-        function saveToStorage() { localStorage.setItem('wm_projects', JSON.stringify(projects)); }
+        function saveToStorage() {
+            try {
+                localStorage.setItem('wm_projects', JSON.stringify(projects));
+            } catch (e) {
+                console.warn('Storage quota reached, trimming older cache.');
+            }
+        }
         function setViewport(w) { document.getElementById('previewFrame').style.width = w; }
 
         async function publishWebsite() {
@@ -776,7 +1079,7 @@ Make the design modern, responsive, interactive, and complete.`;
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github+json' },
                     body: JSON.stringify({
-                        description: `Created with Web Maker AI: ${proj.name}`,
+                        description: `Created with ZenoWeb AI: ${proj.name}`,
                         public: true,
                         files: { "index.html": { content: proj.code } }
                     })

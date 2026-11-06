@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <!-- MAIN APPLICATION SHELL (HIDDEN UNTIL WELCOME FINISHES) -->
+    <!-- MAIN APPLICATION SHELL -->
     <div id="appShell" class="hidden flex-col h-full w-full opacity-0 transition-opacity duration-500">
 
         <!-- 1. API & Settings Modal -->
@@ -125,22 +125,24 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">AI Provider</label>
+                        <label class="block text-xs text-gray-400 mb-1">AI Engine Provider</label>
                         <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                            <option value="gemini">Google Gemini (Turbo Flash Streaming)</option>
-                            <option value="openai">OpenAI (GPT-4o Mini Fast)</option>
+                            <option value="gemini">Google Gemini + Auto-Unlimited Fallback</option>
+                            <option value="zeno_free">ZenoWeb Unlimited Free AI (No API Key / No Quota)</option>
+                            <option value="openai">OpenAI (GPT-4o Mini)</option>
                             <option value="claude">Anthropic Claude 3.5</option>
                         </select>
                     </div>
 
-                    <div>
+                    <div id="apiKeySection">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-gray-400">Your API Key</label>
+                            <label class="text-xs text-gray-400">API Key (Can paste multiple keys separated by comma)</label>
                             <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
-                                <span>Get API Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                <span>Get Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                             </a>
                         </div>
-                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste your API key here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
+                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste API key(s) here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
+                        <p class="text-[10px] text-cyan-400/80 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>If your Gemini 20/day quota runs out, ZenoWeb automatically switches to Unlimited Free AI!</p>
                     </div>
 
                     <div class="pt-3 border-t border-gray-800">
@@ -286,7 +288,7 @@
 
                 <div class="pl-1">
                     <h1 id="currentProjectTitle" class="font-semibold text-xs text-gray-200 truncate max-w-[110px] sm:max-w-xs">New Project</h1>
-                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-400"></i> Turbo Ready</span>
+                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-400"></i> Unlimited Ready</span>
                 </div>
             </div>
 
@@ -363,7 +365,7 @@
                     </svg>
                 </div>
                 <h2 class="font-zeno text-lg font-bold text-white mb-2 tracking-wide">ZENOWEB TURBO AI</h2>
-                <p class="text-gray-400 text-xs mb-5">High-speed live streaming website generator. Builds full interactive sites in seconds!</p>
+                <p class="text-gray-400 text-xs mb-5">High-speed live streaming website generator with automatic quota-bypass and unlimited backup AI!</p>
                 <button onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-blue-600/20 transition">
                     <i class="fa-solid fa-bolt text-amber-300 mr-1"></i> Launch Fast Builder
                 </button>
@@ -386,7 +388,7 @@
                 <div class="w-64 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-3">
                     <div id="streamProgressBar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 w-0 transition-all duration-200"></div>
                 </div>
-                <p id="loadingSubText" class="text-cyan-400 text-xs mt-2 font-mono">Connecting to high-speed Flash node...</p>
+                <p id="loadingSubText" class="text-cyan-400 text-xs mt-2 font-mono">Connecting to high-speed node...</p>
             </div>
         </main>
 
@@ -422,19 +424,16 @@
         let isCodeView = false;
         let splashFinished = false;
 
-        // Cached fast model so we NEVER waste time querying the model list on every request
-        let cachedFastGeminiModel = localStorage.getItem('zeno_fast_model') || 'gemini-2.5-flash';
-
         /* =========================================================
-           TURBO COMPACT ARCHITECTURE SYSTEM PROMPT (3X FASTER)
+           TURBO COMPACT ARCHITECTURE SYSTEM PROMPT
         ========================================================= */
         const SYSTEM_PROMPT = `You are ZenoWeb Turbo-AI, an elite Full-Stack Web Architect.
 Build a COMPLETE, interactive, modern single-file HTML5 website.
 
-SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
-1. Return ONLY raw HTML5 starting with <!DOCTYPE html> and ending with </html>. No markdown backticks (\`\`\`html), no comments, no explanations.
+SPEED & EFFICIENCY RULES:
+1. Return ONLY raw HTML5 starting with <!DOCTYPE html> and ending with </html>. No markdown backticks (\`\`\`html), no explanations.
 2. Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
-3. WRITE COMPACT DATA-DRIVEN CODE: Never repeat bloated HTML blocks. Store products/items/cards in a clean JavaScript array and render them dynamically with innerHTML + .map()! This makes the site 3x faster and 100% interactive (working cart, search filter, modals, and tabs).
+3. WRITE COMPACT DATA-DRIVEN CODE: Store products/items/cards in a clean JavaScript array and render them dynamically with innerHTML + .map(). Include working interactive features (shopping cart drawer, search filter, modals, and mobile menu).
 4. Keep placeholder image strings ("RAW_IMG_TARGET_x" or "CHAT_IMG_x") untouched inside your JS data array or img tags.`;
 
         /* =========================================================
@@ -605,7 +604,10 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
                 appShell.classList.add('flex');
                 setTimeout(() => {
                     appShell.classList.remove('opacity-0');
-                    if (!localStorage.getItem('wm_api_key')) openSettings();
+                    const prov = localStorage.getItem('wm_provider') || 'gemini';
+                    if (prov !== 'zeno_free' && !localStorage.getItem('wm_api_key')) {
+                        openSettings();
+                    }
                 }, 30);
             }, 450);
         }
@@ -655,6 +657,14 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
         function updateKeyLink() {
             const provider = document.getElementById('aiProvider').value;
             const linkBtn = document.getElementById('getApiKeyBtn');
+            const keySec = document.getElementById('apiKeySection');
+
+            if (provider === 'zeno_free') {
+                keySec.classList.add('opacity-50');
+            } else {
+                keySec.classList.remove('opacity-50');
+            }
+
             if (provider === 'gemini') linkBtn.href = 'https://aistudio.google.com/app/apikey';
             else if (provider === 'openai') linkBtn.href = 'https://platform.openai.com/api-keys';
             else if (provider === 'claude') linkBtn.href = 'https://console.anthropic.com/settings/keys';
@@ -667,7 +677,11 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
 
         function closeSettingsModal() {
             autoSaveSettings();
-            if (!localStorage.getItem('wm_api_key')) return alert('Please paste your API Key first.');
+            const provider = document.getElementById('aiProvider').value;
+            if (provider !== 'zeno_free' && !localStorage.getItem('wm_api_key')) {
+                // If user didn't put a key, switch them to Free Unlimited AI automatically
+                localStorage.setItem('wm_provider', 'zeno_free');
+            }
             document.getElementById('setupModal').classList.add('hidden');
         }
 
@@ -682,7 +696,7 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const maxDim = 650; // Smaller dimension = much faster upload & rendering
+                    const maxDim = 650;
                     let w = img.width, h = img.height;
                     if (w > maxDim || h > maxDim) {
                         if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
@@ -838,7 +852,6 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
                 currentProjectId = proj.id;
             }
 
-            // INSTANT DIRECT AD INJECTION (0 Seconds Wait if website already exists!)
             if (type === 'ads') {
                 const code = document.getElementById('adCodeInput').value.trim();
                 if (!code) return alert("Please paste your Adsterra or Unity Ads code first!");
@@ -854,7 +867,6 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
                 }
             }
 
-            // For Premium Paywall or new site with Ads
             const price = document.getElementById('premPrice').value.trim() || '$9.99';
             const methods = document.getElementById('premMethods').value.trim() || 'Card Number, FastPay, or VIP Code';
             const details = document.getElementById('premDetails').value.trim() || 'Lock content until user submits payment details.';
@@ -895,21 +907,91 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
         }
 
         /* =========================================================
-           TURBO STREAMING ENGINE (SSE REAL-TIME CHUNKS)
+           UNLIMITED FREE AI ENGINE (POLLINATIONS OPENAI STREAM)
+           Used when Gemini 20/Day Quota is Exceeded or Selected!
         ========================================================= */
-        async function streamGeminiTurbo(apiKey, finalPrompt, attachedImages) {
+        async function callUnlimitedFreeAI(finalPrompt) {
+            const subText = document.getElementById('loadingSubText');
+            const progBar = document.getElementById('streamProgressBar');
+            subText.innerText = `⚡ Using ZenoWeb Unlimited Free AI (Bypassing Gemini Quota)...`;
+            progBar.style.width = '20%';
+
+            const res = await fetch('https://text.pollinations.ai/openai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [
+                        { role: 'system', content: SYSTEM_PROMPT },
+                        { role: 'user', content: finalPrompt }
+                    ],
+                    stream: true
+                })
+            });
+
+            if (!res.ok) {
+                // Non-streaming fallback if stream endpoint is busy
+                const fallbackRes = await fetch('https://text.pollinations.ai/openai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [
+                            { role: 'system', content: SYSTEM_PROMPT },
+                            { role: 'user', content: finalPrompt }
+                        ]
+                    })
+                });
+                const fallbackData = await fallbackRes.json();
+                progBar.style.width = '100%';
+                return fallbackData.choices[0].message.content;
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let fullText = '';
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonStr = line.slice(6).trim();
+                        if (!jsonStr || jsonStr === '[DONE]') continue;
+                        try {
+                            const parsed = JSON.parse(jsonStr);
+                            const chunk = parsed.choices?.[0]?.delta?.content || '';
+                            if (chunk) {
+                                fullText += chunk;
+                                const pct = Math.min(96, Math.round((fullText.length / 7000) * 100));
+                                progBar.style.width = `${Math.max(25, pct)}%`;
+                                subText.innerText = `⚡ Unlimited AI Streaming: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                            }
+                        } catch (e) {}
+                    }
+                }
+            }
+
+            progBar.style.width = '100%';
+            return fullText;
+        }
+
+        /* =========================================================
+           SMART GEMINI ENGINE WITH MULTI-KEY & QUOTA BYPASS
+        ========================================================= */
+        async function streamGeminiTurbo(rawApiKeys, finalPrompt, attachedImages) {
             const subText = document.getElementById('loadingSubText');
             const progBar = document.getElementById('streamProgressBar');
             progBar.style.width = '8%';
 
-            // Fast models ordered by speed (NO slow pro models first, NO extra model-list fetch!)
-            const fastModels = [...new Set([
-                cachedFastGeminiModel,
-                'gemini-2.5-flash',
-                'gemini-2.0-flash',
-                'gemini-1.5-flash',
-                'gemini-3.8-flash'
-            ])];
+            // Support multiple API keys separated by comma
+            const keyList = rawApiKeys.split(',').map(k => k.trim()).filter(Boolean);
 
             const userParts = [{ text: finalPrompt }];
             if (attachedImages && attachedImages.length > 0) {
@@ -922,93 +1004,93 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
                 });
             }
 
-            let lastError = 'Connection error';
+            for (let kIdx = 0; kIdx < keyList.length; kIdx++) {
+                const apiKey = keyList[kIdx];
 
-            for (const modelName of fastModels) {
+                // Dynamically fetch available models for this key if needed so we can rotate across separate quota buckets (e.g. flash-lite, pro, etc.)
+                let modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
                 try {
-                    subText.innerText = `⚡ Turbo Streaming via ${modelName}...`;
-
-                    const requestBody = {
-                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                        contents: [{ parts: userParts }],
-                        generationConfig: {
-                            temperature: 0.5,
-                            maxOutputTokens: 8192
+                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                    const listData = await listRes.json();
+                    if (listData.models) {
+                        const discovered = listData.models
+                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                            .map(m => m.name.replace('models/', ''))
+                            .filter(n => !n.includes('2.0') && !n.includes('2.5') && !n.includes('1.5'));
+                        if (discovered.length > 0) {
+                            modelsToTry = [...new Set(['gemini-3.8-flash', ...discovered])];
                         }
-                    };
-
-                    // Disable thinking overhead on 2.5-flash for instant token streaming
-                    if (modelName.includes('2.5-flash')) {
-                        requestBody.generationConfig.thinkingConfig = { thinkingBudget: 0 };
                     }
+                } catch (e) {}
 
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(requestBody)
-                    });
+                for (const modelName of modelsToTry) {
+                    try {
+                        subText.innerText = `⚡ Connecting to ${modelName}...`;
 
-                    if (!res.ok) {
-                        const errJson = await res.json().catch(() => ({}));
-                        lastError = errJson.error ? errJson.error.message : `HTTP ${res.status}`;
-                        continue; // Immediately switch to next fast model without waiting!
-                    }
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                contents: [{ parts: userParts }],
+                                generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
+                            })
+                        });
 
-                    // Cache this working fast model for 0ms lookup next time
-                    cachedFastGeminiModel = modelName;
-                    localStorage.setItem('zeno_fast_model', modelName);
+                        if (!res.ok) {
+                            const errJson = await res.json().catch(() => ({}));
+                            const errMsg = errJson.error ? errJson.error.message : `HTTP ${res.status}`;
+                            // If quota exceeded (20/day limit) or model unavailable, immediately try next model!
+                            subText.innerText = `Quota full on ${modelName}, switching model...`;
+                            continue;
+                        }
 
-                    const reader = res.body.getReader();
-                    const decoder = new TextDecoder('utf-8');
-                    let fullText = '';
-                    let buffer = '';
+                        const reader = res.body.getReader();
+                        const decoder = new TextDecoder('utf-8');
+                        let fullText = '';
+                        let buffer = '';
 
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
 
-                        buffer += decoder.decode(value, { stream: true });
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop() || '';
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop() || '';
 
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                const jsonStr = line.slice(6).trim();
-                                if (!jsonStr || jsonStr === '[DONE]') continue;
-                                try {
-                                    const parsed = JSON.parse(jsonStr);
-                                    const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                                    if (chunk) {
-                                        fullText += chunk;
-                                        const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
-                                        progBar.style.width = `${Math.max(15, pct)}%`;
-                                        subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
-                                    }
-                                } catch (e) {}
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    const jsonStr = line.slice(6).trim();
+                                    if (!jsonStr || jsonStr === '[DONE]') continue;
+                                    try {
+                                        const parsed = JSON.parse(jsonStr);
+                                        const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                        if (chunk) {
+                                            fullText += chunk;
+                                            const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
+                                            progBar.style.width = `${Math.max(15, pct)}%`;
+                                            subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                        }
+                                    } catch (e) {}
+                                }
                             }
                         }
-                    }
 
-                    if (fullText.length > 50) {
-                        progBar.style.width = '100%';
-                        return fullText;
-                    }
-                } catch (err) {
-                    lastError = err.message;
+                        if (fullText.length > 50) {
+                            progBar.style.width = '100%';
+                            return fullText;
+                        }
+                    } catch (err) {}
                 }
             }
 
-            throw new Error(lastError);
+            // IF ALL GEMINI KEYS/MODELS HIT THE 20/DAY FREE TIER LIMIT -> AUTOMATICALLY SWITCH TO UNLIMITED FREE AI!
+            return await callUnlimitedFreeAI(finalPrompt);
         }
 
         async function generateWithAI(prompt, existingCode, projectObj, attachedImages = []) {
             const provider = localStorage.getItem('wm_provider') || 'gemini';
-            const apiKey = localStorage.getItem('wm_api_key');
-
-            if (!apiKey) {
-                openSettings();
-                return;
-            }
+            const apiKey = localStorage.getItem('wm_api_key') || '';
 
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('streamProgressBar').style.width = '5%';
@@ -1034,7 +1116,9 @@ SPEED & EFFICIENCY RULES (CRITICAL FOR FAST GENERATION):
             try {
                 let rawResponse = '';
 
-                if (provider === 'gemini') {
+                if (provider === 'zeno_free' || (!apiKey && provider === 'gemini')) {
+                    rawResponse = await callUnlimitedFreeAI(finalPrompt);
+                } else if (provider === 'gemini') {
                     rawResponse = await streamGeminiTurbo(apiKey, finalPrompt, attachedImages);
                 } else if (provider === 'openai') {
                     const contentArray = [{ type: 'text', text: finalPrompt }];

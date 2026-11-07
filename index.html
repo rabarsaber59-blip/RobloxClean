@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZenoWeb Turbo - AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800;900&display=swap');
@@ -33,6 +32,7 @@
             filter: blur(45px);
             transform: rotate(-18deg);
             animation: beamSweep 4s ease-in-out infinite alternate;
+            pointer-events: none;
         }
         @keyframes beamSweep {
             0% { transform: rotate(-18deg) translateY(-30px) scale(0.95); opacity: 0.6; }
@@ -49,25 +49,45 @@
         .animate-ps5-logo { animation: ps5LogoFloat 3s ease-in-out infinite; }
         .animate-ps5-text { animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
+
+    <!-- FAIL-SAFE BOOTSTRAP: Ensures "TAP TO START" ALWAYS works immediately -->
+    <script>
+        window.splashFinished = false;
+        window.enterZenoWeb = function(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            if (window.splashFinished) return;
+            window.splashFinished = true;
+
+            var splash = document.getElementById('ps5Splash');
+            var appShell = document.getElementById('appShell');
+
+            if (splash) {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none';
+                setTimeout(function() { splash.style.display = 'none'; }, 400);
+            }
+            if (appShell) {
+                appShell.classList.remove('hidden');
+                appShell.style.display = 'flex';
+                setTimeout(function() {
+                    appShell.classList.remove('opacity-0');
+                    appShell.style.opacity = '1';
+                }, 30);
+            }
+            try {
+                if (typeof window.initBackgroundEngine === 'function') window.initBackgroundEngine();
+                var prov = localStorage.getItem('wm_provider') || 'gemini';
+                if (prov !== 'zeno_free' && !localStorage.getItem('wm_api_key')) {
+                    if (typeof window.openSettings === 'function') window.openSettings();
+                }
+            } catch (err) {}
+        };
+    </script>
 </head>
 <body class="flex flex-col select-none relative">
 
-    <!-- ========================================== -->
-    <!-- PUBLIC WEBSITE VIEWER MODE (FULL SCREEN)   -->
-    <!-- Activated when someone opens ?site=name    -->
-    <!-- ========================================== -->
-    <div id="publicViewerShell" class="fixed inset-0 z-[200] bg-white hidden flex-col w-screen h-dvh">
-        <div id="publicLoading" class="fixed inset-0 bg-[#07070a] flex flex-col items-center justify-center z-10">
-            <div class="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p id="publicSiteTitleLoad" class="font-zeno text-white text-sm tracking-widest uppercase">Loading Live Website...</p>
-        </div>
-        <iframe id="publicLiveFrame" class="w-full h-full border-0 bg-white" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 0. PS5 WELCOME SCREEN (FAST BOOT)          -->
-    <!-- ========================================== -->
-    <div id="ps5Splash" onclick="enterZenoWeb()" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden transition-all duration-500 cursor-pointer">
+    <!-- 0. PS5 WELCOME SCREEN -->
+    <div id="ps5Splash" onclick="enterZenoWeb(event)" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden transition-all duration-500 cursor-pointer">
         <canvas id="ps5Canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
         <div class="ps5-beam top-1/4"></div>
         <div class="ps5-beam bottom-1/3" style="animation-delay: -2s;"></div>
@@ -107,8 +127,8 @@
                 <div id="ps5Progress" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-0 transition-all duration-[2200ms] ease-out shadow-[0_0_12px_#00f2fe]"></div>
             </div>
 
-            <button onclick="enterZenoWeb()" class="mt-6 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold tracking-widest uppercase backdrop-blur-md transition flex items-center gap-2 shadow-[0_0_20px_rgba(0,210,255,0.25)]">
-                <span>Tap to Start</span>
+            <button type="button" onclick="enterZenoWeb(event)" class="mt-6 px-7 py-3 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 border border-white/25 text-white text-xs font-bold tracking-widest uppercase backdrop-blur-md transition flex items-center gap-2 shadow-[0_0_25px_rgba(0,210,255,0.35)]">
+                <span>TAP TO START</span>
                 <i class="fa-solid fa-bolt text-amber-400"></i>
             </button>
         </div>
@@ -121,72 +141,56 @@
         </div>
         <div>
             <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">ZenoWeb AI</h4>
-            <p id="readyToastMsg" class="text-sm font-semibold text-white">Your project is ready!</p>
+            <p class="text-sm font-semibold text-white">Your project is ready!</p>
         </div>
     </div>
 
     <!-- MAIN APPLICATION SHELL -->
     <div id="appShell" class="hidden flex-col h-full w-full opacity-0 transition-opacity duration-500">
 
-        <!-- 1. Universal API & All-Models Settings Modal (No GitHub Needed) -->
+        <!-- 1. API & Settings Modal -->
         <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
                 <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-microchip text-cyan-400"></i> Universal AI Settings
+                        <i class="fa-solid fa-bolt text-amber-400"></i> ZenoWeb Turbo Settings
                     </h2>
                     <span id="keySaveBadge" class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Auto-Saved</span>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">AI Engine Provider (Reads All APIs)</label>
-                        <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none text-sm">
-                            <option value="auto">⚡ Universal Auto-Detect (Reads Any Key + Free Unlimited)</option>
-                            <option value="zeno_free">🌐 ZenoWeb Unlimited Free AI (No Key Required)</option>
-                            <option value="gemini">✨ Google Gemini (All Models)</option>
-                            <option value="openai">🧠 OpenAI (GPT-4o / o1 / o3 / Mini)</option>
-                            <option value="groq">🚀 Groq Ultra-Fast (Llama 3.3 / Mixtral / DeepSeek)</option>
-                            <option value="openrouter">🔗 OpenRouter (Reads 200+ AI Models)</option>
-                            <option value="deepseek">🐋 DeepSeek API (DeepSeek-V3 / R1)</option>
-                            <option value="claude">🎭 Anthropic Claude (Claude 3.5 / 3.7 Sonnet)</option>
+                        <label class="block text-xs text-gray-400 mb-1">AI Engine Provider</label>
+                        <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
+                            <option value="gemini">Google Gemini + Auto-Unlimited Fallback</option>
+                            <option value="zeno_free">ZenoWeb Unlimited Free AI (No API Key / No Quota)</option>
+                            <option value="openai">OpenAI (GPT-4o Mini)</option>
+                            <option value="claude">Anthropic Claude 3.5</option>
                         </select>
                     </div>
 
                     <div id="apiKeySection">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-gray-400">Universal API Key (Optional)</label>
+                            <label class="text-xs text-gray-400">API Key (Optional if using Unlimited Free AI)</label>
                             <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
                                 <span>Get Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                             </a>
                         </div>
-                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings(); detectKeyTypeAndScan();" placeholder="Paste ANY API key (AIza..., sk-..., gsk_..., sk-or-...)" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none text-sm">
+                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste API key(s) here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
+                        <p class="text-[10px] text-cyan-400/80 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Auto-Heal Active: Automatically retries & switches servers if any connection drops!</p>
                     </div>
 
-                    <!-- Universal Model Selector & Scanner -->
-                    <div class="pt-2 border-t border-gray-800">
+                    <div class="pt-3 border-t border-gray-800">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-cyan-400 font-semibold">AI Model (Auto-Reads All Available Models)</label>
-                            <button onclick="scanAllModelsFromAPI()" id="scanModelsBtn" class="text-[11px] bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-lg transition">
-                                <i class="fa-solid fa-rotate mr-1"></i>Scan Key Models
-                            </button>
+                            <label class="text-xs text-yellow-400 font-semibold">GitHub Classic Token (For Live Links)</label>
+                            <a href="https://github.com/settings/tokens/new?scopes=gist&description=ZenoWeb_Token" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg hover:bg-emerald-600/30 transition font-semibold">
+                                Get Token <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
                         </div>
-                        <select id="modelSelect" onchange="autoSaveSettings()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-xs mb-2">
-                            <option value="auto">🔄 Auto-Select Best & Fastest Working Model</option>
-                            <option value="gemini-3.8-flash">gemini-3.8-flash</option>
-                            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                            <option value="gemini-2.5-pro">gemini-2.5-pro</option>
-                            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                            <option value="gpt-4o-mini">gpt-4o-mini</option>
-                            <option value="gpt-4o">gpt-4o</option>
-                            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Groq)</option>
-                            <option value="deepseek-chat">deepseek-chat (DeepSeek V3)</option>
-                            <option value="claude-3-5-sonnet-latest">claude-3-5-sonnet-latest</option>
-                        </select>
-                        <input type="text" id="customModelInput" oninput="autoSaveSettings()" placeholder="Or type any custom model ID (e.g., gemini-exp, o3-mini)..." class="w-full bg-[#181820] border border-gray-800 rounded-xl p-2 text-gray-300 outline-none text-xs">
+                        <input type="password" id="githubTokenInput" oninput="autoSaveSettings()" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
                     </div>
 
-                    <button onclick="closeSettingsModal()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
+                    <button type="button" onclick="closeSettingsModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
                         Done & Continue
                     </button>
                 </div>
@@ -198,14 +202,13 @@
             <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-bolt text-amber-400 mr-2"></i>Fast Website Builder</h2>
-                    <button onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button type="button" onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 
                 <div class="space-y-3.5">
                     <div>
-                        <label class="block text-xs text-gray-300 mb-1">1. Project / Brand Name (Creates Your Public Link Name!)</label>
-                        <input type="text" id="wName" oninput="previewSlugName(this.value)" placeholder="e.g., Kuku, Rabar Shop, Zeno Store..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm">
-                        <p id="slugPreviewText" class="text-[10px] text-emerald-400 mt-1 font-mono">Public URL: ?site=my-website</p>
+                        <label class="block text-xs text-gray-300 mb-1">1. Brand or Website Name</label>
+                        <input type="text" id="wName" placeholder="e.g., Rabar Shop, Zeno Store, Luxury Cafe..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-300 mb-1">2. Website Niche & Purpose</label>
@@ -229,13 +232,13 @@
                     <div class="bg-[#181820] p-3 rounded-xl border border-gray-800">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-camera mr-1"></i>Upload Products (Images & Prices)</label>
-                            <button onclick="addProductRow()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-lg font-semibold"><i class="fa-solid fa-plus"></i> Add Product</button>
+                            <button type="button" onclick="addProductRow()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-lg font-semibold"><i class="fa-solid fa-plus"></i> Add Product</button>
                         </div>
                         <div id="productsContainer" class="space-y-2 max-h-36 overflow-y-auto pr-1"></div>
                     </div>
 
-                    <button onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
-                        <i class="fa-solid fa-bolt mr-1"></i> Build & Create Public Link
+                    <button type="button" onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
+                        <i class="fa-solid fa-bolt mr-1"></i> Turbo Build Website Now
                     </button>
                 </div>
             </div>
@@ -246,7 +249,7 @@
             <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
                     <h2 class="text-lg font-bold text-yellow-400"><i class="fa-solid fa-sack-dollar mr-2"></i>Monetize Website</h2>
-                    <button onclick="document.getElementById('monetizeModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button type="button" onclick="document.getElementById('monetizeModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 
                 <div class="space-y-4">
@@ -274,7 +277,7 @@
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-xs text-gray-300">2. Paste Ad Script / Unit Code:</label>
-                                <button onclick="pasteAdClipboard()" class="text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-0.5 rounded border border-gray-700"><i class="fa-solid fa-paste mr-1"></i>Paste</button>
+                                <button type="button" onclick="pasteAdClipboard()" class="text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-0.5 rounded border border-gray-700"><i class="fa-solid fa-paste mr-1"></i>Paste</button>
                             </div>
                             <textarea id="adCodeInput" rows="4" placeholder="Paste your <script> code from Adsterra or Unity Ads here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none focus:border-yellow-500"></textarea>
                         </div>
@@ -295,7 +298,7 @@
                         </div>
                     </div>
 
-                    <button onclick="applyMonetization()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
+                    <button type="button" onclick="applyMonetization()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
                         <i class="fa-solid fa-bolt mr-1"></i> Inject Instantly
                     </button>
                 </div>
@@ -305,7 +308,7 @@
         <!-- 4. Top Header Bar -->
         <header class="h-14 bg-[#101016] border-b border-gray-800/80 px-3.5 flex items-center justify-between z-20 shrink-0">
             <div class="flex items-center gap-2.5">
-                <button onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition border border-gray-700/60">
+                <button type="button" onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-[#1e1e26] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition border border-gray-700/60">
                     <i class="fa-solid fa-ellipsis-vertical text-base"></i>
                 </button>
                 
@@ -318,20 +321,17 @@
                     <span class="font-zeno font-bold text-sm tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-cyan-400 hidden sm:inline">ZENOWEB</span>
                 </div>
 
-                <div class="pl-1 cursor-pointer" onclick="renameCurrentProject()" title="Click to rename project & link">
-                    <div class="flex items-center gap-1">
-                        <h1 id="currentProjectTitle" class="font-semibold text-xs text-gray-200 truncate max-w-[110px] sm:max-w-xs">New Project</h1>
-                        <i class="fa-solid fa-pen text-[9px] text-gray-500"></i>
-                    </div>
-                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-rotate text-cyan-400"></i> Auto-Refresh Active</span>
+                <div class="pl-1">
+                    <h1 id="currentProjectTitle" class="font-semibold text-xs text-gray-200 truncate max-w-[110px] sm:max-w-xs">New Project</h1>
+                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-shield-halved text-cyan-400"></i> Auto-Heal Active</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-1 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
-                <button onclick="publishWebsite()" class="px-2.5 py-1 rounded-lg text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold hover:bg-emerald-600/30 transition" title="Get Public Link"><i class="fa-solid fa-link mr-1"></i>Link</button>
-                <button onclick="setViewport('100%')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
-                <button onclick="setViewport('390px')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
-                <button onclick="toggleCodeView()" id="codeBtn" class="px-2 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code"></i></button>
+                <button type="button" onclick="enableNotificationsManual()" class="px-2 py-1 rounded-lg text-xs text-amber-400 hover:bg-gray-700 transition" title="Enable Background Alerts"><i class="fa-solid fa-bell"></i></button>
+                <button type="button" onclick="setViewport('100%')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Desktop View"><i class="fa-solid fa-desktop"></i></button>
+                <button type="button" onclick="setViewport('390px')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition" title="Mobile View"><i class="fa-solid fa-mobile-screen"></i></button>
+                <button type="button" onclick="toggleCodeView()" id="codeBtn" class="px-2 py-1 rounded-lg text-xs text-blue-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
             </div>
         </header>
 
@@ -348,46 +348,42 @@
                         </svg>
                         <span class="font-zeno font-bold text-base text-white tracking-wider">ZENOWEB</span>
                     </div>
-                    <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <button type="button" onclick="toggleSidebar()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
 
-                <button onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/40 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                <button type="button" onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/40 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-plus text-cyan-400"></i> New Website
                 </button>
 
                 <div class="mt-5">
                     <h3 class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">Saved Websites</h3>
-                    <div id="projectList" class="space-y-1.5 max-h-[34vh] overflow-y-auto pr-1"></div>
+                    <div id="projectList" class="space-y-1.5 max-h-[38vh] overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
             <div class="border-t border-gray-800 pt-3 space-y-2">
-                <button onclick="openMonetizeModal(); toggleSidebar();" class="w-full bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
+                <button type="button" onclick="openMonetizeModal(); toggleSidebar();" class="w-full bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
                     <i class="fa-solid fa-dollar-sign"></i> Monetize (Ads / Premium)
                 </button>
 
-                <button onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-globe"></i> Get Public Named Link
+                <button type="button" onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-globe"></i> Publish Live Link
                 </button>
 
-                <!-- Public Named Link Box (No GitHub Required) -->
-                <div id="liveLinkBox" class="hidden bg-[#1a1a22] p-2.5 rounded-xl border border-emerald-500/30">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[10px] text-emerald-400 font-bold"><i class="fa-solid fa-earth-americas mr-1"></i>Public Link (<span id="linkSlugLabel">site</span>):</span>
-                        <a id="openLiveUrlBtn" href="#" target="_blank" class="text-[10px] text-cyan-400 hover:underline">Open <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                    </div>
+                <div id="liveLinkBox" class="hidden bg-[#1a1a22] p-2 rounded-xl border border-gray-700">
+                    <p class="text-[10px] text-gray-400 mb-1">Shareable Website Link:</p>
                     <div class="flex items-center gap-1">
-                        <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-300 p-1.5 rounded text-[10px] outline-none font-mono">
-                        <button onclick="copyLiveLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded text-xs font-bold"><i class="fa-solid fa-copy"></i></button>
+                        <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-blue-400 p-1.5 rounded text-[10px] outline-none">
+                        <button type="button" onclick="copyLiveLink()" class="bg-blue-600 text-white px-2.5 py-1.5 rounded text-xs"><i class="fa-solid fa-copy"></i></button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="downloadHTML()" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                    <button type="button" onclick="downloadHTML()" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-download text-purple-400"></i> Download
                     </button>
-                    <button onclick="openSettings(); toggleSidebar();" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-sliders text-cyan-400"></i> AI Models
+                    <button type="button" onclick="openSettings(); toggleSidebar();" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-gear text-gray-400"></i> Settings
                     </button>
                 </div>
             </div>
@@ -404,8 +400,8 @@
                     </svg>
                 </div>
                 <h2 class="font-zeno text-lg font-bold text-white mb-2 tracking-wide">ZENOWEB TURBO AI</h2>
-                <p class="text-gray-400 text-xs mb-5">Auto-Refresh Zero-Fail AI Engine. Reads all API models and creates instant Public Named Links without GitHub!</p>
-                <button onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-blue-600/20 transition">
+                <p class="text-gray-400 text-xs mb-5">Zero-Fail Multi-Server AI Builder. Automatically heals connection drops and builds websites on the first try!</p>
+                <button type="button" onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-blue-600/20 transition">
                     <i class="fa-solid fa-bolt text-amber-300 mr-1"></i> Launch Fast Builder
                 </button>
             </div>
@@ -416,7 +412,7 @@
 
             <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
             
-            <!-- Auto-Refreshing Progress Overlay (Never shows "Failed to fetch" popup!) -->
+            <!-- Real-Time Turbo Progress Overlay -->
             <div id="loadingOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden px-6 text-center">
                 <div class="relative w-16 h-16 flex items-center justify-center mb-4">
                     <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
@@ -428,7 +424,6 @@
                     <div id="streamProgressBar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 w-0 transition-all duration-200"></div>
                 </div>
                 <p id="loadingSubText" class="text-cyan-400 text-xs mt-2 font-mono">Connecting to high-speed node...</p>
-                <button onclick="cancelActiveGeneration()" class="mt-6 text-[11px] text-gray-500 hover:text-gray-300 underline">Cancel</button>
             </div>
         </main>
 
@@ -441,13 +436,13 @@
                 <div class="flex items-center gap-1.5 bg-[#181822]/95 backdrop-blur-md border border-gray-700/90 rounded-2xl p-1.5 pl-2 shadow-2xl focus-within:border-cyan-500 transition">
                     <input type="file" id="chatImageInput" accept="image/*" multiple onchange="handleChatImages(this)" class="hidden">
                     
-                    <button onclick="document.getElementById('chatImageInput').click()" class="w-9 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 text-cyan-400 flex items-center justify-center shrink-0 transition" title="Upload Image to AI">
+                    <button type="button" onclick="document.getElementById('chatImageInput').click()" class="w-9 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 text-cyan-400 flex items-center justify-center shrink-0 transition" title="Upload Image to AI">
                         <i class="fa-solid fa-image text-sm"></i>
                     </button>
 
                     <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Ask ZenoWeb Turbo AI to build, edit, or use your photo..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400 px-1.5">
                     
-                    <button onclick="sendChatPrompt()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md transition">
+                    <button type="button" onclick="sendChatPrompt()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md transition">
                         <i class="fa-solid fa-paper-plane text-sm"></i>
                     </button>
                 </div>
@@ -457,151 +452,73 @@
     </div>
 
     <script>
-        let projects = JSON.parse(localStorage.getItem('wm_projects') || '[]');
+        /* Safe LocalStorage Loader (Prevents corrupted storage from freezing the app) */
+        function loadSafeProjects() {
+            try {
+                const raw = localStorage.getItem('wm_projects');
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                localStorage.removeItem('wm_projects');
+                return [];
+            }
+        }
+
+        let projects = loadSafeProjects();
         let currentProjectId = localStorage.getItem('wm_current_id') || null;
         let currentProducts = [];
         let pendingChatImages = [];
         let isCodeView = false;
-        let splashFinished = false;
-        let generationCancelled = false;
 
         const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-        /* =========================================================
-           0. PUBLIC NAMED LINK VIEWER (?site=kuku) - NO GITHUB!
-        ========================================================= */
-        function toSlug(name) {
-            const clean = (name || 'website').toLowerCase().trim()
-                .replace(/[^a-z0-9\u0600-\u06FF\s-]/g, '')
-                .replace(/\s+/g, '-');
-            return clean || 'website';
-        }
-
-        function previewSlugName(val) {
-            const slug = toSlug(val || 'my-website');
-            const base = window.location.origin + window.location.pathname;
-            document.getElementById('slugPreviewText').innerText = `Public Link: ${base}?site=${slug}`;
-        }
-
-        async function checkPublicSiteViewerMode() {
-            const params = new URLSearchParams(window.location.search);
-            const siteSlug = params.get('site');
-            if (!siteSlug) return false;
-
-            // Hide Editor & Splash immediately -> Show Fullscreen Public Website
-            document.getElementById('ps5Splash').classList.add('hidden');
-            const viewer = document.getElementById('publicViewerShell');
-            viewer.classList.remove('hidden');
-            viewer.classList.add('flex');
-            document.title = siteSlug.toUpperCase();
-            document.getElementById('publicSiteTitleLoad').innerText = `Loading ${siteSlug}...`;
-
-            let htmlContent = null;
-            const cloudKey = params.get('k');
-            const blobId = params.get('b');
-            const hashData = window.location.hash;
-
-            // 1. Try compressed hash payload (#z=...)
-            if (hashData && hashData.startsWith('#z=')) {
-                try {
-                    htmlContent = LZString.decompressFromEncodedURIComponent(hashData.slice(3));
-                } catch (e) {}
-            }
-
-            // 2. Try Bytebin Cloud Storage (?site=kuku&k=...)
-            if (!htmlContent && cloudKey) {
-                for (let retry = 0; retry < 3; retry++) {
-                    try {
-                        const res = await fetch(`https://bytebin.lucko.me/${cloudKey}`, { cache: 'no-store' });
-                        if (res.ok) {
-                            htmlContent = await res.text();
-                            break;
-                        }
-                    } catch (e) { await sleep(500); }
-                }
-            }
-
-            // 3. Try JSONBlob Cloud Storage (?site=kuku&b=...)
-            if (!htmlContent && blobId) {
-                for (let retry = 0; retry < 3; retry++) {
-                    try {
-                        const res = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, { cache: 'no-store' });
-                        if (res.ok) {
-                            const data = await res.json();
-                            htmlContent = data.html;
-                            break;
-                        }
-                    } catch (e) { await sleep(500); }
-                }
-            }
-
-            // 4. Check local projects matching slug if opened on creator's device
-            if (!htmlContent) {
-                const localMatch = projects.find(p => toSlug(p.name) === siteSlug);
-                if (localMatch && localMatch.code) htmlContent = localMatch.code;
-            }
-
-            document.getElementById('publicLoading').classList.add('hidden');
-            const frame = document.getElementById('publicLiveFrame');
-            if (htmlContent && htmlContent.length > 20) {
-                frame.srcdoc = htmlContent;
-            } else {
-                frame.srcdoc = `<body style="background:#09090e;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><h2>Website "${siteSlug}" is being updated...</h2></body>`;
-            }
-            return true;
-        }
+        const SYSTEM_PROMPT = [
+            "You are ZenoWeb Turbo-AI, an elite Full-Stack Web Architect.",
+            "Build a COMPLETE, interactive, modern single-file HTML5 website.",
+            "SPEED & EFFICIENCY RULES:",
+            "1. Return ONLY raw HTML5 starting with <" + "!DOCTYPE html> and ending with <" + "/html>. No markdown backticks, no explanations.",
+            "2. Include Tailwind CSS (<script src=\"https://cdn.tailwindcss.com\"><" + "/script>) and FontAwesome (<link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\" rel=\"stylesheet\">).",
+            "3. WRITE COMPACT DATA-DRIVEN CODE: Store products/items/cards in a clean JavaScript array and render them dynamically with innerHTML + .map(). Include working interactive features (shopping cart drawer, search filter, modals, and mobile menu).",
+            "4. Keep placeholder image strings (\"RAW_IMG_TARGET_x\" or \"CHAT_IMG_x\") untouched inside your JS data array or img tags."
+        ].join("\n");
 
         /* =========================================================
-           TURBO COMPACT ARCHITECTURE SYSTEM PROMPT
-        ========================================================= */
-        const SYSTEM_PROMPT = `You are ZenoWeb Turbo-AI, an elite Full-Stack Web Architect.
-Build a COMPLETE, interactive, modern single-file HTML5 website.
-
-SPEED & EFFICIENCY RULES:
-1. Return ONLY raw HTML5 starting with <!DOCTYPE html> and ending with </html>. No markdown backticks (\`\`\`html), no explanations.
-2. Include Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome (<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">).
-3. WRITE COMPACT DATA-DRIVEN CODE: Store products/items/cards in a clean JavaScript array and render them dynamically with innerHTML + .map(). Include working interactive features (shopping cart drawer, search filter, modals, and mobile menu).
-4. Keep placeholder image strings ("RAW_IMG_TARGET_x" or "CHAT_IMG_x") untouched inside your JS data array or img tags.`;
-
-        /* =========================================================
-           BACKGROUND KEEP-ALIVE & NOTIFICATION ENGINE
+           BACKGROUND KEEP-ALIVE & NOTIFICATION ENGINE (CRASH-SAFE)
         ========================================================= */
         let audioCtx = null;
         let silentOsc = null;
         let bgWorker = null;
         let wakeLock = null;
 
-        function initBackgroundEngine() {
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
-            }
-            if (!bgWorker) {
-                const blob = new Blob([`
-                    let timer = null;
-                    self.onmessage = function(e) {
-                        if (e.data === 'start') {
-                            if (timer) clearInterval(timer);
-                            timer = setInterval(() => self.postMessage('tick'), 1000);
-                        } else if (e.data === 'stop') {
-                            clearInterval(timer);
-                            timer = null;
-                        }
+        window.initBackgroundEngine = function() {
+            try {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(() => {});
+                }
+            } catch (e) {}
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) audioCtx = new AudioContextClass();
+                }
+            } catch (e) {}
+            try {
+                if (!bgWorker && window.Worker && window.Blob) {
+                    const blob = new Blob([
+                        "let timer = null; self.onmessage = function(e) { if (e.data === 'start') { if (timer) clearInterval(timer); timer = setInterval(() => self.postMessage('tick'), 1000); } else if (e.data === 'stop') { clearInterval(timer); timer = null; } };"
+                    ], { type: 'application/javascript' });
+                    bgWorker = new Worker(URL.createObjectURL(blob));
+                    bgWorker.onmessage = () => {
+                        if (document.hidden) document.title = "⚡ Turbo Building... | ZenoWeb";
                     };
-                `], { type: 'application/javascript' });
-                bgWorker = new Worker(URL.createObjectURL(blob));
-                bgWorker.onmessage = () => {
-                    if (document.hidden) document.title = "⚡ Auto-Building... | ZenoWeb";
-                };
-            }
-        }
+                }
+            } catch (e) {}
+        };
 
         async function startBackgroundKeepAlive() {
-            initBackgroundEngine();
-            if (bgWorker) bgWorker.postMessage('start');
+            window.initBackgroundEngine();
+            try { if (bgWorker) bgWorker.postMessage('start'); } catch (e) {}
             try {
                 if (audioCtx) {
                     if (audioCtx.state === 'suspended') await audioCtx.resume();
@@ -619,7 +536,7 @@ SPEED & EFFICIENCY RULES:
         }
 
         function stopBackgroundKeepAlive() {
-            if (bgWorker) bgWorker.postMessage('stop');
+            try { if (bgWorker) bgWorker.postMessage('stop'); } catch (e) {}
             try {
                 if (silentOsc) { silentOsc.stop(); silentOsc.disconnect(); silentOsc = null; }
             } catch (e) {}
@@ -648,22 +565,23 @@ SPEED & EFFICIENCY RULES:
             } catch (e) {}
         }
 
-        function notifyProjectReady(msgText) {
+        function notifyProjectReady(projectName) {
             document.title = "✅ Your project is ready! - ZenoWeb";
             playPS5ReadyChime();
 
-            document.getElementById('readyToastMsg').innerText = msgText || 'Your project is ready!';
             const toast = document.getElementById('readyToast');
-            toast.classList.remove('-translate-y-28', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('-translate-y-28', 'opacity-0');
-                document.title = "ZenoWeb Turbo - AI Website Builder";
-            }, 5000);
+            if (toast) {
+                toast.classList.remove('-translate-y-28', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('-translate-y-28', 'opacity-0');
+                    document.title = "ZenoWeb Turbo - AI Website Builder";
+                }, 5000);
+            }
 
             if ('Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notif = new Notification('ZenoWeb AI', {
-                        body: 'Your project is ready! (' + msgText + ')',
+                        body: 'Your project is ready! (' + projectName + ')',
                         tag: 'zenoweb-ready',
                         renotify: true
                     });
@@ -672,80 +590,64 @@ SPEED & EFFICIENCY RULES:
             }
         }
 
+        function enableNotificationsManual() {
+            window.initBackgroundEngine();
+            if ('Notification' in window) {
+                Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') notifyProjectReady('Alerts Active');
+                }).catch(() => {});
+            }
+        }
+
         /* =========================================================
-           STARTUP & AUTO-RESUME AFTER REFRESH
+           PS5 PARTICLES & STARTUP INITIALIZATION
         ========================================================= */
         function initPS5Particles() {
-            const canvas = document.getElementById('ps5Canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            try {
+                const canvas = document.getElementById('ps5Canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
 
-            const particles = Array.from({ length: 45 }, () => ({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                r: Math.random() * 2 + 0.5,
-                dx: (Math.random() - 0.5) * 0.8,
-                dy: -Math.random() * 1 - 0.3,
-                color: Math.random() > 0.35 ? 'rgba(0, 210, 255, 0.75)' : 'rgba(255, 195, 90, 0.8)'
-            }));
+                const particles = Array.from({ length: 45 }, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2 + 0.5,
+                    dx: (Math.random() - 0.5) * 0.8,
+                    dy: -Math.random() * 1 - 0.3,
+                    color: Math.random() > 0.35 ? 'rgba(0, 210, 255, 0.75)' : 'rgba(255, 195, 90, 0.8)'
+                }));
 
-            function animate() {
-                if (splashFinished) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.fill();
-                    p.x += p.dx;
-                    p.y += p.dy;
-                    if (p.y < 0) p.y = canvas.height;
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
+                function animate() {
+                    if (window.splashFinished) return;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.fill();
+                        p.x += p.dx;
+                        p.y += p.dy;
+                        if (p.y < 0) p.y = canvas.height;
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            } catch (e) {}
         }
 
-        function enterZenoWeb() {
-            if (splashFinished) return;
-            splashFinished = true;
-            initBackgroundEngine();
-
-            const splash = document.getElementById('ps5Splash');
-            const appShell = document.getElementById('appShell');
-
-            splash.classList.add('opacity-0', 'scale-105');
+        window.addEventListener('DOMContentLoaded', () => {
+            initPS5Particles();
             setTimeout(() => {
-                splash.classList.add('hidden');
-                appShell.classList.remove('hidden');
-                appShell.classList.add('flex');
-                setTimeout(() => {
-                    appShell.classList.remove('opacity-0');
-                    resumeInterruptedGenerationIfNeeded();
-                }, 30);
-            }, 400);
-        }
+                const prog = document.getElementById('ps5Progress');
+                if (prog) prog.style.width = '100%';
+            }, 60);
 
-        window.onload = async () => {
-            // 1. Check if opened as a Public Named Link (?site=kuku)
-            const isPublicView = await checkPublicSiteViewerMode();
-            if (isPublicView) return;
-
-            // 2. Otherwise boot ZenoWeb Studio
-            const pendingTask = sessionStorage.getItem('zeno_pending_task');
-            if (pendingTask) {
-                // Skip splash if auto-refreshing to complete a pending build!
-                enterZenoWeb();
-            } else {
-                initPS5Particles();
-                setTimeout(() => {
-                    const prog = document.getElementById('ps5Progress');
-                    if (prog) prog.style.width = '100%';
-                }, 50);
-                setTimeout(enterZenoWeb, 2100);
-            }
+            // Auto-transition after 2.4 seconds if user hasn't tapped yet
+            setTimeout(() => {
+                window.enterZenoWeb();
+            }, 2400);
 
             populateSettingsInputs();
             renderProjectList();
@@ -754,137 +656,59 @@ SPEED & EFFICIENCY RULES:
             } else if (projects.length > 0) {
                 loadProject(projects[0].id);
             }
-        };
-
-        async function resumeInterruptedGenerationIfNeeded() {
-            const raw = sessionStorage.getItem('zeno_pending_task');
-            if (!raw) return;
-            try {
-                const task = JSON.parse(raw);
-                const proj = projects.find(p => p.id === task.projectId);
-                if (proj) {
-                    currentProjectId = proj.id;
-                    await generateWithAI(task.prompt, proj.code, proj, []);
-                }
-            } catch (e) {
-                sessionStorage.removeItem('zeno_pending_task');
-            }
-        }
+        });
 
         /* =========================================================
-           UNIVERSAL API KEY DETECTOR & ALL-MODELS SCANNER
+           SETTINGS, WIZARD & MONETIZATION
         ========================================================= */
         function populateSettingsInputs() {
-            document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'auto';
+            document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
             document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
-            document.getElementById('modelSelect').value = localStorage.getItem('wm_model') || 'auto';
-            document.getElementById('customModelInput').value = localStorage.getItem('wm_custom_model') || '';
+            document.getElementById('githubTokenInput').value = localStorage.getItem('wm_gh_token') || '';
             updateKeyLink();
         }
 
         function autoSaveSettings() {
             const provider = document.getElementById('aiProvider').value;
             const key = document.getElementById('apiKeyInput').value.trim();
-            const model = document.getElementById('modelSelect').value;
-            const customModel = document.getElementById('customModelInput').value.trim();
+            const ghToken = document.getElementById('githubTokenInput').value.trim();
 
             localStorage.setItem('wm_provider', provider);
-            localStorage.setItem('wm_api_key', key);
-            localStorage.setItem('wm_model', model);
-            localStorage.setItem('wm_custom_model', customModel);
+            if (key) localStorage.setItem('wm_api_key', key);
+            if (ghToken) localStorage.setItem('wm_gh_token', ghToken);
 
             const badge = document.getElementById('keySaveBadge');
             badge.innerText = 'Saved!';
             setTimeout(() => { badge.innerText = 'Auto-Saved'; }, 1000);
         }
 
-        function detectKeyPrefixProvider(apiKey) {
-            if (!apiKey) return 'zeno_free';
-            const firstKey = apiKey.split(',')[0].trim();
-            if (firstKey.startsWith('AIza')) return 'gemini';
-            if (firstKey.startsWith('gsk_')) return 'groq';
-            if (firstKey.startsWith('sk-or-')) return 'openrouter';
-            if (firstKey.startsWith('sk-ant-')) return 'claude';
-            if (firstKey.startsWith('sk-')) return 'openai';
-            return 'gemini';
-        }
-
-        function detectKeyTypeAndScan() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (key.length > 12) {
-                scanAllModelsFromAPI();
-            }
-        }
-
-        async function scanAllModelsFromAPI() {
-            const rawKey = document.getElementById('apiKeyInput').value.trim();
-            const btn = document.getElementById('scanModelsBtn');
-            const select = document.getElementById('modelSelect');
-            if (!rawKey) return;
-
-            const apiKey = rawKey.split(',')[0].trim();
-            const detected = detectKeyPrefixProvider(apiKey);
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>Scanning...`;
-
-            try {
-                let discoveredModels = [];
-
-                if (detected === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                    const data = await res.json();
-                    if (data.models) {
-                        discoveredModels = data.models
-                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-                            .map(m => m.name.replace('models/', ''));
-                    }
-                } else if (detected === 'groq') {
-                    const res = await fetch('https://api.groq.com/openai/v1/models', {
-                        headers: { 'Authorization': `Bearer ${apiKey}` }
-                    });
-                    const data = await res.json();
-                    if (data.data) discoveredModels = data.data.map(m => m.id);
-                } else if (detected === 'openrouter') {
-                    const res = await fetch('https://openrouter.ai/api/v1/models');
-                    const data = await res.json();
-                    if (data.data) discoveredModels = data.data.slice(0, 80).map(m => m.id);
-                } else if (detected === 'openai') {
-                    const res = await fetch('https://api.openai.com/v1/models', {
-                        headers: { 'Authorization': `Bearer ${apiKey}` }
-                    });
-                    const data = await res.json();
-                    if (data.data) discoveredModels = data.data.map(m => m.id).filter(id => id.includes('gpt') || id.includes('o1') || id.includes('o3'));
-                }
-
-                if (discoveredModels.length > 0) {
-                    select.innerHTML = `<option value="auto">🔄 Auto-Select Best Working Model (${discoveredModels.length} found)</option>` +
-                        discoveredModels.map(m => `<option value="${m}">${m}</option>`).join('');
-                    btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i>${discoveredModels.length} Models Read`;
-                } else {
-                    btn.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Ready`;
-                }
-            } catch (e) {
-                btn.innerHTML = `<i class="fa-solid fa-rotate mr-1"></i>Auto-Ready`;
-            }
-        }
-
         function updateKeyLink() {
             const provider = document.getElementById('aiProvider').value;
             const linkBtn = document.getElementById('getApiKeyBtn');
-            if (provider === 'gemini' || provider === 'auto') linkBtn.href = 'https://aistudio.google.com/app/apikey';
-            else if (provider === 'groq') linkBtn.href = 'https://console.groq.com/keys';
-            else if (provider === 'openrouter') linkBtn.href = 'https://openrouter.ai/keys';
-            else if (provider === 'deepseek') linkBtn.href = 'https://platform.deepseek.com/api_keys';
+            const keySec = document.getElementById('apiKeySection');
+
+            if (provider === 'zeno_free') {
+                keySec.classList.add('opacity-50');
+            } else {
+                keySec.classList.remove('opacity-50');
+            }
+
+            if (provider === 'gemini') linkBtn.href = 'https://aistudio.google.com/app/apikey';
             else if (provider === 'openai') linkBtn.href = 'https://platform.openai.com/api-keys';
             else if (provider === 'claude') linkBtn.href = 'https://console.anthropic.com/settings/keys';
         }
 
-        function openSettings() {
+        window.openSettings = function() {
             populateSettingsInputs();
             document.getElementById('setupModal').classList.remove('hidden');
-        }
+        };
 
         function closeSettingsModal() {
             autoSaveSettings();
+            const provider = document.getElementById('aiProvider').value;
+            if (provider !== 'zeno_free' && !localStorage.getItem('wm_api_key')) {
+                localStorage.setItem('wm_provider', 'zeno_free');
+            }
             document.getElementById('setupModal').classList.add('hidden');
         }
 
@@ -893,112 +717,13 @@ SPEED & EFFICIENCY RULES:
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        /* =========================================================
-           PROJECT RENAME & AUTOMATIC PUBLIC LINK BY PROJECT NAME
-        ========================================================= */
-        async function renameCurrentProject() {
-            const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj) return;
-            const newName = prompt('Enter Project Name (Your Public Link will use this name):', proj.name);
-            if (newName && newName.trim()) {
-                proj.name = newName.trim();
-                saveToStorage();
-                loadProject(proj.id);
-                if (proj.code) await autoCreateNamedPublicLink(proj, false);
-            }
-        }
-
-        async function autoCreateNamedPublicLink(proj, showNotification = false) {
-            if (!proj || !proj.code) return '';
-            const slug = toSlug(proj.name);
-            const baseUrl = window.location.origin + window.location.pathname;
-
-            // 1. Instant Self-Contained Named URL (Always works immediately even offline)
-            const compressed = LZString.compressToEncodedURIComponent(proj.code);
-            let publicNamedUrl = `${baseUrl}?site=${encodeURIComponent(slug)}#z=${compressed}`;
-
-            // 2. Upload to Public No-Auth Cloud (Bytebin / JSONBlob) so the link is super short & clean: ?site=kuku&k=xyz
-            try {
-                const res = await fetch('https://bytebin.lucko.me/post', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-                    body: proj.code
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.key) {
-                        publicNamedUrl = `${baseUrl}?site=${encodeURIComponent(slug)}&k=${data.key}`;
-                    }
-                }
-            } catch (e) {
-                try {
-                    const jbRes = await fetch('https://jsonblob.com/api/jsonBlob', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({ name: proj.name, slug: slug, html: proj.code })
-                    });
-                    if (jbRes.ok) {
-                        const loc = jbRes.headers.get('Location') || '';
-                        const blobId = loc.split('/').pop();
-                        if (blobId) {
-                            publicNamedUrl = `${baseUrl}?site=${encodeURIComponent(slug)}&b=${blobId}`;
-                        }
-                    }
-                } catch (e2) {}
-            }
-
-            proj.liveUrl = publicNamedUrl;
-            saveToStorage();
-            updateLiveLinkUI(proj);
-
-            if (showNotification) {
-                notifyProjectReady(`Public Link Ready: ?site=${slug}`);
-            }
-            return publicNamedUrl;
-        }
-
-        function updateLiveLinkUI(proj) {
-            if (proj && proj.liveUrl) {
-                document.getElementById('liveLinkBox').classList.remove('hidden');
-                document.getElementById('liveUrlInput').value = proj.liveUrl;
-                document.getElementById('openLiveUrlBtn').href = proj.liveUrl;
-                document.getElementById('linkSlugLabel').innerText = toSlug(proj.name);
-            } else {
-                document.getElementById('liveLinkBox').classList.add('hidden');
-            }
-        }
-
-        async function publishWebsite() {
-            const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) return alert('Build a website first!');
-
-            document.getElementById('loadingText').innerText = `Creating Public Link for "${proj.name}"...`;
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-
-            await autoCreateNamedPublicLink(proj, true);
-
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            document.getElementById('sidebar').classList.remove('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.remove('hidden');
-        }
-
-        function copyLiveLink() {
-            const input = document.getElementById('liveUrlInput');
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            notifyProjectReady('Public Link Copied!');
-        }
-
-        /* =========================================================
-           WIZARD, IMAGES & MONETIZATION
-        ========================================================= */
         function compressImageFile(file, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const maxDim = 600;
+                    const maxDim = 650;
                     let w = img.width, h = img.height;
                     if (w > maxDim || h > maxDim) {
                         if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
@@ -1008,7 +733,7 @@ SPEED & EFFICIENCY RULES:
                     canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    callback(canvas.toDataURL('image/jpeg', 0.76));
+                    callback(canvas.toDataURL('image/jpeg', 0.78));
                 };
                 img.src = e.target.result;
             };
@@ -1041,7 +766,7 @@ SPEED & EFFICIENCY RULES:
             bar.innerHTML = pendingChatImages.map((img, idx) => `
                 <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0">
                     <img src="${img.b64}" class="w-full h-full object-cover">
-                    <button onclick="removeChatImage(${idx})" class="absolute top-0 right-0 bg-black/80 text-red-400 w-5 h-5 flex items-center justify-center rounded-bl-lg text-[10px]">
+                    <button type="button" onclick="removeChatImage(${idx})" class="absolute top-0 right-0 bg-black/80 text-red-400 w-5 h-5 flex items-center justify-center rounded-bl-lg text-[10px]">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -1056,7 +781,6 @@ SPEED & EFFICIENCY RULES:
         function openWizard() { 
             document.getElementById('productsContainer').innerHTML = ''; 
             currentProducts = [];
-            previewSlugName(document.getElementById('wName').value);
             document.getElementById('wizardModal').classList.remove('hidden'); 
         }
         function closeWizard() { document.getElementById('wizardModal').classList.add('hidden'); }
@@ -1088,11 +812,11 @@ SPEED & EFFICIENCY RULES:
             const type = document.getElementById('wType').value.trim() || 'Online Store';
             const style = document.getElementById('wStyle').value.trim() || 'Modern Dark';
             const lang = document.getElementById('wLang').value.trim() || 'English';
-            const details = document.getElementById('wDetails').value.trim() || 'Interactive website with working cart, search, and modals.';
+            const details = document.getElementById('wDetails').value.trim() || 'Interactive store with cart and search.';
             closeWizard();
 
             let fullPrompt = `Build a complete, high-speed interactive HTML5 website:
-- Brand: "${name}" | Niche: ${type} | Style: ${style} | Language:${lang}
+- Brand: "${name}" | Niche: ${type} | Style: ${style} | Language: ${lang}
 - Features: ${details}`;
 
             currentProducts.forEach(p => {
@@ -1160,5 +884,527 @@ SPEED & EFFICIENCY RULES:
                 if (!code) return alert("Please paste your Adsterra or Unity Ads code first!");
                 document.getElementById('monetizeModal').classList.add('hidden');
 
-                if (proj.code && proj.code.includes('</body>')) {
-                    const adBannerHTML = `\n<!-- Injected Ad Network Code -->\n<div class="w-full py-
+                const closeBodyTag = '<' + '/body>';
+                if (proj.code && proj.code.includes(closeBodyTag)) {
+                    const adBannerHTML = `\n<!-- Injected Ad Network Code -->\n<div class="w-full py-3 flex justify-center items-center z-50">${code}</div>\n` + closeBodyTag;
+                    proj.code = proj.code.replace(closeBodyTag, adBannerHTML);
+                    saveToStorage();
+                    loadProject(proj.id);
+                    notifyProjectReady('Ads Injected Instantly!');
+                    return;
+                }
+            }
+
+            const price = document.getElementById('premPrice').value.trim() || '$9.99';
+            const methods = document.getElementById('premMethods').value.trim() || 'Card Number, FastPay, or VIP Code';
+            const details = document.getElementById('premDetails').value.trim() || 'Lock content until user submits payment details.';
+            document.getElementById('monetizeModal').classList.add('hidden');
+
+            const mPrompt = `Add an interactive Premium VIP Paywall Modal & Checkout Form (Price: ${price}, Fields: ${methods}, Rules: ${details}). Return full HTML.`;
+            await generateWithAI(mPrompt, proj.code, proj, []);
+        }
+
+        async function sendChatPrompt() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text && pendingChatImages.length === 0) return;
+            input.value = '';
+
+            let proj = projects.find(p => p.id === currentProjectId);
+            if (!proj) {
+                proj = { id: 'proj_' + Date.now(), name: (text || 'Image Website').substring(0, 22), code: '', liveUrl: '', products: [], chatImages: [] };
+                projects.unshift(proj);
+                currentProjectId = proj.id;
+            }
+            if (!proj.chatImages) proj.chatImages = [];
+
+            const attachedNow = [...pendingChatImages];
+            pendingChatImages = [];
+            renderChatImagePreviews();
+
+            let userInstruction = text || "Add the attached image(s) into the website.";
+            if (attachedNow.length > 0) {
+                userInstruction += `\nUse these exact placeholder strings in <img src="..."> for the attached photos:\n`;
+                attachedNow.forEach(imgObj => {
+                    proj.chatImages.push(imgObj);
+                    userInstruction += `- src="CHAT_IMG_${imgObj.id}"\n`;
+                });
+            }
+
+            await generateWithAI(userInstruction, proj.code, proj, attachedNow);
+        }
+
+        /* =========================================================
+           ZERO-FAIL MULTI-NODE UNLIMITED FREE AI CLUSTER
+        ========================================================= */
+        async function callUnlimitedFreeAI(finalPrompt) {
+            const subText = document.getElementById('loadingSubText');
+            const progBar = document.getElementById('streamProgressBar');
+            progBar.style.width = '20%';
+
+            const freeNodes = [
+                { model: 'openai', stream: true, label: 'Turbo Node 1' },
+                { model: 'qwen-coder', stream: true, label: 'Coder Node 2' },
+                { model: 'openai', stream: false, label: 'Direct Node 3' },
+                { model: 'mistral', stream: false, label: 'Backup Node 4' }
+            ];
+
+            for (let i = 0; i < freeNodes.length; i++) {
+                const node = freeNodes[i];
+                try {
+                    subText.innerText = `⚡ Auto-Heal Active: Generating via ${node.label}...`;
+                    progBar.style.width = `${22 + i * 12}%`;
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+                    const res = await fetch('https://text.pollinations.ai/openai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            model: node.model,
+                            seed: Math.floor(Math.random() * 999999),
+                            messages: [
+                                { role: 'system', content: SYSTEM_PROMPT },
+                                { role: 'user', content: finalPrompt }
+                            ],
+                            stream: node.stream
+                        })
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!res.ok) {
+                        await sleep(500);
+                        continue;
+                    }
+
+                    if (!node.stream) {
+                        const rawText = await res.text();
+                        let content = rawText;
+                        try {
+                            const json = JSON.parse(rawText);
+                            content = json.choices?.[0]?.message?.content || rawText;
+                        } catch (e) {}
+
+                        if (content && content.includes('<') && content.length > 80) {
+                            progBar.style.width = '100%';
+                            return content;
+                        }
+                        continue;
+                    }
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let fullText = '';
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const jsonStr = line.slice(6).trim();
+                                if (!jsonStr || jsonStr === '[DONE]') continue;
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    const chunk = parsed.choices?.[0]?.delta?.content || '';
+                                    if (chunk) {
+                                        fullText += chunk;
+                                        const pct = Math.min(96, Math.round((fullText.length / 7000) * 100));
+                                        progBar.style.width = `${Math.max(25, pct)}%`;
+                                        subText.innerText = `⚡ Streaming Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (fullText && fullText.includes('<') && fullText.length > 80) {
+                        progBar.style.width = '100%';
+                        return fullText;
+                    }
+                } catch (err) {
+                    subText.innerText = `⚡ Healing connection (${i + 1}/${freeNodes.length})...`;
+                    await sleep(800);
+                }
+            }
+
+            const getRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(SYSTEM_PROMPT + "\n\n" + finalPrompt)}?model=openai`);
+            const getText = await getRes.text();
+            if (getText && getText.includes('<')) {
+                progBar.style.width = '100%';
+                return getText;
+            }
+
+            throw new Error('Network connection unstable. Please check your internet.');
+        }
+
+        /* =========================================================
+           SMART GEMINI ENGINE WITH SILENT AUTO-RETRY & FALLBACK
+        ========================================================= */
+        async function streamGeminiTurbo(rawApiKeys, finalPrompt, attachedImages) {
+            const subText = document.getElementById('loadingSubText');
+            const progBar = document.getElementById('streamProgressBar');
+            progBar.style.width = '8%';
+
+            const keyList = rawApiKeys.split(',').map(k => k.trim()).filter(Boolean);
+
+            const userParts = [{ text: finalPrompt }];
+            if (attachedImages && attachedImages.length > 0) {
+                attachedImages.forEach(img => {
+                    const base64Clean = img.b64.split(',')[1];
+                    const mimeMatch = img.b64.match(/data:(.*?);/);
+                    userParts.push({
+                        inline_data: { mime_type: mimeMatch ? mimeMatch[1] : 'image/jpeg', data: base64Clean }
+                    });
+                });
+            }
+
+            for (let kIdx = 0; kIdx < keyList.length; kIdx++) {
+                const apiKey = keyList[kIdx];
+                const modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
+
+                for (const modelName of modelsToTry) {
+                    for (let attempt = 1; attempt <= 2; attempt++) {
+                        try {
+                            subText.innerText = `⚡ Connecting to ${modelName}...`;
+
+                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                    contents: [{ parts: userParts }],
+                                    generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
+                                })
+                            });
+
+                            if (!res.ok) {
+                                subText.innerText = `Switching from ${modelName} to backup node...`;
+                                break;
+                            }
+
+                            const reader = res.body.getReader();
+                            const decoder = new TextDecoder('utf-8');
+                            let fullText = '';
+                            let buffer = '';
+
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+
+                                buffer += decoder.decode(value, { stream: true });
+                                const lines = buffer.split('\n');
+                                buffer = lines.pop() || '';
+
+                                for (const line of lines) {
+                                    if (line.startsWith('data: ')) {
+                                        const jsonStr = line.slice(6).trim();
+                                        if (!jsonStr || jsonStr === '[DONE]') continue;
+                                        try {
+                                            const parsed = JSON.parse(jsonStr);
+                                            const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                            if (chunk) {
+                                                fullText += chunk;
+                                                const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
+                                                progBar.style.width = `${Math.max(15, pct)}%`;
+                                                subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                            }
+                                        } catch (e) {}
+                                    }
+                                }
+                            }
+
+                            if (fullText.length > 50) {
+                                progBar.style.width = '100%';
+                                return fullText;
+                            }
+                        } catch (err) {
+                            subText.innerText = `⚡ Healing network connection (${attempt}/2)...`;
+                            await sleep(700);
+                        }
+                    }
+                }
+            }
+
+            return await callUnlimitedFreeAI(finalPrompt);
+        }
+
+        async function generateWithAI(prompt, existingCode, projectObj, attachedImages = []) {
+            const provider = localStorage.getItem('wm_provider') || 'gemini';
+            const apiKey = localStorage.getItem('wm_api_key') || '';
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('streamProgressBar').style.width = '5%';
+            await startBackgroundKeepAlive();
+
+            let cleanExisting = existingCode || '';
+            if (cleanExisting && projectObj.products) {
+                projectObj.products.forEach((p, idx) => {
+                    if (p.b64) cleanExisting = cleanExisting.split(p.b64).join(`RAW_IMG_TARGET_${idx}`);
+                });
+            }
+            if (cleanExisting && projectObj.chatImages) {
+                projectObj.chatImages.forEach(img => {
+                    if (img.b64) cleanExisting = cleanExisting.split(img.b64).join(`CHAT_IMG_${img.id}`);
+                });
+            }
+
+            let finalPrompt = prompt;
+            if (cleanExisting && cleanExisting.length > 50) {
+                finalPrompt = `Current HTML:\n${cleanExisting}\n\nEdit Request: "${prompt}"\n\nUpdate the code concisely and return ONLY the full updated HTML5.`;
+            }
+
+            let lastErr = null;
+            for (let cycle = 1; cycle <= 3; cycle++) {
+                try {
+                    let rawResponse = '';
+
+                    if (provider === 'zeno_free' || (!apiKey && provider === 'gemini')) {
+                        rawResponse = await callUnlimitedFreeAI(finalPrompt);
+                    } else if (provider === 'gemini') {
+                        rawResponse = await streamGeminiTurbo(apiKey, finalPrompt, attachedImages);
+                    } else if (provider === 'openai') {
+                        const contentArray = [{ type: 'text', text: finalPrompt }];
+                        attachedImages.forEach(img => {
+                            contentArray.push({ type: 'image_url', image_url: { url: img.b64 } });
+                        });
+                        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4o-mini',
+                                temperature: 0.5,
+                                messages: [
+                                    { role: 'system', content: SYSTEM_PROMPT },
+                                    { role: 'user', content: contentArray }
+                                ]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.choices[0].message.content;
+
+                    } else if (provider === 'claude') {
+                        const res = await fetch('https://api.anthropic.com/v1/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-api-key': apiKey,
+                                'anthropic-version': '2023-06-01',
+                                'anthropic-dangerous-direct-browser-access': 'true'
+                            },
+                            body: JSON.stringify({
+                                model: 'claude-3-5-sonnet-20240620',
+                                max_tokens: 8000,
+                                system: SYSTEM_PROMPT,
+                                messages: [{ role: 'user', content: finalPrompt }]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.content[0].text;
+                    }
+
+                    let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
+                    const docStart = '<' + '!DOCTYPE';
+                    const docIdx = cleanCode.indexOf(docStart);
+                    if (docIdx > 0) cleanCode = cleanCode.substring(docIdx);
+
+                    if (projectObj.products && projectObj.products.length > 0) {
+                        projectObj.products.forEach((p, index) => {
+                            cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
+                        });
+                    }
+
+                    if (projectObj.chatImages && projectObj.chatImages.length > 0) {
+                        projectObj.chatImages.forEach(img => {
+                            cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
+                        });
+                    }
+
+                    projectObj.code = cleanCode;
+                    saveToStorage();
+                    loadProject(projectObj.id);
+                    notifyProjectReady(projectObj.name);
+
+                    lastErr = null;
+                    break;
+                } catch (err) {
+                    lastErr = err;
+                    document.getElementById('loadingSubText').innerText = `⚡ Auto-retrying connection (${cycle}/3)...`;
+                    await sleep(1000);
+                }
+            }
+
+            if (lastErr) {
+                alert('Connection Error:\n' + lastErr.message);
+            }
+
+            stopBackgroundKeepAlive();
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function loadProject(id) {
+            const proj = projects.find(p => p.id === id);
+            if (!proj) return;
+            currentProjectId = id;
+            localStorage.setItem('wm_current_id', id);
+            document.getElementById('currentProjectTitle').innerText = proj.name;
+            
+            if (proj.code && proj.code.length > 20) {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('iframeContainer').classList.remove('hidden');
+                document.getElementById('previewFrame').srcdoc = proj.code;
+                document.getElementById('codeEditor').value = proj.code;
+            } else {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('iframeContainer').classList.add('hidden');
+            }
+
+            if (proj.liveUrl) {
+                document.getElementById('liveLinkBox').classList.remove('hidden');
+                document.getElementById('liveUrlInput').value = proj.liveUrl;
+            } else {
+                document.getElementById('liveLinkBox').classList.add('hidden');
+            }
+            renderProjectList();
+        }
+
+        function renderProjectList() {
+            const list = document.getElementById('projectList');
+            if (!list) return;
+            list.innerHTML = '';
+            projects.forEach(p => {
+                const active = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-cyan-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300';
+                list.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${active} cursor-pointer transition" onclick="loadProject('${p.id}'); toggleSidebar();">
+                        <span class="text-xs font-semibold truncate pr-2">${p.name}</span>
+                        <button type="button" onclick="event.stopPropagation(); deleteProject('${p.id}')" class="text-gray-500 hover:text-red-400 px-1.5"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteProject(id) {
+            projects = projects.filter(p => p.id !== id);
+            if (currentProjectId === id) {
+                currentProjectId = projects.length > 0 ? projects[0].id : null;
+            }
+            saveToStorage();
+            renderProjectList();
+            if (currentProjectId) loadProject(currentProjectId);
+            else location.reload();
+        }
+
+        function manualCodeUpdate() {
+            const proj = projects.find(p => p.id === currentProjectId);
+            if (!proj) return;
+            proj.code = document.getElementById('codeEditor').value;
+            document.getElementById('previewFrame').srcdoc = proj.code;
+            saveToStorage();
+        }
+
+        function toggleCodeView() {
+            isCodeView = !isCodeView;
+            const editor = document.getElementById('codeEditor');
+            const iframeCont = document.getElementById('iframeContainer');
+            const btn = document.getElementById('codeBtn');
+
+            if (isCodeView) {
+                editor.classList.remove('hidden');
+                iframeCont.classList.add('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
+            } else {
+                editor.classList.add('hidden');
+                iframeCont.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-code mr-1"></i>Code';
+            }
+        }
+
+        function downloadHTML() {
+            const proj = projects.find(p => p.id === currentProjectId);
+            if (!proj || !proj.code) return alert('Generate a website first before downloading!');
+            const blob = new Blob([proj.code], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${proj.name.replace(/\s+/g, '_')}.html`;
+            a.click();
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('wm_projects', JSON.stringify(projects));
+            } catch (e) {}
+        }
+        function setViewport(w) { document.getElementById('previewFrame').style.width = w; }
+
+        async function publishWebsite() {
+            const proj = projects.find(p => p.id === currentProjectId);
+            if (!proj || !proj.code) return alert('Generate a website first before publishing!');
+            const ghToken = localStorage.getItem('wm_gh_token');
+            if (!ghToken) {
+                alert('Please paste your GitHub Classic Token in Settings first.');
+                window.openSettings();
+                return;
+            }
+
+            document.getElementById('loadingText').innerText = "Publishing live link...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            let pubErr = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    const res = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github+json' },
+                        body: JSON.stringify({
+                            description: `Created with ZenoWeb Turbo AI: ${proj.name}`,
+                            public: true,
+                            files: { "index.html": { content: proj.code } }
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message);
+                    
+                    const liveShareUrl = `https://htmlpreview.github.io/?${data.files['index.html'].raw_url}`;
+                    proj.liveUrl = liveShareUrl;
+                    saveToStorage();
+                    loadProject(proj.id);
+                    notifyProjectReady('Live Link Published');
+                    pubErr = null;
+                    break;
+                } catch (err) {
+                    pubErr = err;
+                    await sleep(800);
+                }
+            }
+
+            if (pubErr) {
+                alert('GitHub Publish Error:\n' + pubErr.message);
+            }
+
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+        }
+
+        function copyLiveLink() {
+            const input = document.getElementById('liveUrlInput');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            alert('Live link copied!');
+        }
+    </script>
+</body>
+</html>

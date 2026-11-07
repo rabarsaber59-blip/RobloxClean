@@ -3,126 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZenoWeb Turbo - AI Website Builder & Mobile Server</title>
+    <title>ZenoWeb Turbo - Next-Gen AI Website Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- PeerJS for Real P2P Mobile Server Hosting + LZ-String for Instant Serverless URLs -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800;900&display=swap');
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050508; 
-            color: #f3f4f6; 
-            overflow: hidden; 
-            height: 100dvh; 
-            width: 100vw; 
-        }
-        .font-zeno { font-family: 'Orbitron', sans-serif; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #121216; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap');
 
-        .ps5-bg {
-            background: radial-gradient(circle at 50% 35%, rgba(0, 112, 209, 0.38) 0%, rgba(0, 40, 110, 0.2) 42%, #030306 82%);
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            font-family: 'Inter', sans-serif;
+            background-color: #07080d;
+            color: #f3f4f6;
+            overflow: hidden;
+        }
+
+        .font-zeno {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #101118;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2e3346;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        /* PS5 Startup Ambient Background & Light Beams */
+        .ps5-bg {
+            background: radial-gradient(circle at 50% 35%, rgba(0, 120, 230, 0.42) 0%, rgba(0, 45, 120, 0.24) 42%, #04050a 85%);
+        }
+
         .ps5-beam {
             position: absolute;
-            width: 160%;
-            height: 280px;
-            background: linear-gradient(90deg, transparent, rgba(0, 162, 255, 0.2), rgba(255, 195, 90, 0.14), rgba(0, 112, 209, 0.22), transparent);
-            filter: blur(45px);
+            width: 165%;
+            height: 290px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 175, 255, 0.22),
+                rgba(255, 198, 92, 0.16),
+                rgba(0, 118, 225, 0.24),
+                transparent
+            );
+            filter: blur(48px);
             transform: rotate(-18deg);
-            animation: beamSweep 4s ease-in-out infinite alternate;
+            animation: beamSweep 4.5s ease-in-out infinite alternate;
             pointer-events: none;
         }
+
         @keyframes beamSweep {
-            0% { transform: rotate(-18deg) translateY(-30px) scale(0.95); opacity: 0.6; }
-            100% { transform: rotate(-12deg) translateY(30px) scale(1.1); opacity: 1; }
+            0% {
+                transform: rotate(-18deg) translateY(-35px) scale(0.95);
+                opacity: 0.65;
+            }
+            100% {
+                transform: rotate(-12deg) translateY(35px) scale(1.1);
+                opacity: 1;
+            }
         }
+
         @keyframes ps5LogoFloat {
-            0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px rgba(0, 170, 255, 0.6)); }
-            50% { transform: translateY(-8px) scale(1.05); filter: drop-shadow(0 0 45px rgba(255, 200, 100, 0.8)); }
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+                filter: drop-shadow(0 0 28px rgba(0, 180, 255, 0.65));
+            }
+            50% {
+                transform: translateY(-9px) scale(1.05);
+                filter: drop-shadow(0 0 48px rgba(255, 200, 100, 0.85));
+            }
         }
+
         @keyframes textReveal {
-            0% { opacity: 0; letter-spacing: 0.55em; transform: translateY(18px); }
-            100% { opacity: 1; letter-spacing: 0.16em; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                letter-spacing: 0.5em;
+                transform: translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                letter-spacing: 0.16em;
+                transform: translateY(0);
+            }
         }
-        .animate-ps5-logo { animation: ps5LogoFloat 3s ease-in-out infinite; }
-        .animate-ps5-text { animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .animate-ps5-logo {
+            animation: ps5LogoFloat 3.2s ease-in-out infinite;
+        }
+
+        .animate-ps5-text {
+            animation: textReveal 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .studio-grid-bg {
+            background-color: #08090f;
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(0, 140, 255, 0.12) 0px, transparent 55%),
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 100% 100%, 32px 32px, 32px 32px;
+        }
     </style>
 
-    <!-- FAIL-SAFE BOOTSTRAP -->
     <script>
-        window.splashFinished = false;
-        window.enterZenoWeb = function(e) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            if (window.splashFinished) return;
-            window.splashFinished = true;
+        /* Instant Non-Blocking PS5 Welcome Dismissal */
+        window.splashDismissed = false;
+        window.dismissPS5Welcome = function(evt) {
+            if (evt && evt.stopPropagation) {
+                evt.stopPropagation();
+            }
+            if (window.splashDismissed) return;
+            window.splashDismissed = true;
 
             var splash = document.getElementById('ps5Splash');
-            var appShell = document.getElementById('appShell');
-
             if (splash) {
+                splash.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
                 splash.style.opacity = '0';
+                splash.style.transform = 'scale(1.04)';
                 splash.style.pointerEvents = 'none';
-                setTimeout(function() { splash.style.display = 'none'; }, 400);
-            }
-            if (appShell) {
-                appShell.classList.remove('hidden');
-                appShell.style.display = 'flex';
                 setTimeout(function() {
-                    appShell.classList.remove('opacity-0');
-                    appShell.style.opacity = '1';
-                }, 30);
+                    if (splash && splash.parentNode) {
+                        splash.style.display = 'none';
+                    }
+                }, 460);
             }
+
             try {
-                if (typeof window.initBackgroundEngine === 'function') window.initBackgroundEngine();
-                if (typeof window.initMobileP2PServer === 'function') window.initMobileP2PServer();
-            } catch (err) {}
+                if (typeof window.initBackgroundEngine === 'function') {
+                    window.initBackgroundEngine();
+                }
+                var prov = localStorage.getItem('wm_provider') || 'gemini';
+                var key = localStorage.getItem('wm_api_key') || '';
+                if (prov !== 'zeno_free' && !key) {
+                    var modal = document.getElementById('setupModal');
+                    if (modal) modal.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.warn(e);
+            }
         };
     </script>
 </head>
 <body class="flex flex-col select-none relative">
 
     <!-- ========================================================= -->
-    <!-- VISITOR FULL-SCREEN MODE (WHEN SOMEONE OPENS YOUR LINK)   -->
+    <!-- 0. PS5 STARTUP WELCOME OVERLAY (OPENS FIRST)              -->
     <!-- ========================================================= -->
-    <div id="visitorModeScreen" class="fixed inset-0 z-[200] bg-black hidden flex-col">
-        <div id="visitorLoading" class="flex-1 flex flex-col items-center justify-center bg-[#07070c] text-center p-6">
-            <div class="w-14 h-14 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <h2 class="font-zeno text-lg font-bold text-white">Connecting to Mobile Host Server...</h2>
-            <p id="visitorStatusText" class="text-xs text-cyan-400 mt-2">Fetching live website stream from host device...</p>
-        </div>
-        <iframe id="visitorFrame" class="w-full h-full bg-white hidden border-0" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-
-    <!-- 0. PS5 WELCOME SCREEN -->
-    <div id="ps5Splash" onclick="enterZenoWeb(event)" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden transition-all duration-500 cursor-pointer">
+    <div id="ps5Splash" onclick="dismissPS5Welcome(event)" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden cursor-pointer">
         <canvas id="ps5Canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+        
         <div class="ps5-beam top-1/4"></div>
-        <div class="ps5-beam bottom-1/3" style="animation-delay: -2s;"></div>
+        <div class="ps5-beam bottom-1/3" style="animation-delay: -2.2s;"></div>
 
-        <div class="relative z-10 flex flex-col items-center px-6 text-center">
-            <div class="animate-ps5-logo mb-6 relative">
-                <div class="absolute -inset-4 rounded-full bg-blue-500/20 blur-2xl"></div>
+        <div class="relative z-10 flex flex-col items-center px-6 text-center max-w-lg">
+            <!-- Custom 3D Hexagonal ZenoWeb Emblem Logo -->
+            <div class="animate-ps5-logo mb-7 relative">
+                <div class="absolute -inset-5 rounded-full bg-blue-500/25 blur-2xl"></div>
                 <svg class="w-28 h-28 sm:w-32 sm:h-32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <linearGradient id="zenoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <linearGradient id="zenoGradSplash" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="#00f2fe"/>
                             <stop offset="50%" stop-color="#0072ff"/>
                             <stop offset="100%" stop-color="#f5af19"/>
                         </linearGradient>
-                        <linearGradient id="zenoCore" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <linearGradient id="zenoCoreSplash" x1="100%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stop-color="#ffffff"/>
                             <stop offset="100%" stop-color="#60a5fa"/>
                         </linearGradient>
                     </defs>
-                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="url(#zenoGrad)" stroke-width="3.5" fill="rgba(10, 18, 36, 0.78)"/>
-                    <polygon points="60,14 100,37 100,83 60,106 20,83 20,37" stroke="rgba(255,255,255,0.14)" stroke-width="1" fill="none"/>
-                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoCore)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="url(#zenoGradSplash)" stroke-width="3.5" fill="rgba(10, 18, 36, 0.82)"/>
+                    <polygon points="60,14 100,37 100,83 60,106 20,83 20,37" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none"/>
+                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoGradSplash)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zenoCoreSplash)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="36" cy="40" r="5" fill="#00f2fe"/>
                     <circle cx="84" cy="40" r="5" fill="#ffffff"/>
                     <circle cx="42" cy="80" r="5" fill="#ffffff"/>
@@ -130,244 +200,1456 @@
                 </svg>
             </div>
 
-            <p class="text-xs uppercase tracking-[0.45em] text-cyan-300/90 mb-2 font-semibold">Turbo Neural Engine</p>
+            <p class="text-xs uppercase tracking-[0.45em] text-cyan-300/90 mb-2.5 font-semibold">
+                Turbo Neural Engine
+            </p>
             <h1 class="font-zeno text-2xl sm:text-4xl font-extrabold text-white animate-ps5-text bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-amber-200">
                 WELCOME TO ZENOWEB
             </h1>
+            <p class="text-xs text-blue-200/70 mt-2 tracking-wide">
+                Press below to launch your AI Website Studio
+            </p>
 
-            <div class="mt-6 w-60 h-[2px] bg-white/10 rounded-full overflow-hidden relative">
-                <div id="ps5Progress" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-0 transition-all duration-[2000ms] ease-out shadow-[0_0_12px_#00f2fe]"></div>
+            <!-- PS5 Breathing Progress Line -->
+            <div class="mt-6 w-64 h-[3px] bg-white/10 rounded-full overflow-hidden relative">
+                <div id="ps5Progress" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-1/3 transition-all duration-[2200ms] ease-out shadow-[0_0_14px_#00f2fe]"></div>
             </div>
 
-            <button type="button" onclick="enterZenoWeb(event)" class="mt-6 px-7 py-3 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 border border-white/25 text-white text-xs font-bold tracking-widest uppercase backdrop-blur-md transition flex items-center gap-2 shadow-[0_0_25px_rgba(0,210,255,0.35)]">
+            <!-- Interactive PS5 Start Button -->
+            <button type="button" onclick="dismissPS5Welcome(event)" class="mt-7 px-8 py-3.5 rounded-full bg-gradient-to-r from-blue-600/40 to-cyan-500/40 hover:from-blue-600/60 hover:to-cyan-500/60 active:scale-95 border border-cyan-400/50 text-white text-xs font-bold tracking-widest uppercase backdrop-blur-md transition flex items-center gap-2.5 shadow-[0_0_30px_rgba(0,210,255,0.4)]">
                 <span>TAP TO START</span>
-                <i class="fa-solid fa-bolt text-amber-400"></i>
+                <i class="fa-solid fa-bolt text-amber-400 text-sm"></i>
             </button>
         </div>
     </div>
 
-    <!-- IN-APP PUSH NOTIFICATION TOAST BANNER -->
-    <div id="readyToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[90] bg-[#121824]/95 border border-emerald-500/50 text-white px-5 py-3 rounded-2xl shadow-[0_10px_35px_rgba(16,185,129,0.3)] backdrop-blur-xl flex items-center gap-3 transition-all duration-500 -translate-y-28 opacity-0 pointer-events-none">
-        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-            <i class="fa-solid fa-bell animate-bounce"></i>
+    <!-- ========================================================= -->
+    <!-- IN-APP PUSH NOTIFICATION TOAST ("Your project is ready!") -->
+    <!-- ========================================================= -->
+    <div id="readyToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[95] bg-[#111827]/95 border border-emerald-500/60 text-white px-5 py-3.5 rounded-2xl shadow-[0_12px_40px_rgba(16,185,129,0.35)] backdrop-blur-xl flex items-center gap-3.5 transition-all duration-500 -translate-y-32 opacity-0 pointer-events-none">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <i class="fa-solid fa-bell animate-bounce text-base"></i>
         </div>
         <div>
-            <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">ZenoWeb AI</h4>
-            <p class="text-sm font-semibold text-white">Your project is ready!</p>
+            <h4 class="font-bold text-[11px] text-emerald-400 uppercase tracking-wider">ZenoWeb Studio</h4>
+            <p id="readyToastText" class="text-sm font-extrabold text-white">Your project is ready!</p>
         </div>
     </div>
 
     <!-- ========================================================= -->
-    <!-- INSTANT LINK & MOBILE SERVER MODAL (POPS UP WHEN READY)   -->
+    <!-- MAIN STUDIO SHELL (ALWAYS RENDERED & READY UNDERNEATH)    -->
     <!-- ========================================================= -->
-    <div id="instantLinkModal" class="fixed inset-0 z-[80] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="bg-[#13141c] border border-emerald-500/40 rounded-2xl max-w-md w-full p-5 shadow-[0_0_50px_rgba(16,185,129,0.2)]">
-            <div class="flex justify-between items-center pb-3 border-b border-gray-800">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
-                    <h3 class="font-zeno font-bold text-sm text-white tracking-wider">MOBILE SERVER LIVE!</h3>
-                </div>
-                <button type="button" onclick="document.getElementById('instantLinkModal').classList.add('hidden')" class="text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
+    <div id="appShell" class="flex flex-col h-full w-full relative z-10">
 
-            <div class="mt-4 space-y-3">
-                <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between">
+        <!-- 1. API & SETTINGS MODAL (AUTO-SAVES IMMEDIATELY) -->
+        <div id="setupModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+            <div class="bg-[#13141c] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
                     <div class="flex items-center gap-2.5">
-                        <i class="fa-solid fa-server text-emerald-400 text-lg"></i>
+                        <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-cyan-400">
+                            <i class="fa-solid fa-key text-sm"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-white">API & Studio Settings</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="keySaveBadge" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30 font-semibold">
+                            Auto-Saved
+                        </span>
+                        <button type="button" onclick="document.getElementById('setupModal').classList.add('hidden')" class="text-gray-400 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-gray-800/60">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- AI Provider Selector -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">1. Select AI Engine Provider</label>
+                        <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none text-sm font-medium">
+                            <option value="gemini">Google Gemini (3.8 Flash + Unlimited Auto-Backup)</option>
+                            <option value="zeno_free">ZenoWeb Unlimited Free AI (No API Key Required)</option>
+                            <option value="openai">OpenAI (GPT-4o / GPT-4o Mini)</option>
+                            <option value="claude">Anthropic Claude 3.5 Sonnet</option>
+                        </select>
+                    </div>
+
+                    <!-- API Key Input + Direct Get API Key Button -->
+                    <div id="apiKeySection" class="bg-[#181924] p-3.5 rounded-xl border border-gray-800/90">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold text-gray-300">2. Your API Key</label>
+                            <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg transition flex items-center gap-1.5 font-bold shadow">
+                                <span>Get API Key</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste your API key here (auto-saves immediately)..." class="w-full bg-[#101118] border border-gray-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none text-sm">
+                        <p class="text-[11px] text-cyan-400/90 mt-2 leading-relaxed">
+                            <i class="fa-solid fa-shield-halved mr-1"></i>
+                            <b>Smart Quota Protection:</b> If your Gemini 20/day free limit runs out, ZenoWeb automatically switches to Unlimited Free AI without stopping!
+                        </p>
+                    </div>
+
+                    <!-- GitHub Token Input + Direct Get Token Button -->
+                    <div class="bg-[#181924] p-3.5 rounded-xl border border-gray-800/90">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold text-amber-400">
+                                <i class="fa-brands fa-github mr-1"></i>3. GitHub Classic Token (For Live Share Links)
+                            </label>
+                            <a href="https://github.com/settings/tokens/new?scopes=gist&description=ZenoWeb_Live_Publisher" target="_blank" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg transition flex items-center gap-1.5 font-bold shadow">
+                                <span>Get Token</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                        <input type="password" id="githubTokenInput" oninput="autoSaveSettings()" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full bg-[#101118] border border-gray-700 rounded-xl p-3 text-white focus:border-emerald-500 outline-none text-sm">
+                        <p class="text-[10px] text-gray-400 mt-1.5">
+                            Used to publish your generated websites to a real global URL that you can send to anyone.
+                        </p>
+                    </div>
+
+                    <button type="button" onclick="closeSettingsModal()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-600/30">
+                        Save & Open Studio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. WEBSITE SPECIFICATIONS & PRODUCT UPLOAD WIZARD -->
+        <div id="wizardModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+            <div class="bg-[#13141c] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-cyan-400 text-lg"></i>
+                        <h2 class="text-lg font-bold text-white">Website Specifications Wizard</h2>
+                    </div>
+                    <button type="button" onclick="closeWizard()" class="text-gray-400 hover:text-white w-8 h-8 rounded-lg bg-gray-800/60 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">1. Brand or Website Name</label>
+                        <input type="text" id="wName" placeholder="e.g., Rabar Shop, Zeno Gaming, Golden Cafe..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">2. Website Niche & Purpose (Write your own idea)</label>
+                        <input type="text" id="wType" placeholder="e.g., Online Store selling electronics, Personal Portfolio, Restaurant Menu..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <div class="text-xs font-bold text-white">Your Phone is Now a Live Server</div>
-                            <div id="modalServerNodeText" class="text-[10px] text-emerald-400">P2P WebRTC + Instant Cloud Link Active</div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">3. Visual Style & Colors</label>
+                            <input type="text" id="wStyle" placeholder="e.g., Dark Cyberpunk Blue & Gold, Clean Emerald..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">4. Website Language</label>
+                            <input type="text" id="wLang" placeholder="e.g., English, Kurdish, Arabic..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm">
                         </div>
                     </div>
-                    <span id="modalVisitorBadge" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                        <i class="fa-solid fa-users mr-1"></i><span id="liveVisitorCount">0</span> Online
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">5. Your Custom Vision, Sections & Features</label>
+                        <textarea id="wDetails" rows="3" placeholder="Describe everything you want AI to build (e.g., Hero banner, working shopping cart drawer, search bar, WhatsApp order button, customer reviews)..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 text-sm"></textarea>
+                    </div>
+
+                    <!-- Product Upload Box (Images + Prices) -->
+                    <div class="bg-[#181924] p-3.5 rounded-xl border border-gray-800">
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <label class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-box-open"></i> Upload Store Products (Photos & Prices)
+                                </label>
+                                <p class="text-[10px] text-gray-400">AI will place your real product photos & prices into the store.</p>
+                            </div>
+                            <button type="button" onclick="addProductRow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shrink-0 shadow">
+                                <i class="fa-solid fa-plus mr-1"></i> Add Item
+                            </button>
+                        </div>
+                        <div id="productsContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <button type="button" onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-300"></i>
+                        <span>Build Complete Website with AI</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ALWAYS-OPEN MONETIZE MODAL (ADS & CUSTOM PREMIUM PAYWALL) -->
+        <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+            <div class="bg-[#13141c] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-sack-dollar text-amber-400 text-lg"></i>
+                        <h2 class="text-lg font-bold text-white">Monetize Your Website</h2>
+                    </div>
+                    <button type="button" onclick="document.getElementById('monetizeModal').classList.add('hidden')" class="text-gray-400 hover:text-white w-8 h-8 rounded-lg bg-gray-800/60 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Select Monetization Mode</label>
+                        <select id="monetizeType" onchange="toggleMonetizeMode()" class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-3 text-white outline-none text-sm font-bold">
+                            <option value="ads">1. Inject Ads (Adsterra / Unity Ads Code)</option>
+                            <option value="premium">2. Make Website Premium (VIP Paywall & Checkout)</option>
+                        </select>
+                    </div>
+
+                    <!-- Mode 1: Adsterra & Unity Ads -->
+                    <div id="adCodeWrapper" class="space-y-3.5">
+                        <div class="bg-[#181924] p-3 rounded-xl border border-gray-800">
+                            <label class="block text-xs text-gray-300 font-semibold mb-2">Step 1: Open Ad Network & Copy Your Script</label>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <a href="https://publishers.adsterra.com/" target="_blank" class="bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-300 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Adsterra Ads
+                                </a>
+                                <a href="https://dashboard.unity3d.com/" target="_blank" class="bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Unity Ads
+                                </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-xs font-semibold text-gray-300">Step 2: Paste Ad Code (One or Both Networks)</label>
+                                <button type="button" onclick="pasteAdClipboard()" class="text-xs bg-gray-800 hover:bg-gray-700 text-cyan-400 px-2.5 py-1 rounded-lg border border-gray-700 font-semibold">
+                                    <i class="fa-solid fa-paste mr-1"></i> Paste Code
+                                </button>
+                            </div>
+                            <textarea id="adCodeInput" rows="4" placeholder="Paste your <script> or banner code from Adsterra and/or Unity Ads here..." class="w-full bg-[#101118] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none focus:border-amber-500"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Mode 2: Custom Premium Paywall -->
+                    <div id="premiumWrapper" class="space-y-3.5 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">1. Subscription / Unlock Price</label>
+                            <input type="text" id="premPrice" placeholder="e.g., $9.99 / Month, $20 VIP Access, or 15,000 IQD" class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">2. What Payment Details Must Users Enter?</label>
+                            <input type="text" id="premMethods" placeholder="e.g., Keycard / Visa Card, FastPay, FIB Phone Number, Transaction ID..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">3. Your Payment Rules & What Gets Unlocked</label>
+                            <textarea id="premDetails" rows="3" placeholder="e.g., Show a VIP Paywall modal locking the site until the visitor fills out the payment form with their receipt number or unlock code..." class="w-full bg-[#1c1d29] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-amber-500 text-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="applyMonetization()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-extrabold py-3.5 rounded-xl transition shadow-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Integrate Monetization into Website
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TOP STUDIO HEADER BAR WITH ZENOWEB LOGO -->
+        <header class="h-14 bg-[#101119] border-b border-gray-800/90 px-3.5 flex items-center justify-between z-20 shrink-0">
+            <div class="flex items-center gap-2.5">
+                <!-- 3-Dots Menu Button -->
+                <button type="button" onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-[#1c1e2b] hover:bg-gray-800 flex items-center justify-center text-gray-200 transition border border-gray-700/70" title="Menu & Projects">
+                    <i class="fa-solid fa-ellipsis-vertical text-base"></i>
+                </button>
+                
+                <!-- ZenoWeb Logo -->
+                <div class="flex items-center gap-2 pr-2.5 border-r border-gray-800">
+                    <svg class="w-7 h-7 shrink-0" viewBox="0 0 120 120" fill="none">
+                        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
+                        <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                    </svg>
+                    <span class="font-zeno font-extrabold text-sm tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-cyan-400 hidden sm:inline">
+                        ZENOWEB
                     </span>
                 </div>
 
-                <div>
-                    <label class="block text-xs text-gray-300 mb-1 font-semibold">Instant Shareable Website Link:</label>
+                <!-- Active Project Name & Status -->
+                <div class="pl-0.5">
+                    <h1 id="currentProjectTitle" class="font-bold text-xs text-white truncate max-w-[120px] sm:max-w-xs">
+                        ZenoWeb Studio
+                    </h1>
+                    <span id="saveStatus" class="text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
+                        <i class="fa-solid fa-circle-check text-[9px]"></i> Auto-Saved
+                    </span>
+                </div>
+            </div>
+
+            <!-- Viewport & Code Controls -->
+            <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1 bg-[#191b26] p-1 rounded-xl border border-gray-800">
+                    <button type="button" onclick="enableNotificationsManual()" class="px-2 py-1 rounded-lg text-xs text-amber-400 hover:bg-gray-700/70 transition" title="Enable Background Notifications">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                    <button type="button" onclick="setViewport('100%')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700/70 transition" title="Desktop View">
+                        <i class="fa-solid fa-desktop"></i>
+                    </button>
+                    <button type="button" onclick="setViewport('390px')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700/70 transition" title="Mobile View">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                    </button>
+                    <button type="button" onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-cyan-400 hover:bg-gray-700/70 transition font-bold">
+                        <i class="fa-solid fa-code mr-1"></i>Code
+                    </button>
+                </div>
+
+                <button type="button" onclick="openWizard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden md:inline">New Site</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 5. 3-DOTS SIDEBAR DRAWER (GEMINI STYLE) -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/65 z-30 hidden backdrop-blur-sm"></div>
+        <aside id="sidebar" class="fixed top-0 left-0 h-full w-76 max-w-[85vw] bg-[#11121a] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4 shadow-2xl">
+            <div>
+                <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-8 h-8" viewBox="0 0 120 120" fill="none">
+                            <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
+                            <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                        </svg>
+                        <div>
+                            <span class="font-zeno font-bold text-sm text-white tracking-wider block">ZENOWEB</span>
+                            <span class="text-[10px] text-cyan-400">AI Web Builder Pro</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleSidebar()" class="text-gray-400 hover:text-white w-8 h-8 rounded-lg bg-gray-800/60 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <button type="button" onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white py-3 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-plus"></i> Create New Website (Wizard)
+                </button>
+
+                <div class="mt-5">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Your Saved Websites</h3>
+                        <span id="projectCountBadge" class="text-[10px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="projectList" class="space-y-1.5 max-h-[38vh] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Actions inside 3-Dots Menu -->
+            <div class="border-t border-gray-800 pt-3.5 space-y-2">
+                <button type="button" onclick="openMonetizeModal(); toggleSidebar();" class="w-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/35 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between transition">
+                    <span><i class="fa-solid fa-sack-dollar mr-2"></i>Monetize (Ads / Premium)</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+
+                <button type="button" onclick="publishWebsite()" id="publishBtn" class="w-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/35 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between transition">
+                    <span><i class="fa-solid fa-globe mr-2"></i>Publish & Get Live Link</span>
+                    <i class="fa-solid fa-share-nodes text-xs"></i>
+                </button>
+
+                <!-- Live Shareable Link Box -->
+                <div id="liveLinkBox" class="hidden bg-[#181a26] p-2.5 rounded-xl border border-emerald-500/40">
+                    <p class="text-[10px] text-emerald-400 font-semibold mb-1">
+                        <i class="fa-solid fa-check-circle mr-1"></i>Live Shareable Website URL:
+                    </p>
                     <div class="flex items-center gap-1.5">
-                        <input type="text" id="instantShareUrl" readonly class="w-full bg-black/70 border border-gray-700 text-cyan-400 p-2.5 rounded-xl text-xs outline-none font-mono">
-                        <button type="button" onclick="copyInstantLink()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 transition">
-                            <i class="fa-solid fa-copy mr-1"></i>Copy
+                        <input type="text" id="liveUrlInput" readonly class="w-full bg-black/60 text-cyan-300 p-1.5 rounded-lg text-[10px] outline-none border border-gray-700">
+                        <button type="button" onclick="copyLiveLink()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">
+                            <i class="fa-solid fa-copy"></i>
                         </button>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-1.5">Anyone opening this link connects directly to your website!</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 pt-2">
-                    <button type="button" onclick="shareNativeLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-share-nodes"></i> Share Link Now
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button type="button" onclick="downloadHTML()" class="bg-[#1c1e2b] hover:bg-gray-800 text-gray-200 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-gray-800">
+                        <i class="fa-solid fa-download text-purple-400"></i> Download
                     </button>
-                    <button type="button" onclick="openLiveSiteNewTab()" class="bg-[#1e1e28] hover:bg-gray-800 border border-gray-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-cyan-400"></i> Test Live Link
+                    <button type="button" onclick="openSettings(); toggleSidebar();" class="bg-[#1c1e2b] hover:bg-gray-800 text-gray-200 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-gray-800">
+                        <i class="fa-solid fa-gear text-cyan-400"></i> Settings
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 6. MAIN STUDIO WORKSPACE (VISIBLE BY DEFAULT - NEVER BLACK) -->
+        <main class="flex-1 relative studio-grid-bg flex flex-col items-center justify-center overflow-hidden pb-24">
+            
+            <!-- Default Studio Dashboard (Shown when no website is active yet) -->
+            <div id="emptyState" class="text-center p-6 max-w-lg mx-auto z-10">
+                <div class="w-20 h-20 bg-blue-950/50 border border-cyan-500/40 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_40px_rgba(0,180,255,0.2)]">
+                    <svg class="w-12 h-12" viewBox="0 0 120 120" fill="none">
+                        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="5" fill="#0b1329"/>
+                        <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="84" cy="80" r="7" fill="#f5af19"/>
+                    </svg>
+                </div>
+                <h2 class="font-zeno text-xl sm:text-2xl font-extrabold text-white mb-2 tracking-wide">
+                    ZENOWEB AI STUDIO
+                </h2>
+                <p class="text-gray-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                    Build complete, interactive websites with real product photos, shopping carts, Adsterra/Unity Ads, and Premium Paywalls. Works in the background and notifies you when ready!
+                </p>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+                    <button type="button" onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-blue-600/25 transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                        <span>Start Website Wizard</span>
+                    </button>
+                    <button type="button" onclick="openMonetizeModal()" class="bg-[#1a1c29] hover:bg-gray-800 text-amber-400 border border-amber-500/35 font-bold px-5 py-3.5 rounded-xl text-xs sm:text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                        <span>Monetize (Ads / VIP)</span>
+                    </button>
+                </div>
+
+                <!-- Quick Instant Starter Prompts -->
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button type="button" onclick="quickPrompt('Build a modern online electronics & gaming store with working shopping cart and search filter')" class="text-[11px] bg-[#161824] hover:bg-gray-800 text-gray-300 border border-gray-700/80 px-3 py-1.5 rounded-full transition">
+                        🛒 Online E-Commerce Store
+                    </button>
+                    <button type="button" onclick="quickPrompt('Build a luxury restaurant & cafe website with interactive food menu, prices, and WhatsApp order modal')" class="text-[11px] bg-[#161824] hover:bg-gray-800 text-gray-300 border border-gray-700/80 px-3 py-1.5 rounded-full transition">
+                        🍔 Restaurant & Cafe Menu
+                    </button>
+                    <button type="button" onclick="quickPrompt('Build a sleek dark-mode SaaS & AI software landing page with interactive pricing calculator')" class="text-[11px] bg-[#161824] hover:bg-gray-800 text-gray-300 border border-gray-700/80 px-3 py-1.5 rounded-full transition">
+                        🚀 AI SaaS Platform
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Website Preview Iframe -->
+            <div id="iframeContainer" class="w-full h-full hidden flex items-center justify-center bg-[#0d0e14]">
+                <iframe id="previewFrame" class="w-full h-full bg-white transition-all shadow-2xl border-0" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+            </div>
+
+            <!-- Live Raw HTML Code Editor -->
+            <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0b0c12] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
+            
+            <!-- Real-Time Turbo Streaming Progress Overlay -->
+            <div id="loadingOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden px-6 text-center">
+                <div class="relative w-16 h-16 flex items-center justify-center mb-4">
+                    <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                    <i class="fa-solid fa-bolt text-amber-400 text-xl animate-pulse"></i>
+                </div>
+                <p id="loadingText" class="text-white font-bold text-sm sm:text-base">
+                    ZenoWeb Turbo AI is building your website...
+                </p>
+                <div class="w-64 sm:w-72 h-2 bg-gray-800 rounded-full overflow-hidden mt-3.5 border border-gray-700">
+                    <div id="streamProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-0 transition-all duration-200"></div>
+                </div>
+                <p id="loadingSubText" class="text-cyan-400 text-xs mt-2.5 font-mono">
+                    Background Mode Active: You can switch apps safely, we will notify you when ready!
+                </p>
+            </div>
+        </main>
+
+        <!-- 7. ELEVATED FLOATING AI CHAT BAR WITH IMAGE UPLOAD BUTTON -->
+        <div class="fixed bottom-4 left-0 right-0 px-3 sm:px-4 z-30 pointer-events-none">
+            <div class="max-w-2xl mx-auto pointer-events-auto">
+                
+                <!-- Attached Chat Images Preview Strip -->
+                <div id="chatImgPreviewBar" class="hidden flex items-center gap-2 mb-2 bg-[#151722]/95 backdrop-blur-md p-2 rounded-xl border border-cyan-500/40 overflow-x-auto shadow-lg"></div>
+
+                <!-- Chat Bar -->
+                <div class="flex items-center gap-1.5 bg-[#171926]/95 backdrop-blur-md border border-gray-700 rounded-2xl p-1.5 pl-2 shadow-[0_10px_30px_rgba(0,0,0,0.6)] focus-within:border-cyan-400 transition">
+                    <input type="file" id="chatImageInput" accept="image/*" multiple onchange="handleChatImages(this)" class="hidden">
+                    
+                    <!-- Upload Photo Button Inside Chat -->
+                    <button type="button" onclick="document.getElementById('chatImageInput').click()" class="w-10 h-10 rounded-xl bg-[#232638] hover:bg-gray-700 text-cyan-400 flex items-center justify-center shrink-0 transition border border-gray-700/60" title="Send Photo to AI">
+                        <i class="fa-solid fa-image text-sm"></i>
+                    </button>
+
+                    <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell ZenoWeb AI what to build, edit, or send a photo..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400 px-2">
+                    
+                    <button type="button" onclick="sendChatPrompt()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md transition">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
                     </button>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <!-- MAIN APPLICATION SHELL -->
-    <div id="appShell" class="hidden flex-col h-full w-full opacity-0 transition-opacity duration-500">
+    <!-- ========================================================= -->
+    <!-- COMPLETE APPLICATION LOGIC                                -->
+    <!-- ========================================================= -->
+    <script>
+        /* Safe LocalStorage Loader */
+        function loadSafeProjects() {
+            try {
+                const raw = localStorage.getItem('wm_projects');
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return [];
+                return parsed.filter(p => p && typeof p === 'object' && p.id);
+            } catch (e) {
+                localStorage.removeItem('wm_projects');
+                return [];
+            }
+        }
 
-        <!-- 1. API & Settings Modal -->
-        <div id="setupModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-amber-400"></i> ZenoWeb Settings
-                    </h2>
-                    <span id="keySaveBadge" class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Auto-Saved</span>
-                </div>
+        let projects = loadSafeProjects();
+        let currentProjectId = localStorage.getItem('wm_current_id') || null;
+        let currentProducts = [];
+        let pendingChatImages = [];
+        let isCodeView = false;
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">AI Engine Provider</label>
-                        <select id="aiProvider" onchange="autoSaveSettings(); updateKeyLink();" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                            <option value="gemini">Google Gemini + Zero-Fail Hybrid Engine</option>
-                            <option value="zeno_free">ZenoWeb Built-in Turbo AI (No Key Needed / Instant)</option>
-                            <option value="openai">OpenAI (GPT-4o Mini)</option>
-                            <option value="claude">Anthropic Claude 3.5</option>
-                        </select>
-                    </div>
+        const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-                    <div id="apiKeySection">
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-gray-400">API Key (Optional)</label>
-                            <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
-                                <span>Get Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                            </a>
-                        </div>
-                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste API key here (or leave empty for Built-in AI)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                    </div>
+        /* =========================================================
+           ULTRA-SMART AI ARCHITECT SYSTEM PROMPT
+        ========================================================= */
+        const SYSTEM_PROMPT = [
+            "You are ZenoWeb Turbo-AI, a Principal Full-Stack Web Architect and Elite UI/UX Product Designer.",
+            "Build a COMPLETE, PRODUCTION-GRADE, interactive single-file HTML5 website tailored to the user's request.",
+            "",
+            "STRICT ARCHITECTURAL & SPEED RULES:",
+            "1. OUTPUT FORMAT: Return ONLY valid raw HTML5 starting with <" + "!DOCTYPE html> and ending with <" + "/html>. Never wrap in markdown backticks or write explanations.",
+            "2. FRAMEWORKS: Include Tailwind CSS (<script src=\"https://cdn.tailwindcss.com\"><" + "/script>) and FontAwesome 6 (<link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\" rel=\"stylesheet\">).",
+            "3. REAL INTERACTIVE JAVASCRIPT: Write clean vanilla JS inside <script> tags so the website is 100% functional:",
+            "   - Store items/products/cards in a JS array and render dynamically with .map() for speed and clean filtering.",
+            "   - Include a working interactive Shopping Cart Drawer (add/remove items, live total calculation, checkout modal), live search/category filter buttons, mobile menu toggle, and interactive modals.",
+            "4. PRESERVE USER IMAGES: Never alter placeholder image strings like \"RAW_IMG_TARGET_x\" or \"CHAT_IMG_x\"."
+        ].join("\n");
 
-                    <div class="pt-3 border-t border-gray-800">
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-yellow-400 font-semibold">GitHub Classic Token (Optional Cloud Gist)</label>
-                            <a href="https://github.com/settings/tokens/new?scopes=gist&description=ZenoWeb_Token" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg hover:bg-emerald-600/30 transition font-semibold">
-                                Get Token <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                            </a>
-                        </div>
-                        <input type="password" id="githubTokenInput" oninput="autoSaveSettings()" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                    </div>
+        /* =========================================================
+           BACKGROUND KEEP-ALIVE & NOTIFICATION ENGINE
+        ========================================================= */
+        let audioCtx = null;
+        let silentOsc = null;
+        let bgWorker = null;
+        let wakeLock = null;
 
-                    <button type="button" onclick="closeSettingsModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
-                        Save & Start Building
+        window.initBackgroundEngine = function() {
+            try {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(() => {});
+                }
+            } catch (e) {}
+
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) audioCtx = new AudioContextClass();
+                }
+            } catch (e) {}
+
+            try {
+                if (!bgWorker && window.Worker && window.Blob) {
+                    const workerCode = [
+                        "let timer = null;",
+                        "self.onmessage = function(e) {",
+                        "  if (e.data === 'start') {",
+                        "    if (timer) clearInterval(timer);",
+                        "    timer = setInterval(() => self.postMessage('tick'), 1000);",
+                        "  } else if (e.data === 'stop') {",
+                        "    clearInterval(timer);",
+                        "    timer = null;",
+                        "  }",
+                        "};"
+                    ].join("\n");
+                    const blob = new Blob([workerCode], { type: 'application/javascript' });
+                    bgWorker = new Worker(URL.createObjectURL(blob));
+                    bgWorker.onmessage = () => {
+                        if (document.hidden) {
+                            document.title = "⚡ Building in Background... | ZenoWeb";
+                        }
+                    };
+                }
+            } catch (e) {}
+        };
+
+        async function startBackgroundKeepAlive() {
+            window.initBackgroundEngine();
+            try {
+                if (bgWorker) bgWorker.postMessage('start');
+            } catch (e) {}
+
+            try {
+                if (audioCtx) {
+                    if (audioCtx.state === 'suspended') await audioCtx.resume();
+                    silentOsc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.value = 0.0001;
+                    silentOsc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    silentOsc.start();
+                }
+            } catch (e) {}
+
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (e) {}
+        }
+
+        function stopBackgroundKeepAlive() {
+            try {
+                if (bgWorker) bgWorker.postMessage('stop');
+            } catch (e) {}
+
+            try {
+                if (silentOsc) {
+                    silentOsc.stop();
+                    silentOsc.disconnect();
+                    silentOsc = null;
+                }
+            } catch (e) {}
+
+            try {
+                if (wakeLock) {
+                    wakeLock.release();
+                    wakeLock = null;
+                }
+            } catch (e) {}
+        }
+
+        function playPS5ReadyChime() {
+            try {
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.09, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.85);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.9);
+                });
+            } catch (e) {}
+        }
+
+        function notifyProjectReady(customMsg) {
+            const msg = customMsg || "Your project is ready!";
+            document.title = "✅ " + msg + " - ZenoWeb";
+            playPS5ReadyChime();
+
+            const toast = document.getElementById('readyToast');
+            const toastText = document.getElementById('readyToastText');
+            if (toastText) toastText.innerText = "Your project is ready!";
+            if (toast) {
+                toast.classList.remove('-translate-y-32', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('-translate-y-32', 'opacity-0');
+                    document.title = "ZenoWeb Turbo - Next-Gen AI Website Studio";
+                }, 5500);
+            }
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    const notif = new Notification('ZenoWeb AI Studio', {
+                        body: 'Your project is ready!',
+                        tag: 'zenoweb-project-ready',
+                        renotify: true
+                    });
+                    notif.onclick = () => {
+                        window.focus();
+                        notif.close();
+                    };
+                } catch (e) {}
+            }
+        }
+
+        function enableNotificationsManual() {
+            window.initBackgroundEngine();
+            if ('Notification' in window) {
+                Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') {
+                        notifyProjectReady('Your project is ready!');
+                    } else {
+                        alert('Notifications are active inside the studio!');
+                    }
+                }).catch(() => {});
+            } else {
+                notifyProjectReady('Your project is ready!');
+            }
+        }
+
+        /* =========================================================
+           PS5 PARTICLES & STARTUP INITIALIZATION
+        ========================================================= */
+        function initPS5Particles() {
+            try {
+                const canvas = document.getElementById('ps5Canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const particles = Array.from({ length: 50 }, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2.2 + 0.6,
+                    dx: (Math.random() - 0.5) * 0.8,
+                    dy: -Math.random() * 1.0 - 0.3,
+                    color: Math.random() > 0.35 ? 'rgba(0, 210, 255, 0.78)' : 'rgba(255, 198, 92, 0.82)'
+                }));
+
+                function animate() {
+                    if (window.splashDismissed) return;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.fill();
+                        p.x += p.dx;
+                        p.y += p.dy;
+                        if (p.y < 0) p.y = canvas.height;
+                        if (p.x < 0) p.x = canvas.width;
+                        if (p.x > canvas.width) p.x = 0;
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            } catch (e) {}
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPS5Particles();
+            setTimeout(() => {
+                const prog = document.getElementById('ps5Progress');
+                if (prog) prog.style.width = '100%';
+            }, 80);
+
+            // Automatically open studio after 2.8 seconds even if user doesn't tap
+            setTimeout(() => {
+                window.dismissPS5Welcome();
+            }, 2800);
+
+            populateSettingsInputs();
+            renderProjectList();
+
+            // Only load a project if it has valid HTML code
+            if (currentProjectId) {
+                const found = projects.find(p => p.id === currentProjectId);
+                if (found && found.code && found.code.includes('<')) {
+                    loadProject(currentProjectId);
+                }
+            }
+        });
+
+        /* =========================================================
+           SETTINGS & AUTO-SAVE
+        ========================================================= */
+        function populateSettingsInputs() {
+            const provEl = document.getElementById('aiProvider');
+            const keyEl = document.getElementById('apiKeyInput');
+            const ghEl = document.getElementById('githubTokenInput');
+
+            if (provEl) provEl.value = localStorage.getItem('wm_provider') || 'gemini';
+            if (keyEl) keyEl.value = localStorage.getItem('wm_api_key') || '';
+            if (ghEl) ghEl.value = localStorage.getItem('wm_gh_token') || '';
+            updateKeyLink();
+        }
+
+        function autoSaveSettings() {
+            const provider = document.getElementById('aiProvider').value;
+            const key = document.getElementById('apiKeyInput').value.trim();
+            const ghToken = document.getElementById('githubTokenInput').value.trim();
+
+            localStorage.setItem('wm_provider', provider);
+            localStorage.setItem('wm_api_key', key);
+            localStorage.setItem('wm_gh_token', ghToken);
+
+            const badge = document.getElementById('keySaveBadge');
+            if (badge) {
+                badge.innerText = 'Saved!';
+                setTimeout(() => { badge.innerText = 'Auto-Saved'; }, 1000);
+            }
+        }
+
+        function updateKeyLink() {
+            const provider = document.getElementById('aiProvider').value;
+            const linkBtn = document.getElementById('getApiKeyBtn');
+            const keySec = document.getElementById('apiKeySection');
+
+            if (keySec) {
+                if (provider === 'zeno_free') keySec.classList.add('opacity-60');
+                else keySec.classList.remove('opacity-60');
+            }
+
+            if (linkBtn) {
+                if (provider === 'gemini') linkBtn.href = 'https://aistudio.google.com/app/apikey';
+                else if (provider === 'openai') linkBtn.href = 'https://platform.openai.com/api-keys';
+                else if (provider === 'claude') linkBtn.href = 'https://console.anthropic.com/settings/keys';
+            }
+        }
+
+        window.openSettings = function() {
+            populateSettingsInputs();
+            document.getElementById('setupModal').classList.remove('hidden');
+        };
+
+        function closeSettingsModal() {
+            autoSaveSettings();
+            document.getElementById('setupModal').classList.add('hidden');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        /* =========================================================
+           IMAGE COMPRESSION & CHAT PHOTO UPLOAD
+        ========================================================= */
+        function compressImageFile(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 650;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round(h * (maxDim / w));
+                            w = maxDim;
+                        } else {
+                            w = Math.round(w * (maxDim / h));
+                            h = maxDim;
+                        }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleChatImages(input) {
+            const files = Array.from(input.files || []);
+            if (!files.length) return;
+            files.forEach(file => {
+                compressImageFile(file, (b64Data) => {
+                    pendingChatImages.push({
+                        id: 'cimg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        b64: b64Data
+                    });
+                    renderChatImagePreviews();
+                });
+            });
+            input.value = '';
+        }
+
+        function renderChatImagePreviews() {
+            const bar = document.getElementById('chatImgPreviewBar');
+            if (!bar) return;
+            if (pendingChatImages.length === 0) {
+                bar.classList.add('hidden');
+                bar.innerHTML = '';
+                return;
+            }
+            bar.classList.remove('hidden');
+            bar.innerHTML = pendingChatImages.map((img, idx) => `
+                <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-cyan-400 shrink-0">
+                    <img src="${img.b64}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeChatImage(${idx})" class="absolute top-0 right-0 bg-black/85 text-red-400 w-5 h-5 flex items-center justify-center rounded-bl-lg text-[10px]">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
-            </div>
-        </div>
+            `).join('') + `<span class="text-xs text-cyan-300 font-semibold px-2">${pendingChatImages.length} photo(s) ready to send</span>`;
+        }
 
-        <!-- 2. Website Specifications & Product Upload Wizard -->
-        <div id="wizardModal" class="fixed inset-0 z-40 bg-black/90 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
-                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-bolt text-amber-400 mr-2"></i>Fast Website Builder</h2>
-                    <button type="button" onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                
-                <div class="space-y-3.5">
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">1. Brand or Website Name</label>
-                        <input type="text" id="wName" placeholder="e.g., Kuku Store, Rabar Shop, Luxury Cafe..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">2. Website Niche & Purpose</label>
-                        <input type="text" id="wType" placeholder="e.g., Online Store, Portfolio, Gaming Platform, Restaurant..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">3. Style & Colors</label>
-                            <input type="text" id="wStyle" placeholder="e.g., Dark Blue & Neon, Green, Gold..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
+        function removeChatImage(index) {
+            pendingChatImages.splice(index, 1);
+            renderChatImagePreviews();
+        }
+
+        /* =========================================================
+           WEBSITE WIZARD & STORE PRODUCT UPLOADER
+        ========================================================= */
+        function openWizard() {
+            document.getElementById('productsContainer').innerHTML = '';
+            currentProducts = [];
+            document.getElementById('wizardModal').classList.remove('hidden');
+        }
+
+        function closeWizard() {
+            document.getElementById('wizardModal').classList.add('hidden');
+        }
+
+        function addProductRow() {
+            const id = Date.now() + Math.floor(Math.random() * 1000);
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center bg-[#232536] p-2 rounded-xl border border-gray-700";
+            div.innerHTML = `
+                <input type="text" id="pn_${id}" placeholder="Product Name" class="w-1/3 bg-black/50 text-white text-xs p-2 rounded-lg outline-none border border-gray-700">
+                <input type="text" id="pp_${id}" placeholder="Price ($)" class="w-1/4 bg-black/50 text-white text-xs p-2 rounded-lg outline-none border border-gray-700">
+                <input type="file" accept="image/*" onchange="encodeImg(this, ${id})" class="w-5/12 text-[10px] text-gray-300 file:bg-blue-600 file:border-0 file:rounded-lg file:text-white file:px-2.5 file:py-1 file:font-bold">
+            `;
+            document.getElementById('productsContainer').appendChild(div);
+            currentProducts.push({ id: id, name: '', price: '', b64: '' });
+        }
+
+        function encodeImg(input, id) {
+            const file = input.files[0];
+            if (!file) return;
+            compressImageFile(file, (b64Data) => {
+                const prod = currentProducts.find(p => p.id === id);
+                if (prod) prod.b64 = b64Data;
+            });
+        }
+
+        async function startWizardGeneration() {
+            const name = document.getElementById('wName').value.trim() || 'My Website';
+            const type = document.getElementById('wType').value.trim() || 'Online Store & Brand';
+            const style = document.getElementById('wStyle').value.trim() || 'Modern Dark & Sleek';
+            const lang = document.getElementById('wLang').value.trim() || 'English';
+            const details = document.getElementById('wDetails').value.trim() || 'Complete website with hero section, interactive features, cart, and contact modal.';
+            closeWizard();
+
+            let fullPrompt = `Build a complete, high-speed, interactive HTML5 website strictly following the user's opinions and specifications:
+- Brand / Website Name: "${name}"
+- Purpose / Niche: ${type}
+- Visual Style & Colors: ${style}
+- Website Language: ${lang}
+- User's Custom Vision & Features: ${details}`;
+
+            currentProducts.forEach(p => {
+                const nameEl = document.getElementById(`pn_${p.id}`);
+                const priceEl = document.getElementById(`pp_${p.id}`);
+                if (nameEl) p.name = nameEl.value || 'Product';
+                if (priceEl) p.price = priceEl.value || '$19';
+            });
+            const validProducts = currentProducts.filter(p => p.b64 !== '');
+
+            if (validProducts.length > 0) {
+                fullPrompt += `\n\nCRITICAL USER PRODUCT CATALOG: Display these exact user products in an interactive store grid with working Add-to-Cart buttons:\n`;
+                validProducts.forEach((p, index) => {
+                    fullPrompt += `- Product ${index + 1}: Name="${p.name}", Price="${p.price}", Image src MUST be exactly "RAW_IMG_TARGET_${index}"\n`;
+                });
+                fullPrompt += `Never alter the string "RAW_IMG_TARGET_x" inside <img src="...">.`;
+            }
+
+            const newProj = {
+                id: 'proj_' + Date.now(),
+                name: name,
+                code: '',
+                liveUrl: '',
+                products: validProducts,
+                chatImages: []
+            };
+            projects.unshift(newProj);
+            currentProjectId = newProj.id;
+            saveToStorage();
+            renderProjectList();
+
+            await generateWithAI(fullPrompt, null, newProj, []);
+        }
+
+        function quickPrompt(text) {
+            document.getElementById('chatInput').value = text;
+            sendChatPrompt();
+        }
+
+        /* =========================================================
+           MONETIZATION (ADSTERRA, UNITY ADS & PREMIUM PAYWALL)
+        ========================================================= */
+        function openMonetizeModal() {
+            document.getElementById('monetizeModal').classList.remove('hidden');
+        }
+
+        function toggleMonetizeMode() {
+            const type = document.getElementById('monetizeType').value;
+            document.getElementById('adCodeWrapper').classList.toggle('hidden', type !== 'ads');
+            document.getElementById('premiumWrapper').classList.toggle('hidden', type !== 'premium');
+        }
+
+        async function pasteAdClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const box = document.getElementById('adCodeInput');
+                box.value = (box.value ? box.value + '\n' : '') + text;
+            } catch (e) {
+                alert('Long-press inside the code box to paste your ad script.');
+            }
+        }
+
+        async function applyMonetization() {
+            const type = document.getElementById('monetizeType').value;
+            let proj = projects.find(p => p.id === currentProjectId);
+
+            if (!proj) {
+                proj = {
+                    id: 'proj_' + Date.now(),
+                    name: 'Monetized Website',
+                    code: '',
+                    liveUrl: '',
+                    products: [],
+                    chatImages: []
+                };
+                projects.unshift(proj);
+                currentProjectId = proj.id;
+            }
+
+            if (type === 'ads') {
+                const code = document.getElementById('adCodeInput').value.trim();
+                if (!code) {
+                    alert("Please paste your Adsterra or Unity Ads code first!");
+                    return;
+                }
+                document.getElementById('monetizeModal').classList.add('hidden');
+
+                const closeBodyTag = '<' + '/body>';
+                if (proj.code && proj.code.includes(closeBodyTag)) {
+                    const adContainer = `\n<!-- ZenoWeb Injected Ad Unit -->\n<div class="w-full py-3 bg-black/90 text-center flex justify-center items-center z-50">${code}</div>\n` + closeBodyTag;
+                    proj.code = proj.code.replace(closeBodyTag, adContainer);
+                    saveToStorage();
+                    loadProject(proj.id);
+                    notifyProjectReady('Your project is ready!');
+                    return;
+                }
+
+                const adPrompt = `Create a complete modern website and integrate this exact Ad Network script (Adsterra / Unity Ads) into the page:\n\n${code}`;
+                await generateWithAI(adPrompt, proj.code, proj, []);
+                return;
+            }
+
+            const price = document.getElementById('premPrice').value.trim() || '$9.99 / Month';
+            const methods = document.getElementById('premMethods').value.trim() || 'Card Number, FastPay, FIB, or VIP Unlock Code';
+            const details = document.getElementById('premDetails').value.trim() || 'Lock premium content behind an interactive VIP payment modal until the visitor submits their payment details.';
+            document.getElementById('monetizeModal').classList.add('hidden');
+
+            const premPrompt = `Integrate an interactive PREMIUM VIP PAYWALL & PAYMENT CHECKOUT SYSTEM into the website:
+- Price: ${price}
+- Required Payment Input Fields from Visitor: ${methods}
+- Rules & Benefits: ${details}
+- Build a working modal/form where users enter these payment details to unlock the VIP experience.`;
+
+            await generateWithAI(premPrompt, proj.code, proj, []);
+        }
+
+        /* =========================================================
+           CHAT PROMPT & PHOTO SENDER
+        ========================================================= */
+        async function sendChatPrompt() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text && pendingChatImages.length === 0) return;
+            input.value = '';
+
+            let proj = projects.find(p => p.id === currentProjectId);
+            if (!proj) {
+                proj = {
+                    id: 'proj_' + Date.now(),
+                    name: (text || 'Custom Website').substring(0, 24),
+                    code: '',
+                    liveUrl: '',
+                    products: [],
+                    chatImages: []
+                };
+                projects.unshift(proj);
+                currentProjectId = proj.id;
+            }
+            if (!proj.chatImages) proj.chatImages = [];
+
+            const attachedNow = [...pendingChatImages];
+            pendingChatImages = [];
+            renderChatImagePreviews();
+
+            let userInstruction = text || "Integrate the attached photo(s) into the website.";
+            if (attachedNow.length > 0) {
+                userInstruction += `\n\nCRITICAL PHOTO INSTRUCTION: Use these exact placeholder strings in <img src="..."> for the attached photos:\n`;
+                attachedNow.forEach(imgObj => {
+                    proj.chatImages.push(imgObj);
+                    userInstruction += `- src="CHAT_IMG_${imgObj.id}"\n`;
+                });
+                userInstruction += `Never change "CHAT_IMG_..." in the HTML!`;
+            }
+
+            await generateWithAI(userInstruction, proj.code, proj, attachedNow);
+        }
+
+        /* =========================================================
+           ZERO-FAIL MULTI-NODE UNLIMITED FREE AI CLUSTER
+        ========================================================= */
+        async function callUnlimitedFreeAI(finalPrompt) {
+            const subText = document.getElementById('loadingSubText');
+            const progBar = document.getElementById('streamProgressBar');
+            progBar.style.width = '20%';
+
+            const freeNodes = [
+                { model: 'openai', stream: true, label: 'Turbo Node 1' },
+                { model: 'qwen-coder', stream: true, label: 'Coder Node 2' },
+                { model: 'openai', stream: false, label: 'Direct Node 3' },
+                { model: 'mistral', stream: false, label: 'Backup Node 4' }
+            ];
+
+            for (let i = 0; i < freeNodes.length; i++) {
+                const node = freeNodes[i];
+                try {
+                    subText.innerText = `⚡ Auto-Heal Active: Generating via ${node.label}...`;
+                    progBar.style.width = `${22 + i * 12}%`;
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+                    const res = await fetch('https://text.pollinations.ai/openai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            model: node.model,
+                            seed: Math.floor(Math.random() * 999999),
+                            messages: [
+                                { role: 'system', content: SYSTEM_PROMPT },
+                                { role: 'user', content: finalPrompt }
+                            ],
+                            stream: node.stream
+                        })
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!res.ok) {
+                        await sleep(500);
+                        continue;
+                    }
+
+                    if (!node.stream) {
+                        const rawText = await res.text();
+                        let content = rawText;
+                        try {
+                            const json = JSON.parse(rawText);
+                            content = json.choices?.[0]?.message?.content || rawText;
+                        } catch (e) {}
+
+                        if (content && content.includes('<') && content.length > 80) {
+                            progBar.style.width = '100%';
+                            return content;
+                        }
+                        continue;
+                    }
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let fullText = '';
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const jsonStr = line.slice(6).trim();
+                                if (!jsonStr || jsonStr === '[DONE]') continue;
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    const chunk = parsed.choices?.[0]?.delta?.content || '';
+                                    if (chunk) {
+                                        fullText += chunk;
+                                        const pct = Math.min(96, Math.round((fullText.length / 7000) * 100));
+                                        progBar.style.width = `${Math.max(25, pct)}%`;
+                                        subText.innerText = `⚡ Streaming Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (fullText && fullText.includes('<') && fullText.length > 80) {
+                        progBar.style.width = '100%';
+                        return fullText;
+                    }
+                } catch (err) {
+                    subText.innerText = `⚡ Healing connection (${i + 1}/${freeNodes.length})...`;
+                    await sleep(750);
+                }
+            }
+
+            const getRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(SYSTEM_PROMPT + "\n\n" + finalPrompt)}?model=openai`);
+            const getText = await getRes.text();
+            if (getText && getText.includes('<')) {
+                progBar.style.width = '100%';
+                return getText;
+            }
+
+            throw new Error('All AI nodes are temporarily busy. Please check your internet connection.');
+        }
+
+        /* =========================================================
+           GEMINI STREAMING ENGINE WITH QUOTA BYPASS & AUTO-HEAL
+        ========================================================= */
+        async function streamGeminiTurbo(rawApiKeys, finalPrompt, attachedImages) {
+            const subText = document.getElementById('loadingSubText');
+            const progBar = document.getElementById('streamProgressBar');
+            progBar.style.width = '10%';
+
+            const keyList = rawApiKeys.split(',').map(k => k.trim()).filter(Boolean);
+
+            const userParts = [{ text: finalPrompt }];
+            if (attachedImages && attachedImages.length > 0) {
+                attachedImages.forEach(img => {
+                    const base64Clean = img.b64.split(',')[1];
+                    const mimeMatch = img.b64.match(/data:(.*?);/);
+                    userParts.push({
+                        inline_data: { mime_type: mimeMatch ? mimeMatch[1] : 'image/jpeg', data: base64Clean }
+                    });
+                });
+            }
+
+            for (let kIdx = 0; kIdx < keyList.length; kIdx++) {
+                const apiKey = keyList[kIdx];
+                const modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
+
+                for (const modelName of modelsToTry) {
+                    for (let attempt = 1; attempt <= 2; attempt++) {
+                        try {
+                            subText.innerText = `⚡ Connecting to ${modelName}...`;
+
+                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                    contents: [{ parts: userParts }],
+                                    generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
+                                })
+                            });
+
+                            if (!res.ok) {
+                                subText.innerText = `Switching from ${modelName} to Unlimited Backup Node...`;
+                                break;
+                            }
+
+                            const reader = res.body.getReader();
+                            const decoder = new TextDecoder('utf-8');
+                            let fullText = '';
+                            let buffer = '';
+
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+
+                                buffer += decoder.decode(value, { stream: true });
+                                const lines = buffer.split('\n');
+                                buffer = lines.pop() || '';
+
+                                for (const line of lines) {
+                                    if (line.startsWith('data: ')) {
+                                        const jsonStr = line.slice(6).trim();
+                                        if (!jsonStr || jsonStr === '[DONE]') continue;
+                                        try {
+                                            const parsed = JSON.parse(jsonStr);
+                                            const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                            if (chunk) {
+                                                fullText += chunk;
+                                                const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
+                                                progBar.style.width = `${Math.max(15, pct)}%`;
+                                                subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                            }
+                                        } catch (e) {}
+                                    }
+                                }
+                            }
+
+                            if (fullText.length > 50) {
+                                progBar.style.width = '100%';
+                                return fullText;
+                            }
+                        } catch (err) {
+                            subText.innerText = `⚡ Healing network connection (${attempt}/2)...`;
+                            await sleep(600);
+                        }
+                    }
+                }
+            }
+
+            return await callUnlimitedFreeAI(finalPrompt);
+        }
+
+        /* =========================================================
+           MASTER AI GENERATION CONTROLLER
+        ========================================================= */
+        async function generateWithAI(prompt, existingCode, projectObj, attachedImages = []) {
+            const provider = localStorage.getItem('wm_provider') || 'gemini';
+            const apiKey = localStorage.getItem('wm_api_key') || '';
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('streamProgressBar').style.width = '6%';
+            await startBackgroundKeepAlive();
+
+            let cleanExisting = existingCode || '';
+            if (cleanExisting && projectObj.products) {
+                projectObj.products.forEach((p, idx) => {
+                    if (p.b64) cleanExisting = cleanExisting.split(p.b64).join(`RAW_IMG_TARGET_${idx}`);
+                });
+            }
+            if (cleanExisting && projectObj.chatImages) {
+                projectObj.chatImages.forEach(img => {
+                    if (img.b64) cleanExisting = cleanExisting.split(img.b64).join(`CHAT_IMG_${img.id}`);
+                });
+            }
+
+            let finalPrompt = prompt;
+            if (cleanExisting && cleanExisting.length > 50) {
+                finalPrompt = `Current HTML:\n${cleanExisting}\n\nUser Edit Instruction: "${prompt}"\n\nUpdate the website and return ONLY the full updated HTML5 code.`;
+            }
+
+            let lastErr = null;
+            for (let cycle = 1; cycle <= 3; cycle++) {
+                try {
+                    let rawResponse = '';
+
+                    if (provider === 'zeno_free' || (!apiKey && provider === 'gemini')) {
+                        rawResponse = await callUnlimitedFreeAI(finalPrompt);
+                    } else if (provider === 'gemini') {
+                        rawResponse = await streamGeminiTurbo(apiKey, finalPrompt, attachedImages);
+                    } else if (provider === 'openai') {
+                        const contentArray = [{ type: 'text', text: finalPrompt }];
+                        attachedImages.forEach(img => {
+                            contentArray.push({ type: 'image_url', image_url: { url: img.b64 } });
+                        });
+                        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4o-mini',
+                                temperature: 0.5,
+                                messages: [
+                                    { role: 'system', content: SYSTEM_PROMPT },
+                                    { role: 'user', content: contentArray }
+                                ]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.choices[0].message.content;
+
+                    } else if (provider === 'claude') {
+                        const res = await fetch('https://api.anthropic.com/v1/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-api-key': apiKey,
+                                'anthropic-version': '2023-06-01',
+                                'anthropic-dangerous-direct-browser-access': 'true'
+                            },
+                            body: JSON.stringify({
+                                model: 'claude-3-5-sonnet-20240620',
+                                max_tokens: 8000,
+                                system: SYSTEM_PROMPT,
+                                messages: [{ role: 'user', content: finalPrompt }]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.content[0].text;
+                    }
+
+                    let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
+                    const docStart = '<' + '!DOCTYPE';
+                    const docIdx = cleanCode.indexOf(docStart);
+                    if (docIdx > 0) cleanCode = cleanCode.substring(docIdx);
+
+                    if (projectObj.products && projectObj.products.length > 0) {
+                        projectObj.products.forEach((p, index) => {
+                            cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
+                        });
+                    }
+
+                    if (projectObj.chatImages && projectObj.chatImages.length > 0) {
+                        projectObj.chatImages.forEach(img => {
+                            cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
+                        });
+                    }
+
+                    projectObj.code = cleanCode;
+                    saveToStorage();
+                    loadProject(projectObj.id);
+                    notifyProjectReady('Your project is ready!');
+
+                    lastErr = null;
+                    break;
+                } catch (err) {
+                    lastErr = err;
+                    document.getElementById('loadingSubText').innerText = `⚡ Auto-healing connection (${cycle}/3)...`;
+                    await sleep(900);
+                }
+            }
+
+            if (lastErr) {
+                alert('Connection Error:\n' + lastErr.message);
+            }
+
+            stopBackgroundKeepAlive();
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        /* =========================================================
+           PROJECT WORKSPACE & LIVE PUBLISHING
+        ========================================================= */
+        function loadProject(id) {
+            const proj = projects.find(p => p.id === id);
+            if (!proj) return;
+            currentProjectId = id;
+            localStorage.setItem('wm_current_id', id);
+            document.getElementById('currentProjectTitle').innerText = proj.name;
+            
+            if (proj.code && proj.code.length > 30 && proj.code.includes('<')) {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('iframeContainer').classList.remove('hidden');
+                document.getElementById('previewFrame').srcdoc = proj.code;
+                document.getElementById('codeEditor').value = proj.code;
+            } else {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('iframeContainer').classList.add('hidden');
+            }
+
+            if (proj.liveUrl) {
+                document.getElementById('liveLinkBox').classList.remove('hidden');
+                document.getElementById('liveUrlInput').value = proj.liveUrl;
+            } else {
+                document.getElementById('liveLinkBox').classList.add('hidden');
+            }
+            renderProjectList();
+        }
+
+        function renderProjectList() {
+            const list = document.getElementById('projectList');
+            const badge = document.getElementById('projectCountBadge');
+            if (badge) badge.innerText = projects.length;
+            if (!list) return;
+
+            list.innerHTML = '';
+            projects.forEach(p => {
+                const active = p.id === currentProjectId
+                    ? 'bg-blue-600/20 border-cyan-500/50 text-cyan-300'
+                    : 'bg-[#181a26] border-gray-800 text-gray-300 hover:bg-gray-800';
+                list.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${active} cursor-pointer transition" onclick="loadProject('${p.id}'); toggleSidebar();">
+                        <div class="flex items-center gap-2 truncate pr-2">
+                            <i class="fa-solid fa-globe text-xs text-cyan-400"></i>
+                            <span class="text-xs font-semibold truncate">${p.name}</span>
                         </div>
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">4. Language</label>
-                            <input type="text" id="wLang" placeholder="e.g., English, Kurdish, Arabic..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm">
-                        </div>
+                        <button type="button" onclick="event.stopPropagation(); deleteProject('${p.id}')" class="text-gray-500 hover:text-red-400 px-1.5">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
                     </div>
+                `;
+            });
+        }
 
-                    <!-- Thinking Level Inside Wizard Too -->
-                    <div>
-                        <label class="block text-xs text-cyan-400 font-bold mb-1"><i class="fa-solid fa-microchip mr-1"></i>AI Thinking & Design Level</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="setThinkingLevel('low')" id="wizThink_low" class="py-2 px-2 rounded-xl border text-xs font-bold transition">
-                                ⚡ Low (Fastest)
-                            </button>
-                            <button type="button" onclick="setThinkingLevel('medium')" id="wizThink_medium" class="py-2 px-2 rounded-xl border text-xs font-bold transition">
-                                ⚖️ Medium
-                            </button>
-                            <button type="button" onclick="setThinkingLevel('high')" id="wizThink_high" class="py-2 px-2 rounded-xl border text-xs font-bold transition">
-                                💎 High (Best UI)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">5. Your Custom Vision & Features</label>
-                        <textarea id="wDetails" rows="2" placeholder="Write everything you want AI to build (e.g., Hero banner, shopping cart, contact form, animations)..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-blue-500 text-sm"></textarea>
-                    </div>
-
-                    <div class="bg-[#181820] p-3 rounded-xl border border-gray-800">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-camera mr-1"></i>Upload Products (Images & Prices)</label>
-                            <button type="button" onclick="addProductRow()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-lg font-semibold"><i class="fa-solid fa-plus"></i> Add Product</button>
-                        </div>
-                        <div id="productsContainer" class="space-y-2 max-h-36 overflow-y-auto pr-1"></div>
-                    </div>
-
-                    <button type="button" onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
-                        <i class="fa-solid fa-bolt mr-1"></i> Build & Launch Mobile Server
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Always-Open Monetize Modal -->
-        <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-yellow-400"><i class="fa-solid fa-sack-dollar mr-2"></i>Monetize Website</h2>
-                    <button type="button" onclick="document.getElementById('monetizeModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">Choose Monetization Method</label>
-                        <select id="monetizeType" onchange="toggleMonetizeMode()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none text-sm font-semibold">
-                            <option value="ads">Add Ad Networks (Adsterra / Unity Ads)</option>
-                            <option value="premium">Make Website Premium (Custom Payment Form)</option>
-                        </select>
-                    </div>
-
-                    <div id="adCodeWrapper" class="space-y-3">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1.5">1. Get Your Ad Code From Network:</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="https://publishers.adsterra.com/" target="_blank" class="bg-[#1e1e26] hover:bg-gray-800 border border-red-500/40 text-red-400 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition">
-                                    <i class="fa-solid fa-external-link-alt"></i> Open Adsterra
-                                </a>
-                                <a href="https://dashboard.unity3d.com/" target="_blank" class="bg-[#1e1e26] hover:bg-gray-800 border border-blue-500/40 text-blue-400 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition">
-                                    <i class="fa-solid fa-external-link-alt"></i> Open Unity Ads
-                                </a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs text-gray-300">2. Paste Ad Script / Unit Code:</label>
-                                <button type="button" onclick="pasteAdClipboard()" class="text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-0.5 rounded border border-gray-700"><i class="fa-solid fa-paste mr-1"></i>Paste</button>
-                            </div>
-                            <textarea id="adCodeInput" rows="4" placeholder="Paste your <script> code from Adsterra or Unity Ads here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none focus:border-yellow-500"></textarea>
-                        </div>
-                    </div>
-
-                    <div id="premiumWrapper" class="space-y-3 hidden">
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">1. Subscription or Access Price</label>
-                            <input type="text" id="premPrice" placeholder="e.g., $9.99 / Month, $25 Lifetime, or 10,000 IQD" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none focus:border-yellow-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">2. What Payment Info Should Users Enter?</label>
-                            <input type="text" id="premMethods
+        function delete

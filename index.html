@@ -136,13 +136,13 @@
 
                     <div id="apiKeySection">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-gray-400">API Key (Can paste multiple keys separated by comma)</label>
+                            <label class="text-xs text-gray-400">API Key (Optional if using Unlimited Free AI)</label>
                             <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
                                 <span>Get Key</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                             </a>
                         </div>
                         <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste API key(s) here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white focus:border-blue-500 outline-none text-sm">
-                        <p class="text-[10px] text-cyan-400/80 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>If your Gemini 20/day quota runs out, ZenoWeb automatically switches to Unlimited Free AI!</p>
+                        <p class="text-[10px] text-cyan-400/80 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Auto-Heal Active: Automatically retries & switches servers if any connection drops!</p>
                     </div>
 
                     <div class="pt-3 border-t border-gray-800">
@@ -288,7 +288,7 @@
 
                 <div class="pl-1">
                     <h1 id="currentProjectTitle" class="font-semibold text-xs text-gray-200 truncate max-w-[110px] sm:max-w-xs">New Project</h1>
-                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-400"></i> Unlimited Ready</span>
+                    <span id="saveStatus" class="text-[9px] text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-shield-halved text-cyan-400"></i> Auto-Heal Active</span>
                 </div>
             </div>
 
@@ -365,7 +365,7 @@
                     </svg>
                 </div>
                 <h2 class="font-zeno text-lg font-bold text-white mb-2 tracking-wide">ZENOWEB TURBO AI</h2>
-                <p class="text-gray-400 text-xs mb-5">High-speed live streaming website generator with automatic quota-bypass and unlimited backup AI!</p>
+                <p class="text-gray-400 text-xs mb-5">Zero-Fail Multi-Server AI Builder. Automatically heals connection drops and builds websites on the first try!</p>
                 <button onclick="openWizard()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-blue-600/20 transition">
                     <i class="fa-solid fa-bolt text-amber-300 mr-1"></i> Launch Fast Builder
                 </button>
@@ -423,6 +423,8 @@
         let pendingChatImages = [];
         let isCodeView = false;
         let splashFinished = false;
+
+        const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
         /* =========================================================
            TURBO COMPACT ARCHITECTURE SYSTEM PROMPT
@@ -679,7 +681,6 @@ SPEED & EFFICIENCY RULES:
             autoSaveSettings();
             const provider = document.getElementById('aiProvider').value;
             if (provider !== 'zeno_free' && !localStorage.getItem('wm_api_key')) {
-                // If user didn't put a key, switch them to Free Unlimited AI automatically
                 localStorage.setItem('wm_provider', 'zeno_free');
             }
             document.getElementById('setupModal').classList.add('hidden');
@@ -907,90 +908,131 @@ SPEED & EFFICIENCY RULES:
         }
 
         /* =========================================================
-           UNLIMITED FREE AI ENGINE (POLLINATIONS OPENAI STREAM)
-           Used when Gemini 20/Day Quota is Exceeded or Selected!
+           ZERO-FAIL MULTI-NODE UNLIMITED FREE AI CLUSTER
+           Automatically retries & switches nodes on "Failed to fetch"
         ========================================================= */
         async function callUnlimitedFreeAI(finalPrompt) {
             const subText = document.getElementById('loadingSubText');
             const progBar = document.getElementById('streamProgressBar');
-            subText.innerText = `⚡ Using ZenoWeb Unlimited Free AI (Bypassing Gemini Quota)...`;
             progBar.style.width = '20%';
 
-            const res = await fetch('https://text.pollinations.ai/openai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'openai',
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        { role: 'user', content: finalPrompt }
-                    ],
-                    stream: true
-                })
-            });
+            // Multiple fast coding models & nodes so if one drops connection, the next succeeds immediately
+            const freeNodes = [
+                { model: 'openai', stream: true, label: 'Turbo Node 1' },
+                { model: 'qwen-coder', stream: true, label: 'Coder Node 2' },
+                { model: 'openai', stream: false, label: 'Direct Node 3' },
+                { model: 'mistral', stream: false, label: 'Backup Node 4' },
+                { model: 'openai-fast', stream: false, label: 'Fast Node 5' }
+            ];
 
-            if (!res.ok) {
-                // Non-streaming fallback if stream endpoint is busy
-                const fallbackRes = await fetch('https://text.pollinations.ai/openai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'openai',
-                        messages: [
-                            { role: 'system', content: SYSTEM_PROMPT },
-                            { role: 'user', content: finalPrompt }
-                        ]
-                    })
-                });
-                const fallbackData = await fallbackRes.json();
-                progBar.style.width = '100%';
-                return fallbackData.choices[0].message.content;
-            }
+            for (let i = 0; i < freeNodes.length; i++) {
+                const node = freeNodes[i];
+                try {
+                    subText.innerText = `⚡ Auto-Heal Active: Generating via ${node.label}...`;
+                    progBar.style.width = `${22 + i * 10}%`;
 
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let fullText = '';
-            let buffer = '';
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+                    const res = await fetch('https://text.pollinations.ai/openai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            model: node.model,
+                            seed: Math.floor(Math.random() * 999999),
+                            messages: [
+                                { role: 'system', content: SYSTEM_PROMPT },
+                                { role: 'user', content: finalPrompt }
+                            ],
+                            stream: node.stream
+                        })
+                    });
 
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop() || '';
+                    clearTimeout(timeoutId);
 
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const jsonStr = line.slice(6).trim();
-                        if (!jsonStr || jsonStr === '[DONE]') continue;
-                        try {
-                            const parsed = JSON.parse(jsonStr);
-                            const chunk = parsed.choices?.[0]?.delta?.content || '';
-                            if (chunk) {
-                                fullText += chunk;
-                                const pct = Math.min(96, Math.round((fullText.length / 7000) * 100));
-                                progBar.style.width = `${Math.max(25, pct)}%`;
-                                subText.innerText = `⚡ Unlimited AI Streaming: ${fullText.length.toLocaleString()} chars (${pct}%)`;
-                            }
-                        } catch (e) {}
+                    if (!res.ok) {
+                        await sleep(600);
+                        continue;
                     }
+
+                    if (!node.stream) {
+                        const rawText = await res.text();
+                        let content = rawText;
+                        try {
+                            const json = JSON.parse(rawText);
+                            content = json.choices?.[0]?.message?.content || rawText;
+                        } catch (e) {}
+
+                        if (content && content.includes('<') && content.length > 80) {
+                            progBar.style.width = '100%';
+                            return content;
+                        }
+                        continue;
+                    }
+
+                    // Stream reading with auto-recovery
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let fullText = '';
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const jsonStr = line.slice(6).trim();
+                                if (!jsonStr || jsonStr === '[DONE]') continue;
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    const chunk = parsed.choices?.[0]?.delta?.content || '';
+                                    if (chunk) {
+                                        fullText += chunk;
+                                        const pct = Math.min(96, Math.round((fullText.length / 7000) * 100));
+                                        progBar.style.width = `${Math.max(25, pct)}%`;
+                                        subText.innerText = `⚡ Streaming Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (fullText && fullText.includes('<') && fullText.length > 80) {
+                        progBar.style.width = '100%';
+                        return fullText;
+                    }
+                } catch (err) {
+                    // Silent auto-retry on "Failed to fetch" or network blip!
+                    subText.innerText = `⚡ Connection blip detected, auto-retrying (${i + 1}/${freeNodes.length})...`;
+                    await sleep(900);
                 }
             }
 
-            progBar.style.width = '100%';
-            return fullText;
+            // Final GET fallback if POST was blocked by mobile carrier
+            const getRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(SYSTEM_PROMPT + "\n\n" + finalPrompt)}?model=openai`);
+            const getText = await getRes.text();
+            if (getText && getText.includes('<')) {
+                progBar.style.width = '100%';
+                return getText;
+            }
+
+            throw new Error('Network connection unstable. Please check your internet.');
         }
 
         /* =========================================================
-           SMART GEMINI ENGINE WITH MULTI-KEY & QUOTA BYPASS
+           SMART GEMINI ENGINE WITH SILENT AUTO-RETRY & FALLBACK
         ========================================================= */
         async function streamGeminiTurbo(rawApiKeys, finalPrompt, attachedImages) {
             const subText = document.getElementById('loadingSubText');
             const progBar = document.getElementById('streamProgressBar');
             progBar.style.width = '8%';
 
-            // Support multiple API keys separated by comma
             const keyList = rawApiKeys.split(',').map(k => k.trim()).filter(Boolean);
 
             const userParts = [{ text: finalPrompt }];
@@ -1006,85 +1048,74 @@ SPEED & EFFICIENCY RULES:
 
             for (let kIdx = 0; kIdx < keyList.length; kIdx++) {
                 const apiKey = keyList[kIdx];
-
-                // Dynamically fetch available models for this key if needed so we can rotate across separate quota buckets (e.g. flash-lite, pro, etc.)
-                let modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
-                try {
-                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                    const listData = await listRes.json();
-                    if (listData.models) {
-                        const discovered = listData.models
-                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-                            .map(m => m.name.replace('models/', ''))
-                            .filter(n => !n.includes('2.0') && !n.includes('2.5') && !n.includes('1.5'));
-                        if (discovered.length > 0) {
-                            modelsToTry = [...new Set(['gemini-3.8-flash', ...discovered])];
-                        }
-                    }
-                } catch (e) {}
+                const modelsToTry = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
 
                 for (const modelName of modelsToTry) {
-                    try {
-                        subText.innerText = `⚡ Connecting to ${modelName}...`;
+                    // Try up to 2 times per model if network drops ("Failed to fetch")
+                    for (let attempt = 1; attempt <= 2; attempt++) {
+                        try {
+                            subText.innerText = `⚡ Connecting to ${modelName}...`;
 
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                                contents: [{ parts: userParts }],
-                                generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
-                            })
-                        });
+                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                    contents: [{ parts: userParts }],
+                                    generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
+                                })
+                            });
 
-                        if (!res.ok) {
-                            const errJson = await res.json().catch(() => ({}));
-                            const errMsg = errJson.error ? errJson.error.message : `HTTP ${res.status}`;
-                            // If quota exceeded (20/day limit) or model unavailable, immediately try next model!
-                            subText.innerText = `Quota full on ${modelName}, switching model...`;
-                            continue;
-                        }
+                            if (!res.ok) {
+                                subText.innerText = `Switching from ${modelName} to backup node...`;
+                                break; // Move to next model or Unlimited Free AI
+                            }
 
-                        const reader = res.body.getReader();
-                        const decoder = new TextDecoder('utf-8');
-                        let fullText = '';
-                        let buffer = '';
+                            const reader = res.body.getReader();
+                            const decoder = new TextDecoder('utf-8');
+                            let fullText = '';
+                            let buffer = '';
 
-                        while (true) {
-                            const { done, value } = await reader.read();
-                            if (done) break;
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
 
-                            buffer += decoder.decode(value, { stream: true });
-                            const lines = buffer.split('\n');
-                            buffer = lines.pop() || '';
+                                buffer += decoder.decode(value, { stream: true });
+                                const lines = buffer.split('\n');
+                                buffer = lines.pop() || '';
 
-                            for (const line of lines) {
-                                if (line.startsWith('data: ')) {
-                                    const jsonStr = line.slice(6).trim();
-                                    if (!jsonStr || jsonStr === '[DONE]') continue;
-                                    try {
-                                        const parsed = JSON.parse(jsonStr);
-                                        const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                                        if (chunk) {
-                                            fullText += chunk;
-                                            const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
-                                            progBar.style.width = `${Math.max(15, pct)}%`;
-                                            subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
-                                        }
-                                    } catch (e) {}
+                                for (const line of lines) {
+                                    if (line.startsWith('data: ')) {
+                                        const jsonStr = line.slice(6).trim();
+                                        if (!jsonStr || jsonStr === '[DONE]') continue;
+                                        try {
+                                            const parsed = JSON.parse(jsonStr);
+                                            const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                            if (chunk) {
+                                                fullText += chunk;
+                                                const pct = Math.min(96, Math.round((fullText.length / 7500) * 100));
+                                                progBar.style.width = `${Math.max(15, pct)}%`;
+                                                subText.innerText = `⚡ Streaming Live Code: ${fullText.length.toLocaleString()} chars (${pct}%)`;
+                                            }
+                                        } catch (e) {}
+                                    }
                                 }
                             }
-                        }
 
-                        if (fullText.length > 50) {
-                            progBar.style.width = '100%';
-                            return fullText;
+                            if (fullText.length > 50) {
+                                progBar.style.width = '100%';
+                                return fullText;
+                            }
+                        } catch (err) {
+                            // Network blip ("Failed to fetch"), wait 700ms and retry silently
+                            subText.innerText = `⚡ Healing network connection (${attempt}/2)...`;
+                            await sleep(700);
                         }
-                    } catch (err) {}
+                    }
                 }
             }
 
-            // IF ALL GEMINI KEYS/MODELS HIT THE 20/DAY FREE TIER LIMIT -> AUTOMATICALLY SWITCH TO UNLIMITED FREE AI!
+            // Seamlessly switch to Multi-Node Unlimited Free AI if Gemini quota is full or unreachable
             return await callUnlimitedFreeAI(finalPrompt);
         }
 
@@ -1113,84 +1144,97 @@ SPEED & EFFICIENCY RULES:
                 finalPrompt = `Current HTML:\n${cleanExisting}\n\nEdit Request: "${prompt}"\n\nUpdate the code concisely and return ONLY the full updated HTML5.`;
             }
 
-            try {
-                let rawResponse = '';
+            // Master Auto-Heal Loop: Up to 3 full cycle retries before ever showing an error
+            let lastErr = null;
+            for (let cycle = 1; cycle <= 3; cycle++) {
+                try {
+                    let rawResponse = '';
 
-                if (provider === 'zeno_free' || (!apiKey && provider === 'gemini')) {
-                    rawResponse = await callUnlimitedFreeAI(finalPrompt);
-                } else if (provider === 'gemini') {
-                    rawResponse = await streamGeminiTurbo(apiKey, finalPrompt, attachedImages);
-                } else if (provider === 'openai') {
-                    const contentArray = [{ type: 'text', text: finalPrompt }];
-                    attachedImages.forEach(img => {
-                        contentArray.push({ type: 'image_url', image_url: { url: img.b64 } });
-                    });
-                    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: 'gpt-4o-mini',
-                            temperature: 0.5,
-                            messages: [
-                                { role: 'system', content: SYSTEM_PROMPT },
-                                { role: 'user', content: contentArray }
-                            ]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.choices[0].message.content;
+                    if (provider === 'zeno_free' || (!apiKey && provider === 'gemini')) {
+                        rawResponse = await callUnlimitedFreeAI(finalPrompt);
+                    } else if (provider === 'gemini') {
+                        rawResponse = await streamGeminiTurbo(apiKey, finalPrompt, attachedImages);
+                    } else if (provider === 'openai') {
+                        const contentArray = [{ type: 'text', text: finalPrompt }];
+                        attachedImages.forEach(img => {
+                            contentArray.push({ type: 'image_url', image_url: { url: img.b64 } });
+                        });
+                        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4o-mini',
+                                temperature: 0.5,
+                                messages: [
+                                    { role: 'system', content: SYSTEM_PROMPT },
+                                    { role: 'user', content: contentArray }
+                                ]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.choices[0].message.content;
 
-                } else if (provider === 'claude') {
-                    const res = await fetch('https://api.anthropic.com/v1/messages', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': apiKey,
-                            'anthropic-version': '2023-06-01',
-                            'anthropic-dangerous-direct-browser-access': 'true'
-                        },
-                        body: JSON.stringify({
-                            model: 'claude-3-5-sonnet-20240620',
-                            max_tokens: 8000,
-                            system: SYSTEM_PROMPT,
-                            messages: [{ role: 'user', content: finalPrompt }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-                    rawResponse = data.content[0].text;
+                    } else if (provider === 'claude') {
+                        const res = await fetch('https://api.anthropic.com/v1/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-api-key': apiKey,
+                                'anthropic-version': '2023-06-01',
+                                'anthropic-dangerous-direct-browser-access': 'true'
+                            },
+                            body: JSON.stringify({
+                                model: 'claude-3-5-sonnet-20240620',
+                                max_tokens: 8000,
+                                system: SYSTEM_PROMPT,
+                                messages: [{ role: 'user', content: finalPrompt }]
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error.message);
+                        rawResponse = data.content[0].text;
+                    }
+
+                    let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
+                    const docIdx = cleanCode.indexOf('<!DOCTYPE');
+                    if (docIdx > 0) cleanCode = cleanCode.substring(docIdx);
+
+                    if (projectObj.products && projectObj.products.length > 0) {
+                        projectObj.products.forEach((p, index) => {
+                            cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
+                        });
+                    }
+
+                    if (projectObj.chatImages && projectObj.chatImages.length > 0) {
+                        projectObj.chatImages.forEach(img => {
+                            cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
+                        });
+                    }
+
+                    projectObj.code = cleanCode;
+                    saveToStorage();
+                    loadProject(projectObj.id);
+                    notifyProjectReady(projectObj.name);
+
+                    lastErr = null;
+                    break; // Success! Exit retry loop
+                } catch (err) {
+                    lastErr = err;
+                    document.getElementById('loadingSubText').innerText = `⚡ Auto-retrying connection (${cycle}/3)...`;
+                    await sleep(1000);
                 }
-
-                let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
-
-                if (projectObj.products && projectObj.products.length > 0) {
-                    projectObj.products.forEach((p, index) => {
-                        cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
-                    });
-                }
-
-                if (projectObj.chatImages && projectObj.chatImages.length > 0) {
-                    projectObj.chatImages.forEach(img => {
-                        cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
-                    });
-                }
-
-                projectObj.code = cleanCode;
-                saveToStorage();
-                loadProject(projectObj.id);
-
-                notifyProjectReady(projectObj.name);
-
-            } catch (err) {
-                alert('AI Error:\n' + err.message);
-            } finally {
-                stopBackgroundKeepAlive();
-                document.getElementById('loadingOverlay').classList.add('hidden');
             }
+
+            if (lastErr) {
+                alert('Connection Error:\n' + lastErr.message);
+            }
+
+            stopBackgroundKeepAlive();
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
         function loadProject(id) {
@@ -1299,31 +1343,41 @@ SPEED & EFFICIENCY RULES:
             document.getElementById('loadingText').innerText = "Publishing live link...";
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
-            try {
-                const res = await fetch('https://api.github.com/gists', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github+json' },
-                    body: JSON.stringify({
-                        description: `Created with ZenoWeb Turbo AI: ${proj.name}`,
-                        public: true,
-                        files: { "index.html": { content: proj.code } }
-                    })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message);
-                
-                const liveShareUrl = `https://htmlpreview.github.io/?${data.files['index.html'].raw_url}`;
-                proj.liveUrl = liveShareUrl;
-                saveToStorage();
-                loadProject(proj.id);
-                notifyProjectReady('Live Link Published');
-            } catch (err) {
-                alert('GitHub Publish Error:\n' + err.message);
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                document.getElementById('sidebar').classList.remove('-translate-x-full');
-                document.getElementById('sidebarOverlay').classList.remove('hidden');
+            let pubErr = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    const res = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github+json' },
+                        body: JSON.stringify({
+                            description: `Created with ZenoWeb Turbo AI: ${proj.name}`,
+                            public: true,
+                            files: { "index.html": { content: proj.code } }
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message);
+                    
+                    const liveShareUrl = `https://htmlpreview.github.io/?${data.files['index.html'].raw_url}`;
+                    proj.liveUrl = liveShareUrl;
+                    saveToStorage();
+                    loadProject(proj.id);
+                    notifyProjectReady('Live Link Published');
+                    pubErr = null;
+                    break;
+                } catch (err) {
+                    pubErr = err;
+                    await sleep(800);
+                }
             }
+
+            if (pubErr) {
+                alert('GitHub Publish Error:\n' + pubErr.message);
+            }
+
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
         }
 
         function copyLiveLink() {

@@ -1,1402 +1,997 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="dark">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZenoWeb AI Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZoneWeb - AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800;900&display=swap');
+        :root {
+            --accent: #3b82f6;
+            --bg-main: #090a0f;
+            --bg-card: #12141d;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        html.light {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: rgba(0, 0, 0, 0.12);
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #050508;
-            color: #f3f4f6;
-            overflow: hidden;
-            height: 100dvh;
-            width: 100vw;
-            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
-        .font-zeno { font-family: 'Orbitron', sans-serif; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #121216; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-
-        .ps5-bg {
-            background: radial-gradient(circle at 50% 35%, rgba(0, 112, 209, 0.38) 0%, rgba(0, 40, 110, 0.2) 42%, #030306 82%);
+        .accent-bg { background-color: var(--accent); }
+        .accent-text { color: var(--accent); }
+        .accent-border { border-color: var(--accent); }
+        .card-bg { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.06); opacity: 1; }
         }
-        @keyframes ps5LogoFloat {
-            0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px rgba(0, 170, 255, 0.6)); }
-            50% { transform: translateY(-8px) scale(1.05); filter: drop-shadow(0 0 45px rgba(255, 200, 100, 0.8)); }
-        }
-        .animate-ps5-logo { animation: ps5LogoFloat 3s ease-in-out infinite; }
+        .welcome-anim { animation: pulseGlow 2s infinite ease-in-out; }
+        .drawer-backdrop { background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 3px; }
     </style>
 </head>
-<body class="flex flex-col select-none relative">
+<body class="min-h-screen flex flex-col">
 
-    <!-- ======================================================= -->
-    <!-- STANDALONE LIVE WEBSITE VIEWER (FOR SHARED LINKS)       -->
-    <!-- ======================================================= -->
-    <div id="standaloneViewer" class="fixed inset-0 z-[200] bg-white hidden">
-        <iframe id="standaloneFrame" class="w-full h-full border-0" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    <!-- PUBLIC SITE STANDALONE VIEWER (When opening a public link) -->
+    <div id="publicViewerScreen" class="hidden fixed inset-0 z-50 bg-white">
+        <iframe id="publicSiteFrame" class="w-full h-full border-0"></iframe>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- 0. PS5 WELCOME SPLASH SCREEN                            -->
-    <!-- ======================================================= -->
-    <div id="ps5Splash" onclick="enterZenoStudio()" class="fixed inset-0 z-[100] ps5-bg flex flex-col items-center justify-center overflow-hidden transition-opacity duration-500 cursor-pointer">
-        <div class="relative z-10 flex flex-col items-center px-6 text-center">
-            <div class="animate-ps5-logo mb-6 relative">
-                <div class="absolute -inset-4 rounded-full bg-blue-500/20 blur-2xl"></div>
-                <svg class="w-28 h-28" viewBox="0 0 120 120" fill="none">
-                    <defs>
-                        <linearGradient id="zGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#00f2fe"/>
-                            <stop offset="50%" stop-color="#0072ff"/>
-                            <stop offset="100%" stop-color="#f5af19"/>
-                        </linearGradient>
-                    </defs>
-                    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="url(#zGrad)" stroke-width="4" fill="rgba(10, 18, 36, 0.85)"/>
-                    <path d="M36 40 H84 L42 80 H84" stroke="url(#zGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="36" cy="40" r="5" fill="#00f2fe"/>
-                    <circle cx="84" cy="80" r="5" fill="#f5af19"/>
-                </svg>
+    <!-- SCREEN 1: 4-SECOND WELCOME SPLASH -->
+    <div id="screen1" class="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#07080c] text-white px-4">
+        <div class="welcome-anim text-center">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl accent-bg flex items-center justify-center shadow-2xl shadow-blue-500/40">
+                <i class="fa-solid fa-bolt text-4xl text-white"></i>
             </div>
-
-            <p class="text-xs uppercase tracking-[0.4em] text-cyan-300/90 mb-2 font-semibold">Turbo Neural Engine</p>
-            <h1 class="font-zeno text-2xl sm:text-4xl font-extrabold text-white tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-amber-200">
-                WELCOME TO ZENOWEB
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
+                Welcome to ZoneWeb
             </h1>
-
-            <div class="mt-6 w-56 h-[2px] bg-white/10 rounded-full overflow-hidden">
-                <div id="ps5Progress" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 w-0 transition-all duration-[1800ms] ease-out"></div>
-            </div>
-
-            <button type="button" onclick="enterZenoStudio()" class="mt-6 px-7 py-3 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 border border-white/25 text-white text-xs font-bold tracking-widest uppercase backdrop-blur-md transition flex items-center gap-2 shadow-lg">
-                <span>TAP TO START</span>
-                <i class="fa-solid fa-bolt text-amber-400"></i>
-            </button>
+            <p class="mt-3 text-gray-400 text-sm md:text-base">Next-Generation Autonomous AI Web Builder</p>
+        </div>
+        <div class="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-8">
+            <div id="splashProgress" class="h-full accent-bg transition-all duration-[4000ms] ease-linear w-0"></div>
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- READY NOTIFICATION TOAST                                -->
-    <!-- ======================================================= -->
-    <div id="readyToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[95] bg-[#121824]/95 border border-emerald-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-xl flex items-center gap-3 transition-all duration-500 -translate-y-28 opacity-0 pointer-events-none">
-        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-            <i class="fa-solid fa-check-circle"></i>
-        </div>
-        <div>
-            <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">Your project is ready!</h4>
-            <p class="text-[11px] text-gray-300">Live shareable link generated automatically.</p>
-        </div>
-    </div>
-
-    <!-- ======================================================= -->
-    <!-- MAIN STUDIO INTERFACE                                   -->
-    <!-- ======================================================= -->
-    <div id="appShell" class="flex flex-col h-full w-full">
-
-        <!-- 1. Settings Modal -->
-        <div id="setupModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-amber-400"></i> ZenoWeb AI Settings
-                    </h2>
-                    <button type="button" onclick="closeSettingsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <!-- SCREEN 2: API KEY SETUP -->
+    <div id="screen2" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4">
+        <div class="card-bg w-full max-w-lg rounded-3xl p-6 md:p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-2xl accent-bg flex items-center justify-center text-white text-xl">
+                    <i class="fa-solid fa-key"></i>
                 </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">AI Engine Mode</label>
-                        <select id="aiProvider" onchange="autoSaveSettings()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none text-sm">
-                            <option value="gemini">Google Gemini API (+ Zero-Fail Fallback)</option>
-                            <option value="zeno_free">ZenoWeb Unlimited Free AI (No Key Required)</option>
-                            <option value="openai">OpenAI (GPT-4o Mini)</option>
-                            <option value="claude">Anthropic Claude 3.5</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs text-gray-400">API Key (Optional)</label>
-                            <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs bg-blue-600/20 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded-lg font-semibold">
-                                Get API Key <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                            </a>
-                        </div>
-                        <input type="password" id="apiKeyInput" oninput="autoSaveSettings()" placeholder="Paste your Gemini / OpenAI key here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none text-sm">
-                    </div>
-
-                    <button type="button" onclick="closeSettingsModal()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
-                        Save & Continue
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. Website Wizard Modal -->
-        <div id="wizardModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i>Website Wizard</h2>
-                    <button type="button" onclick="closeWizard()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                
-                <div class="space-y-3.5">
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">1. Brand or Website Name</label>
-                        <input type="text" id="wName" placeholder="e.g., Rabar Shop, Zeno Store, Luxury Cafe..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">2. Website Niche & Purpose</label>
-                        <input type="text" id="wType" placeholder="e.g., Online Store, Portfolio, Gaming Platform..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">3. Style & Colors</label>
-                            <input type="text" id="wStyle" placeholder="e.g., Dark Emerald & Gold" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">4. Language</label>
-                            <input type="text" id="wLang" placeholder="e.g., English, Kurdish..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">5. Custom Vision & Features</label>
-                        <textarea id="wDetails" rows="2" placeholder="Describe sections, cart, contact form, animations..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm"></textarea>
-                    </div>
-
-                    <div class="bg-[#181820] p-3 rounded-xl border border-gray-800">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-camera mr-1"></i>Upload Products (Images & Prices)</label>
-                            <button type="button" onclick="addProductRow()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-lg font-semibold"><i class="fa-solid fa-plus"></i> Add Item</button>
-                        </div>
-                        <div id="productsContainer" class="space-y-2 max-h-36 overflow-y-auto pr-1"></div>
-                    </div>
-
-                    <button type="button" onclick="startWizardGeneration()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2">
-                        <i class="fa-solid fa-bolt mr-1"></i> Build Website & Get Link
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Monetize (Ads / VIP) Modal -->
-        <div id="monetizeModal" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 hidden">
-            <div class="bg-[#141419] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-yellow-400"><i class="fa-solid fa-sack-dollar mr-2"></i>Monetize (Ads / VIP)</h2>
-                    <button type="button" onclick="closeMonetizeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-300 mb-1">Choose Monetization Method</label>
-                        <select id="monetizeType" onchange="toggleMonetizeMode()" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-white outline-none text-sm font-semibold">
-                            <option value="ads">Add Ad Networks (Adsterra / Unity Ads)</option>
-                            <option value="premium">Make Website Premium (VIP Paywall Form)</option>
-                        </select>
-                    </div>
-
-                    <div id="adCodeWrapper" class="space-y-3">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1.5">1. Get Your Ad Code:</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="https://publishers.adsterra.com/" target="_blank" class="bg-[#1e1e26] hover:bg-gray-800 border border-red-500/40 text-red-400 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold">
-                                    <i class="fa-solid fa-external-link-alt"></i> Adsterra
-                                </a>
-                                <a href="https://dashboard.unity3d.com/" target="_blank" class="bg-[#1e1e26] hover:bg-gray-800 border border-blue-500/40 text-blue-400 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold">
-                                    <i class="fa-solid fa-external-link-alt"></i> Unity Ads
-                                </a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs text-gray-300">2. Paste Ad Script Code:</label>
-                                <button type="button" onclick="pasteAdClipboard()" class="text-[11px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded border border-gray-700"><i class="fa-solid fa-paste mr-1"></i>Paste</button>
-                            </div>
-                            <textarea id="adCodeInput" rows="4" placeholder="Paste your Adsterra or Unity Ads code here..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-3 text-emerald-400 font-mono text-xs outline-none"></textarea>
-                        </div>
-                    </div>
-
-                    <div id="premiumWrapper" class="space-y-3 hidden">
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">1. Subscription / Unlock Price</label>
-                            <input type="text" id="premPrice" placeholder="e.g., $9.99 / Month, or 10,000 IQD" class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">2. Required Payment Fields from Visitor</label>
-                            <input type="text" id="premMethods" placeholder="e.g., Card / Keycard Number, FastPay, FIB, Phone..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-300 mb-1">3. Payment Instructions</label>
-                            <textarea id="premDetails" rows="3" placeholder="e.g., Lock content until visitor submits payment details..." class="w-full bg-[#1e1e26] border border-gray-700 rounded-xl p-2.5 text-white outline-none text-sm"></textarea>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="applyMonetization()" class="w-full bg-yellow-600 hover:bg-yellow-500 active:scale-95 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
-                        <i class="fa-solid fa-bolt mr-1"></i> Apply to Website Now
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Top Header Bar -->
-        <header class="h-14 bg-[#101016] border-b border-gray-800/80 px-3.5 flex items-center justify-between z-20 shrink-0">
-            <div class="flex items-center gap-2.5">
-                <button type="button" onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-[#1e1e26] hover:bg-gray-800 active:scale-95 flex items-center justify-center text-gray-200 transition border border-gray-700/60">
-                    <i class="fa-solid fa-ellipsis-vertical text-base"></i>
-                </button>
-                
-                <div class="flex items-center gap-2 pr-2 border-r border-gray-800">
-                    <svg class="w-7 h-7 shrink-0" viewBox="0 0 120 120" fill="none">
-                        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
-                        <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="84" cy="80" r="7" fill="#f5af19"/>
-                    </svg>
-                </div>
-
                 <div>
-                    <h1 id="currentProjectTitle" class="font-bold text-xs text-white truncate max-w-[115px] sm:max-w-xs">ZenoWeb Studio</h1>
-                    <span id="activeModeBadge" class="text-[10px] text-cyan-400 flex items-center gap-1"><i class="fa-solid fa-gauge-high"></i> Mode: HIGH</span>
+                    <h2 class="text-2xl font-bold">Connect Your AI Engine</h2>
+                    <p class="text-xs text-gray-400">Accepts Gemini, OpenAI, or Claude API keys seamlessly</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-1 bg-[#1e1e26] p-1 rounded-xl border border-gray-800">
-                <button type="button" onclick="enableNotificationsManual()" class="px-2 py-1 rounded-lg text-xs text-amber-400 hover:bg-gray-700 transition" title="Notifications"><i class="fa-solid fa-bell"></i></button>
-                <button type="button" onclick="setViewport('100%')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition"><i class="fa-solid fa-desktop"></i></button>
-                <button type="button" onclick="setViewport('390px')" class="px-2 py-1 rounded-lg text-xs text-gray-300 hover:bg-gray-700 transition"><i class="fa-solid fa-mobile-screen"></i></button>
-                <button type="button" onclick="toggleCodeView()" id="codeBtn" class="px-2.5 py-1 rounded-lg text-xs text-cyan-400 hover:bg-gray-700 transition font-semibold"><i class="fa-solid fa-code mr-1"></i>Code</button>
+            <!-- Provider Selector -->
+            <div class="grid grid-cols-3 gap-2 mb-5">
+                <button onclick="selectProvider('gemini')" id="prov-gemini" class="prov-btn py-2.5 px-3 rounded-xl font-semibold text-sm border accent-border accent-bg text-white flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gemini
+                </button>
+                <button onclick="selectProvider('openai')" id="prov-openai" class="prov-btn py-2.5 px-3 rounded-xl font-semibold text-sm border border-gray-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-microchip"></i> OpenAI
+                </button>
+                <button onclick="selectProvider('claude')" id="prov-claude" class="prov-btn py-2.5 px-3 rounded-xl font-semibold text-sm border border-gray-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-brain"></i> Claude
+                </button>
+            </div>
+
+            <!-- API Key Box + Fast Direct Get Key Button Next To It -->
+            <label class="block text-xs font-medium text-gray-400 mb-2">Enter Any Valid API Key</label>
+            <div class="flex gap-2 mb-4">
+                <input id="apiKeyInput" type="password" placeholder="Paste Gemini (AIza...), OpenAI (sk-...), or Claude key..." 
+                    class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-gray-700 focus:outline-none focus:border-blue-500 text-sm">
+                <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" 
+                    class="px-4 py-3 rounded-xl accent-bg text-white font-semibold text-xs flex items-center gap-1.5 whitespace-nowrap hover:opacity-90 transition shadow-lg">
+                    <i class="fa-solid fa-external-link-alt"></i> Get API Key
+                </a>
+            </div>
+
+            <!-- Quick Links for all 3 providers -->
+            <div class="flex flex-wrap gap-2 mb-6 text-xs">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-blue-400">
+                    <i class="fa-solid fa-bolt mr-1"></i>Fast Gemini Key
+                </a>
+                <a href="https://platform.openai.com/api-keys" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-400">
+                    <i class="fa-solid fa-bolt mr-1"></i>Fast OpenAI Key
+                </a>
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-amber-400">
+                    <i class="fa-solid fa-bolt mr-1"></i>Fast Claude Key
+                </a>
+            </div>
+
+            <button onclick="saveApiKeyAndContinue()" class="w-full py-3.5 rounded-xl accent-bg text-white font-bold text-sm hover:opacity-95 transition shadow-lg">
+                Save & Launch ZoneWeb <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+            <p id="apiErrorMsg" class="text-red-400 text-xs mt-2 hidden"></p>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: MAIN WORKSPACE -->
+    <div id="screen3" class="hidden flex-1 flex flex-col min-h-screen relative">
+        
+        <!-- Top Header Bar -->
+        <header class="card-bg px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <!-- 3-Dots Menu Trigger -->
+                <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-lg" title="Menu & Settings">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-lg tracking-tight">ZoneWeb</span>
+                    <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold">AI</span>
+                </div>
+            </div>
+
+            <!-- Public Website Link Bar (Appears as soon as a website is built) -->
+            <div id="publicLinkBanner" class="hidden items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl max-w-xs md:max-w-md overflow-hidden">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <a id="publicUrlAnchor" href="#" target="_blank" class="text-xs text-emerald-400 font-mono truncate hover:underline"></a>
+                <button onclick="copyPublicLink()" class="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30" title="Copy Public Link">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+                <button onclick="openPreviewModal()" class="text-xs px-2 py-1 rounded accent-bg text-white" title="Preview Live">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+
+            <!-- AI Level Selector (Low / Medium / High) -->
+            <div class="flex items-center gap-1 bg-black/20 p-1 rounded-xl border border-white/10">
+                <button onclick="setAiLevel('low')" id="lvl-low" class="lvl-btn px-2.5 py-1 rounded-lg text-xs font-medium">Low</button>
+                <button onclick="setAiLevel('medium')" id="lvl-medium" class="lvl-btn px-2.5 py-1 rounded-lg text-xs font-medium accent-bg text-white">Medium</button>
+                <button onclick="setAiLevel('high')" id="lvl-high" class="lvl-btn px-2.5 py-1 rounded-lg text-xs font-medium">High</button>
             </div>
         </header>
 
-        <!-- 5. Instant Live Link Bar (Appears Automatically When Website is Created) -->
-        <div id="instantLinkBanner" class="hidden bg-emerald-950/90 border-b border-emerald-500/40 px-3 py-2 flex items-center justify-between gap-2 z-20 shrink-0">
-            <div class="flex items-center gap-2 overflow-hidden flex-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
-                <span class="text-[11px] font-bold text-emerald-300 shrink-0">Live URL:</span>
-                <input type="text" id="topLiveUrlInput" readonly class="w-full bg-black/50 text-cyan-300 px-2 py-1 rounded border border-emerald-500/30 text-[11px] outline-none font-mono">
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-                <button type="button" onclick="copyLiveLink()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    <i class="fa-solid fa-copy"></i> Copy
-                </button>
-                <button type="button" onclick="shareLiveLink()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    <i class="fa-solid fa-share-nodes"></i> Share
-                </button>
-                <button type="button" onclick="openLiveLinkNewTab()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-[11px] px-2 py-1 rounded-lg" title="Open Website">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- 6. Sidebar Drawer (3-Dots Menu) -->
-        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
-        <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#121217] border-r border-gray-800 z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4">
-            <div>
-                <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-                    <div class="flex items-center gap-2.5">
-                        <svg class="w-8 h-8" viewBox="0 0 120 120" fill="none">
-                            <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="6" fill="#0b1329"/>
-                            <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="84" cy="80" r="7" fill="#f5af19"/>
-                        </svg>
-                        <span class="font-zeno font-bold text-base text-white tracking-wider">ZENOWEB</span>
-                    </div>
-                    <button type="button" onclick="toggleSidebar()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-
-                <button type="button" onclick="openWizard(); toggleSidebar();" class="w-full mt-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 border border-blue-500/40 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-plus text-cyan-400"></i> New Website
-                </button>
-
-                <div class="mt-5">
-                    <h3 class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">Saved Websites</h3>
-                    <div id="projectList" class="space-y-1.5 max-h-[38vh] overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 pt-3 space-y-2">
-                <button type="button" onclick="openMonetizeModal(); toggleSidebar();" class="w-full bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-dollar-sign"></i> Monetize (Ads / VIP)
-                </button>
-
-                <div id="sidebarLinkBox" class="hidden bg-[#1a1a22] p-2.5 rounded-xl border border-emerald-500/40">
-                    <p class="text-[10px] text-emerald-400 font-bold mb-1"><i class="fa-solid fa-globe mr-1"></i>Ready Website Link:</p>
-                    <div class="flex items-center gap-1">
-                        <input type="text" id="liveUrlInput" readonly class="w-full bg-black/50 text-cyan-400 p-1.5 rounded text-[10px] outline-none">
-                        <button type="button" onclick="copyLiveLink()" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded text-xs"><i class="fa-solid fa-copy"></i></button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button type="button" onclick="downloadHTML()" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-download text-purple-400"></i> Download
-                    </button>
-                    <button type="button" onclick="openSettings(); toggleSidebar();" class="bg-[#1e1e26] hover:bg-gray-800 text-gray-300 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-gear text-gray-400"></i> Settings
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- 7. Main Workspace (Clean, Examples Removed, Low/Medium/High Mode Added) -->
-        <main class="flex-1 relative bg-[#07070a] flex flex-col items-center justify-center overflow-y-auto pb-28">
+        <!-- Main Center Content & Chat Messages -->
+        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 pt-6 pb-36 overflow-y-auto">
             
-            <div id="emptyState" class="text-center p-6 max-w-md w-full flex flex-col items-center">
-                <div class="w-20 h-20 bg-blue-950/30 border border-blue-500/30 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_35px_rgba(0,150,255,0.2)]">
-                    <svg class="w-12 h-12" viewBox="0 0 120 120" fill="none">
-                        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="#00d2ff" stroke-width="5" fill="#0b1329"/>
-                        <path d="M36 40 H84 L42 80 H84" stroke="#00f2fe" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="84" cy="80" r="7" fill="#f5af19"/>
-                    </svg>
+            <!-- Center Hero Prompt -->
+            <div id="heroPrompt" class="my-auto text-center py-12">
+                <div class="w-16 h-16 rounded-2xl accent-bg/20 border accent-border mx-auto mb-4 flex items-center justify-center">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl accent-text"></i>
                 </div>
+                <h2 class="text-2xl md:text-4xl font-extrabold mb-3">What business do you want to build today?</h2>
+                <p class="text-sm text-gray-400 max-w-md mx-auto">Click the chat box below to start. I will ask you about your website name, style, and features, or analyze any image you send.</p>
+            </div>
 
-                <h2 class="font-zeno text-xl font-extrabold text-white mb-2 tracking-wider">ZENOWEB AI STUDIO</h2>
-                <p class="text-gray-400 text-xs mb-6 leading-relaxed">Build complete, interactive websites with real product photos, shopping carts, Adsterra/Unity Ads, and Premium Paywalls. Instant shareable link generated automatically!</p>
+            <!-- Conversation Feed -->
+            <div id="chatFeed" class="space-y-4 w-full"></div>
 
-                <!-- LOW / MEDIUM / HIGH MODE SELECTOR -->
-                <div class="w-full max-w-xs mb-5">
-                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Select AI Build Power Mode</label>
-                    <div class="grid grid-cols-3 gap-2 bg-[#12121a] p-1.5 rounded-2xl border border-gray-800">
-                        <button type="button" id="modeBtn_low" onclick="setBuildQuality('low')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-                            <i class="fa-solid fa-feather text-emerald-400"></i>
-                            <span>Low</span>
-                        </button>
-                        <button type="button" id="modeBtn_medium" onclick="setBuildQuality('medium')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-                            <i class="fa-solid fa-layer-group text-blue-400"></i>
-                            <span>Medium</span>
-                        </button>
-                        <button type="button" id="modeBtn_high" onclick="setBuildQuality('high')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border border-cyan-500/50 text-white shadow-md">
-                            <i class="fa-solid fa-fire-flame-curved text-amber-400"></i>
-                            <span>High</span>
-                        </button>
+            <!-- Live Background Status Bar -->
+            <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-spinner fa-spin accent-text text-xl"></i>
+                    <div>
+                        <p class="text-sm font-semibold">Building your website in the background...</p>
+                        <p class="text-xs text-gray-400">You can switch tabs or minimize; we'll notify you as soon as it's ready!</p>
                     </div>
-                    <p id="modeDescText" class="text-[11px] text-cyan-400/90 mt-2 font-medium">High Mode: Full interactive system, cart, animations & ultra UI</p>
                 </div>
-
-                <!-- Main Action Buttons (Example Pills Removed!) -->
-                <div class="w-full max-w-xs space-y-3">
-                    <button type="button" onclick="openWizard()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl text-sm shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Start Website Wizard
-                    </button>
-
-                    <button type="button" onclick="openMonetizeModal()" class="w-full bg-[#1e1b14] hover:bg-[#2a2519] active:scale-95 text-amber-400 border border-amber-500/30 font-bold py-3 px-6 rounded-2xl text-sm transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-sack-dollar"></i> Monetize (Ads / VIP)
-                    </button>
-                </div>
-            </div>
-
-            <div id="iframeContainer" class="w-full h-full hidden flex items-center justify-center">
-                <iframe id="previewFrame" class="w-full h-full bg-white transition-all shadow-2xl" sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-            </div>
-
-            <textarea id="codeEditor" oninput="manualCodeUpdate()" class="w-full h-full bg-[#0d0d11] text-emerald-400 font-mono text-xs p-4 outline-none hidden" spellcheck="false"></textarea>
-            
-            <!-- Real-Time Turbo Progress Overlay -->
-            <div id="loadingOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-md z-20 flex flex-col items-center justify-center hidden px-6 text-center">
-                <div class="relative w-16 h-16 flex items-center justify-center mb-4">
-                    <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-                    <div class="absolute inset-0 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                    <i class="fa-solid fa-bolt text-amber-400 text-xl animate-pulse"></i>
-                </div>
-                <p id="loadingText" class="text-white font-bold text-sm">ZenoWeb AI is building your website...</p>
-                <div class="w-64 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-3">
-                    <div id="streamProgressBar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 w-0 transition-all duration-200"></div>
-                </div>
-                <p id="loadingSubText" class="text-cyan-400 text-xs mt-2 font-mono">Generating code & live share link...</p>
             </div>
         </main>
 
-        <!-- 8. Elevated Floating AI Chat Bar with Quick Mode Switcher -->
-        <div class="fixed bottom-4 left-0 right-0 px-3 sm:px-4 z-30 pointer-events-none">
-            <div class="max-w-2xl mx-auto pointer-events-auto">
-                <div id="chatImgPreviewBar" class="hidden flex items-center gap-2 mb-2 bg-[#16161e]/95 backdrop-blur-md p-2 rounded-xl border border-gray-700/80 overflow-x-auto"></div>
-
-                <div class="flex items-center gap-1.5 bg-[#181822]/95 backdrop-blur-md border border-gray-700/90 rounded-2xl p-1.5 pl-2 shadow-2xl focus-within:border-cyan-500 transition">
-                    <input type="file" id="chatImageInput" accept="image/*" multiple onchange="handleChatImages(this)" class="hidden">
-                    
-                    <button type="button" onclick="document.getElementById('chatImageInput').click()" class="w-9 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 active:scale-95 text-cyan-400 flex items-center justify-center shrink-0 transition" title="Upload Photo">
-                        <i class="fa-solid fa-image text-sm"></i>
+        <!-- Bottom Fixed AI Chat Bar -->
+        <div class="fixed bottom-0 inset-x-0 p-3 md:p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-20">
+            <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl">
+                <!-- Attached Image Preview -->
+                <div id="imagePreviewContainer" class="hidden px-3 pt-2 pb-2 flex items-center gap-3 border-b border-white/10 mb-2">
+                    <img id="attachedImageThumb" src="" class="w-14 h-14 object-cover rounded-xl border border-white/20">
+                    <div class="flex-1 text-xs">
+                        <p class="font-semibold text-blue-400">Image attached for AI Vision analysis</p>
+                        <p id="attachedImageName" class="text-gray-400 truncate"></p>
+                    </div>
+                    <button onclick="clearAttachedImage()" class="text-gray-400 hover:text-red-400 p-1">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
+                </div>
 
-                    <!-- Compact Mode Selector Pill inside Chat Bar -->
-                    <button type="button" onclick="cycleBuildQuality()" id="chatModePill" class="px-2.5 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 active:scale-95 text-[11px] font-bold text-amber-400 border border-gray-700 shrink-0 flex items-center gap-1" title="Tap to switch Low / Medium / High">
-                        <i class="fa-solid fa-fire-flame-curved"></i>
-                        <span id="chatModeLabel">HIGH</span>
-                    </button>
+                <div class="flex items-end gap-2">
+                    <!-- Image Upload Button -->
+                    <label class="w-11 h-11 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer text-gray-300 shrink-0" title="Send Image to AI">
+                        <i class="fa-regular fa-image text-lg"></i>
+                        <input id="imageInput" type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
 
-                    <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatPrompt()" placeholder="Tell ZenoWeb AI what to build..." class="w-full bg-transparent text-white text-sm outline-none placeholder-gray-400 px-1.5">
-                    
-                    <button type="button" onclick="sendChatPrompt()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md transition">
-                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    <!-- Chat Input -->
+                    <textarea id="chatInput" rows="1" onfocus="handleChatFocus()" placeholder="Describe your business website or answer AI questions..."
+                        class="flex-1 bg-transparent px-2 py-2.5 text-sm focus:outline-none resize-none max-h-32"></textarea>
+
+                    <!-- Send Button -->
+                    <button onclick="sendUserMessage()" id="sendBtn" class="w-11 h-11 rounded-xl accent-bg text-white flex items-center justify-center shrink-0 hover:opacity-90 transition">
+                        <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- 3-DOTS SIDEBAR DRAWER (Matches the screenshot layout) -->
+    <div id="drawerOverlay" class="hidden fixed inset-0 z-50 drawer-backdrop flex">
+        <div class="w-80 max-w-[88vw] bg-[#0b0c10] text-white h-full flex flex-col justify-between p-4 border-r border-white/10 overflow-y-auto">
+            
+            <!-- Top Section: Brand + Settings at Top -->
+            <div>
+                <div class="flex items-center justify-between pb-4 mb-3 border-b border-white/10">
+                    <span class="text-xl font-bold tracking-wide">ZoneWeb</span>
+                    <button onclick="toggleDrawer(false)" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- SETTINGS AT THE TOP (API Key, Accent Color, Dark/Light Mode) -->
+                <div class="mb-5 bg-white/5 rounded-2xl p-3.5 border border-white/10">
+                    <div class="flex items-center gap-2 text-sm font-bold mb-3 accent-text">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Top Settings</span>
+                    </div>
+
+                    <!-- Change API Key -->
+                    <div class="mb-3">
+                        <label class="text-[11px] text-gray-400 block mb-1">Update API Key (Gemini / OpenAI / Claude)</label>
+                        <div class="flex gap-1.5">
+                            <input id="drawerApiKey" type="password" placeholder="New API Key..." class="flex-1 bg-black/40 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs">
+                            <button onclick="updateApiKeyFromDrawer()" class="px-3 py-1.5 rounded-lg accent-bg text-xs font-semibold">Save</button>
+                        </div>
+                    </div>
+
+                    <!-- Theme Accent Color + Dark/Light Mode -->
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs text-gray-300">Color:</span>
+                            <button onclick="setAccentColor('#3b82f6')" class="w-5 h-5 rounded-full bg-blue-500 border border-white/40"></button>
+                            <button onclick="setAccentColor('#10b981')" class="w-5 h-5 rounded-full bg-emerald-500 border border-white/40"></button>
+                            <button onclick="setAccentColor('#8b5cf6')" class="w-5 h-5 rounded-full bg-violet-500 border border-white/40"></button>
+                            <button onclick="setAccentColor('#e11d48')" class="w-5 h-5 rounded-full bg-rose-600 border border-white/40"></button>
+                            <input type="color" onchange="setAccentColor(this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-0">
+                        </div>
+                        <button onclick="toggleThemeMode()" id="themeToggleBtn" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-moon"></i> <span id="themeModeText">Dark</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu Items (Matching screenshot style) -->
+                <nav class="space-y-1 text-sm">
+                    <button onclick="startNewWebsiteProject()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                        <i class="fa-regular fa-pen-to-square w-5 text-center text-gray-300"></i>
+                        <span>New Website Chat</span>
+                    </button>
+                    <button onclick="openPreviewModal()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                        <i class="fa-solid fa-table-cells-large w-5 text-center text-gray-300"></i>
+                        <span>Live Website Library</span>
+                    </button>
+                    <button onclick="document.getElementById('imageInput').click(); toggleDrawer(false);" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                        <i class="fa-regular fa-image w-5 text-center text-gray-300"></i>
+                        <span>Send Vision Image</span>
+                    </button>
+                    <button onclick="downloadGeneratedSite()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                        <i class="fa-solid fa-download w-5 text-center text-gray-300"></i>
+                        <span>Download index.html</span>
+                    </button>
+                </nav>
+
+                <!-- Saved Websites History -->
+                <div class="mt-4 pt-3 border-t border-white/10">
+                    <p class="text-xs text-gray-400 px-2 mb-2 uppercase tracking-wider">Saved Projects</p>
+                    <div id="savedProjectsList" class="space-y-1 max-h-32 overflow-y-auto text-xs"></div>
+                </div>
+            </div>
+
+            <!-- BOTTOM OF 3-DOTS MENU: 2 MAIN BUTTONS (ADS & PREMIUM) -->
+            <div class="pt-4 border-t border-white/10 space-y-3">
+                
+                <!-- BUTTON 1: GET ADS (Adsterra & Unity + Code Paste Box Below) -->
+                <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+                    <button onclick="toggleSection('adsPanel')" class="w-full py-2 px-3 rounded-xl accent-bg text-white font-bold text-xs flex items-center justify-between">
+                        <span><i class="fa-solid fa-rectangle-ad mr-1.5"></i> 1. Add Ads (Adsterra & Unity)</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    
+                    <div id="adsPanel" class="mt-3 space-y-2.5">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="https://beta.publishers.adsterra.com/websites" target="_blank" 
+                                class="py-2 px-2.5 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-300 text-xs font-semibold text-center hover:bg-orange-500/30">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Adsterra Codes
+                            </a>
+                            <a href="https://cloud.unity.com/" target="_blank" 
+                                class="py-2 px-2.5 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold text-center hover:bg-indigo-500/30">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Unity Ads Codes
+                            </a>
+                        </div>
+                        <textarea id="adsCodeInput" rows="2" oninput="autoSaveConfig()" placeholder="Paste copied Adsterra or Unity Ads script/code here to inject into your website..." 
+                            class="w-full bg-black/50 border border-white/15 rounded-xl p-2 text-xs text-gray-200 focus:outline-none"></textarea>
+                        <button onclick="applyAdsToWebsite()" class="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
+                            Inject Ads into Website Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BUTTON 2: PREMIUM MONETIZATION SETUP -->
+                <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+                    <button onclick="toggleSection('premiumPanel')" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-bold text-xs flex items-center justify-between">
+                        <span><i class="fa-solid fa-crown mr-1.5"></i> 2. Setup Premium & Payment</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <div id="premiumPanel" class="hidden mt-3 space-y-2 text-xs">
+                        <input id="premMethod" type="text" oninput="autoSaveConfig()" placeholder="Payment Method (e.g. Bank Card, Local Wallet, PayPal)" 
+                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5">
+                        <input id="premApp" type="text" oninput="autoSaveConfig()" placeholder="On which App? (e.g. QiCard, FIB, FastPay, ZainCash)" 
+                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5">
+                        <input id="premAccount" type="text" oninput="autoSaveConfig()" placeholder="Account Number / Wallet Link / Phone" 
+                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5">
+                        <input id="premPrice" type="text" oninput="autoSaveConfig()" placeholder="Subscription Price (e.g. $9.99 or 10,000 IQD)" 
+                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5">
+                        <select id="premPlacement" onchange="autoSaveConfig()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-gray-200">
+                            <option value="header">Place Premium Button in Top Header</option>
+                            <option value="modal">Place as Full VIP Paywall Popup</option>
+                            <option value="pricing">Place as Dedicated Pricing Section</option>
+                        </select>
+                        <button onclick="applyPremiumToWebsite()" class="w-full py-1.5 rounded-lg bg-amber-500 text-black font-bold">
+                            Add Premium Checkout to Website
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom User Profile Row -->
+                <div class="flex items-center justify-between pt-2 px-1">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-xs">ZW</div>
+                        <div>
+                            <p class="text-xs font-bold leading-none">ZoneWeb Builder</p>
+                            <span class="text-[10px] text-blue-400 font-semibold">PRO ACTIVE</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1" onclick="toggleDrawer(false)"></div>
+    </div>
+
+    <!-- LIVE WEBSITE PREVIEW MODAL -->
+    <div id="previewModal" class="hidden fixed inset-0 z-50 bg-black/85 flex flex-col p-2 md:p-6">
+        <div class="card-bg rounded-t-2xl px-4 py-3 flex items-center justify-between border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <span id="previewSiteTitle" class="font-bold text-sm">Live Generated Website</span>
+                <span id="previewSlugBadge" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="copyPublicLink()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold">
+                    <i class="fa-solid fa-share-nodes mr-1"></i> Copy Public Link
+                </button>
+                <button onclick="downloadGeneratedSite()" class="px-3 py-1.5 rounded-lg accent-bg text-white text-xs font-semibold">
+                    <i class="fa-solid fa-download mr-1"></i> Download HTML
+                </button>
+                <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <iframe id="livePreviewIframe" class="flex-1 w-full bg-white rounded-b-2xl border-0"></iframe>
     </div>
 
     <script>
-        /* =========================================================
-           1. STANDALONE SHARED LINK VIEWER
-        ========================================================= */
-        (async function checkStandaloneSiteMode() {
-            const params = new URLSearchParams(window.location.search);
-            const siteId = params.get('site');
-            const hashData = window.location.hash;
+        // --- STATE & AUTO-SAVE STORAGE ---
+        let state = {
+            provider: localStorage.getItem('zw_provider') || 'gemini',
+            apiKey: localStorage.getItem('zw_api_key') || '',
+            aiLevel: localStorage.getItem('zw_ai_level') || 'medium',
+            accentColor: localStorage.getItem('zw_accent') || '#3b82f6',
+            themeMode: localStorage.getItem('zw_theme') || 'dark',
+            adsCode: localStorage.getItem('zw_ads_code') || '',
+            premium: JSON.parse(localStorage.getItem('zw_premium') || '{"method":"","app":"","account":"","price":"","placement":"header"}'),
+            chatHistory: JSON.parse(localStorage.getItem('zw_chat_history') || '[]'),
+            projects: JSON.parse(localStorage.getItem('zw_projects') || '[]'),
+            currentSiteName: localStorage.getItem('zw_current_site_name') || '',
+            currentSiteHtml: localStorage.getItem('zw_current_site_html') || '',
+            hasAskedInitialQuestions: false
+        };
 
-            if (siteId) {
-                document.getElementById('ps5Splash').classList.add('hidden');
-                document.getElementById('appShell').classList.add('hidden');
-                const viewer = document.getElementById('standaloneViewer');
-                viewer.classList.remove('hidden');
+        let attachedImageBase64 = null;
+        let attachedImageMime = null;
+
+        // --- CHECK IF URL IS OPENING A PUBLIC SHARED WEBSITE ---
+        function checkPublicSiteRoute() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/public/')) {
+                const parts = hash.replace('#/public/', '').split('/');
+                const slug = parts[0];
+                const encodedHtml = parts.slice(1).join('/');
                 try {
-                    const res = await fetch('https://bytebin.lucko.me/' + siteId);
-                    const html = await res.text();
-                    document.getElementById('standaloneFrame').srcdoc = html;
+                    const decodedHtml = decodeURIComponent(escape(atob(encodedHtml)));
+                    document.getElementById('screen1').classList.add('hidden');
+                    document.getElementById('publicViewerScreen').classList.remove('hidden');
+                    document.title = slug.toUpperCase() + " | ZoneWeb Public Site";
+                    const frame = document.getElementById('publicSiteFrame');
+                    frame.srcdoc = decodedHtml;
+                    return true;
                 } catch (e) {
-                    document.getElementById('standaloneFrame').srcdoc = '<h2 style="font-family:sans-serif;text-align:center;margin-top:20%;">Loading website...</h2>';
+                    console.error("Invalid public link encoding", e);
                 }
-                return;
             }
-
-            if (hashData && hashData.startsWith('#site=')) {
-                document.getElementById('ps5Splash').classList.add('hidden');
-                document.getElementById('appShell').classList.add('hidden');
-                const viewer = document.getElementById('standaloneViewer');
-                viewer.classList.remove('hidden');
-                try {
-                    const encoded = hashData.substring(6);
-                    const html = decodeURIComponent(escape(atob(encoded)));
-                    document.getElementById('standaloneFrame').srcdoc = html;
-                } catch (e) {}
-                return;
-            }
-        })();
-
-        /* =========================================================
-           2. CORE STATE & LOW / MEDIUM / HIGH MODE CONTROLLER
-        ========================================================= */
-        function loadSafeProjects() {
-            try {
-                const raw = localStorage.getItem('wm_projects');
-                if (!raw) return [];
-                const parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : [];
-            } catch (e) {
-                return [];
-            }
+            return false;
         }
 
-        let projects = loadSafeProjects();
-        let currentProjectId = localStorage.getItem('wm_current_id') || null;
-        let currentProducts = [];
-        let pendingChatImages = [];
-        let isCodeView = false;
-        let splashClosed = false;
-        let buildQuality = localStorage.getItem('wm_quality') || 'high';
-
-        const sleep = (ms) => new Promise(res => setTimeout(res, ms));
-
-        function setBuildQuality(mode) {
-            buildQuality = mode;
-            localStorage.setItem('wm_quality', mode);
-
-            const modes = ['low', 'medium', 'high'];
-            modes.forEach(m => {
-                const btn = document.getElementById('modeBtn_' + m);
-                if (!btn) return;
-                if (m === mode) {
-                    btn.className = "py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border border-cyan-500/50 text-white shadow-md";
-                } else {
-                    btn.className = "py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-gray-400 hover:text-white";
-                }
-            });
-
-            const descEl = document.getElementById('modeDescText');
-            const badgeEl = document.getElementById('activeModeBadge');
-            const pillLabel = document.getElementById('chatModeLabel');
-            const pillBtn = document.getElementById('chatModePill');
-
-            if (mode === 'low') {
-                if (descEl) descEl.innerText = "Low Mode: Ultra-fast generation, clean & lightweight layout";
-                if (badgeEl) badgeEl.innerHTML = '<i class="fa-solid fa-feather text-emerald-400"></i> Mode: LOW';
-                if (pillLabel) pillLabel.innerText = 'LOW';
-                if (pillBtn) pillBtn.className = "px-2.5 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 active:scale-95 text-[11px] font-bold text-emerald-400 border border-emerald-500/40 shrink-0 flex items-center gap-1";
-            } else if (mode === 'medium') {
-                if (descEl) descEl.innerText = "Medium Mode: Balanced speed, modern multi-section UI & forms";
-                if (badgeEl) badgeEl.innerHTML = '<i class="fa-solid fa-layer-group text-blue-400"></i> Mode: MEDIUM';
-                if (pillLabel) pillLabel.innerText = 'MED';
-                if (pillBtn) pillBtn.className = "px-2.5 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 active:scale-95 text-[11px] font-bold text-blue-400 border border-blue-500/40 shrink-0 flex items-center gap-1";
-            } else {
-                if (descEl) descEl.innerText = "High Mode: Full interactive system, cart, animations & ultra UI";
-                if (badgeEl) badgeEl.innerHTML = '<i class="fa-solid fa-fire-flame-curved text-amber-400"></i> Mode: HIGH';
-                if (pillLabel) pillLabel.innerText = 'HIGH';
-                if (pillBtn) pillBtn.className = "px-2.5 h-9 rounded-xl bg-[#252533] hover:bg-gray-700 active:scale-95 text-[11px] font-bold text-amber-400 border border-amber-500/40 shrink-0 flex items-center gap-1";
-            }
-        }
-
-        function cycleBuildQuality() {
-            const next = buildQuality === 'low' ? 'medium' : (buildQuality === 'medium' ? 'high' : 'low');
-            setBuildQuality(next);
-        }
-
-        function getSystemPromptForQuality() {
-            const baseRules = [
-                "You are ZenoWeb AI, an elite Full-Stack Web Developer.",
-                "Return ONLY raw HTML5 starting with <!DOCTYPE html> and ending with </html>. Do NOT use markdown backticks.",
-                "Include Tailwind CSS CDN and FontAwesome 6 CDN.",
-                "Keep placeholder image strings (\"RAW_IMG_TARGET_x\" or \"CHAT_IMG_x\") untouched inside img src attributes."
-            ];
-
-            if (buildQuality === 'low') {
-                baseRules.push("QUALITY MODE: LOW (FAST & LIGHTWEIGHT). Build a clean, concise, fast-loading single-page website with Hero, core items/features, and footer. Keep code compact.");
-            } else if (buildQuality === 'medium') {
-                baseRules.push("QUALITY MODE: MEDIUM (BALANCED MODERN). Build a complete multi-section website with sticky navbar, hero banner, interactive product/service grid, contact form, and responsive mobile menu.");
-            } else {
-                baseRules.push("QUALITY MODE: HIGH (ULTRA PRO FULL-STACK). Build a rich, production-grade interactive web app with glassmorphism, smooth animations, working JavaScript shopping cart drawer (add/remove/total), live search bar filter, interactive modals, and toast alerts.");
-            }
-            return baseRules.join("\n");
-        }
-
-        /* =========================================================
-           3. WELCOME SPLASH TRANSITION
-        ========================================================= */
-        function enterZenoStudio() {
-            if (splashClosed) return;
-            splashClosed = true;
-            const splash = document.getElementById('ps5Splash');
-            if (splash) {
-                splash.style.opacity = '0';
-                splash.style.pointerEvents = 'none';
-                setTimeout(() => { splash.classList.add('hidden'); }, 400);
-            }
-            initAudioAndNotifications();
-        }
-
+        // --- INITIALIZATION & 4-SECOND SPLASH SCREEN ---
         window.addEventListener('DOMContentLoaded', () => {
-            setBuildQuality(buildQuality);
+            if (checkPublicSiteRoute()) return;
+
+            applySavedPreferences();
+
+            // Request Notification Permission early so background alerts work
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+
+            // Animate 4-second progress bar
             setTimeout(() => {
-                const prog = document.getElementById('ps5Progress');
-                if (prog) prog.style.width = '100%';
+                const bar = document.getElementById('splashProgress');
+                if (bar) bar.style.width = '100%';
             }, 50);
 
-            setTimeout(enterZenoStudio, 1900);
-
-            populateSettingsInputs();
-            renderProjectList();
-            if (currentProjectId && projects.find(p => p.id === currentProjectId)) {
-                loadProject(currentProjectId);
-            } else if (projects.length > 0) {
-                loadProject(projects[0].id);
-            }
+            // Exactly 4 seconds splash transition
+            setTimeout(() => {
+                document.getElementById('screen1').classList.add('hidden');
+                if (state.apiKey && state.apiKey.trim().length > 5) {
+                    launchScreen3();
+                } else {
+                    document.getElementById('screen2').classList.remove('hidden');
+                }
+            }, 4000);
         });
 
-        /* =========================================================
-           4. AUTOMATIC INSTANT LIVE LINK GENERATOR
-        ========================================================= */
-        async function createInstantLiveLink(htmlCode) {
-            const baseUrl = window.location.origin + window.location.pathname;
-            try {
-                const res = await fetch('https://bytebin.lucko.me/post', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-                    body: htmlCode
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.key) return baseUrl + '?site=' + data.key;
-                }
-            } catch (e) {}
+        function applySavedPreferences() {
+            setAccentColor(state.accentColor, false);
+            if (state.themeMode === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                document.getElementById('themeModeText').innerText = 'Light';
+            }
+            setAiLevel(state.aiLevel, false);
 
-            try {
-                const b64 = btoa(unescape(encodeURIComponent(htmlCode)));
-                return baseUrl + '#site=' + b64;
-            } catch (e) {
-                const blob = new Blob([htmlCode], { type: 'text/html' });
-                return URL.createObjectURL(blob);
+            document.getElementById('adsCodeInput').value = state.adsCode;
+            document.getElementById('premMethod').value = state.premium.method || '';
+            document.getElementById('premApp').value = state.premium.app || '';
+            document.getElementById('premAccount').value = state.premium.account || '';
+            document.getElementById('premPrice').value = state.premium.price || '';
+            document.getElementById('premPlacement').value = state.premium.placement || 'header';
+
+            renderChatHistory();
+            renderProjectsList();
+            if (state.currentSiteHtml && state.currentSiteName) {
+                updatePublicLinkUI(state.currentSiteName, state.currentSiteHtml);
             }
         }
 
-        function showLiveLinkUI(url) {
-            if (!url) return;
-            document.getElementById('instantLinkBanner').classList.remove('hidden');
-            document.getElementById('topLiveUrlInput').value = url;
-            document.getElementById('sidebarLinkBox').classList.remove('hidden');
-            document.getElementById('liveUrlInput').value = url;
-        }
-
-        function copyLiveLink() {
-            const url = document.getElementById('topLiveUrlInput').value || document.getElementById('liveUrlInput').value;
-            if (!url) return;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('Website link copied! Ready to share.');
-            }).catch(() => {
-                const inp = document.getElementById('topLiveUrlInput');
-                inp.select();
-                document.execCommand('copy');
-                alert('Website link copied!');
+        // --- SCREEN 2: PROVIDER & API KEY LOGIC ---
+        function selectProvider(prov) {
+            state.provider = prov;
+            localStorage.setItem('zw_provider', prov);
+            document.querySelectorAll('.prov-btn').forEach(btn => {
+                btn.classList.remove('accent-bg', 'text-white', 'accent-border');
+                btn.classList.add('border-gray-700');
             });
+            const activeBtn = document.getElementById('prov-' + prov);
+            activeBtn.classList.add('accent-bg', 'text-white', 'accent-border');
+
+            const getBtn = document.getElementById('getApiKeyBtn');
+            if (prov === 'gemini') getBtn.href = 'https://aistudio.google.com/app/apikey';
+            if (prov === 'openai') getBtn.href = 'https://platform.openai.com/api-keys';
+            if (prov === 'claude') getBtn.href = 'https://console.anthropic.com/settings/keys';
         }
 
-        function shareLiveLink() {
-            const url = document.getElementById('topLiveUrlInput').value || document.getElementById('liveUrlInput').value;
-            if (!url) return;
-            if (navigator.share) {
-                navigator.share({ title: 'My Website', text: 'Check out my website:', url: url }).catch(() => {});
-            } else {
-                copyLiveLink();
-            }
+        function detectProviderFromKey(key) {
+            const k = key.trim();
+            if (k.startsWith('AIza')) return 'gemini';
+            if (k.startsWith('sk-ant-')) return 'claude';
+            if (k.startsWith('sk-')) return 'openai';
+            return state.provider;
         }
 
-        function openLiveLinkNewTab() {
-            const url = document.getElementById('topLiveUrlInput').value || document.getElementById('liveUrlInput').value;
-            if (url) window.open(url, '_blank');
-        }
-
-        /* =========================================================
-           5. UI MODALS & PRODUCT UPLOAD HANDLERS
-        ========================================================= */
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.toggle('hidden');
-        }
-
-        function openSettings() {
-            populateSettingsInputs();
-            document.getElementById('setupModal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            autoSaveSettings();
-            document.getElementById('setupModal').classList.add('hidden');
-        }
-
-        function populateSettingsInputs() {
-            document.getElementById('aiProvider').value = localStorage.getItem('wm_provider') || 'gemini';
-            document.getElementById('apiKeyInput').value = localStorage.getItem('wm_api_key') || '';
-        }
-
-        function autoSaveSettings() {
-            const provider = document.getElementById('aiProvider').value;
+        function saveApiKeyAndContinue() {
             const key = document.getElementById('apiKeyInput').value.trim();
-            localStorage.setItem('wm_provider', provider);
-            if (key) localStorage.setItem('wm_api_key', key);
+            if (key.length < 6) {
+                const err = document.getElementById('apiErrorMsg');
+                err.innerText = "Please enter a valid API key.";
+                err.classList.remove('hidden');
+                return;
+            }
+            state.provider = detectProviderFromKey(key);
+            state.apiKey = key;
+            localStorage.setItem('zw_api_key', key);
+            localStorage.setItem('zw_provider', state.provider);
+
+            document.getElementById('screen2').classList.add('hidden');
+            launchScreen3();
         }
 
-        function openWizard() {
-            document.getElementById('productsContainer').innerHTML = '';
-            currentProducts = [];
-            document.getElementById('wizardModal').classList.remove('hidden');
-        }
-
-        function closeWizard() {
-            document.getElementById('wizardModal').classList.add('hidden');
-        }
-
-        function openMonetizeModal() {
-            document.getElementById('monetizeModal').classList.remove('hidden');
-        }
-
-        function closeMonetizeModal() {
-            document.getElementById('monetizeModal').classList.add('hidden');
-        }
-
-        function toggleMonetizeMode() {
-            const type = document.getElementById('monetizeType').value;
-            document.getElementById('adCodeWrapper').classList.toggle('hidden', type !== 'ads');
-            document.getElementById('premiumWrapper').classList.toggle('hidden', type !== 'premium');
-        }
-
-        async function pasteAdClipboard() {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById('adCodeInput').value += '\n' + text;
-            } catch (e) {
-                alert('Long-press inside the box to paste your ad code.');
+        function launchScreen3() {
+            document.getElementById('screen3').classList.remove('hidden');
+            document.getElementById('activeProviderBadge').innerText = state.provider.toUpperCase();
+            document.getElementById('drawerApiKey').value = state.apiKey;
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
             }
         }
 
-        function compressImageFile(file, callback) {
+        // --- INTERACTIVE CHAT FOCUS QUESTIONING ---
+        function handleChatFocus() {
+            if (state.chatHistory.length === 0 && !state.hasAskedInitialQuestions) {
+                state.hasAskedInitialQuestions = true;
+                appendMessage('ai', "Welcome to **ZoneWeb Builder**! To build your complete live website right now, please tell me:\n1. **What is the name of your website/business?**\n2. **What should the website do and look like?** (Colors, sections, features)\n3. Feel free to **attach any image/logo** using the image button so I can recognize and include its style!");
+            }
+        }
+
+        // --- IMAGE UPLOAD & VISION RECOGNITION ---
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const maxDim = 600;
-                    let w = img.width, h = img.height;
-                    if (w > maxDim || h > maxDim) {
-                        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
-                        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
-                    }
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-                    callback(canvas.toDataURL('image/jpeg', 0.75));
-                };
-                img.src = e.target.result;
+            reader.onload = function(evt) {
+                const dataUrl = evt.target.result;
+                attachedImageMime = file.type || 'image/jpeg';
+                attachedImageBase64 = dataUrl.split(',')[1];
+                document.getElementById('attachedImageThumb').src = dataUrl;
+                document.getElementById('attachedImageName').innerText = file.name;
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
             };
             reader.readAsDataURL(file);
         }
 
-        function addProductRow() {
-            const id = Date.now() + Math.floor(Math.random() * 1000);
-            const div = document.createElement('div');
-            div.className = "flex gap-2 items-center bg-[#22222d] p-2 rounded-lg border border-gray-700";
-            div.innerHTML = `
-                <input type="text" id="pn_${id}" placeholder="Item Name" class="w-1/3 bg-black/50 text-white text-xs p-1.5 rounded outline-none">
-                <input type="text" id="pp_${id}" placeholder="Price ($)" class="w-1/4 bg-black/50 text-white text-xs p-1.5 rounded outline-none">
-                <input type="file" accept="image/*" onchange="encodeImg(this, ${id})" class="w-5/12 text-[10px] text-gray-400 file:bg-blue-600 file:border-0 file:rounded file:text-white file:px-2 file:py-1">
-            `;
-            document.getElementById('productsContainer').appendChild(div);
-            currentProducts.push({ id: id, name: '', price: '', b64: '' });
+        function clearAttachedImage() {
+            attachedImageBase64 = null;
+            attachedImageMime = null;
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
         }
 
-        function encodeImg(input, id) {
-            const file = input.files[0];
-            if (!file) return;
-            compressImageFile(file, (b64Data) => {
-                const prod = currentProducts.find(p => p.id === id);
-                if (prod) prod.b64 = b64Data;
-            });
+        // --- SEND MESSAGE & REAL AI CALL (WORKS IN BACKGROUND) ---
+        async function sendUserMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text && !attachedImageBase64) return;
+
+            input.value = '';
+            const userImg = attachedImageBase64 ? `data:${attachedImageMime};base64,${attachedImageBase64}` : null;
+            const currentImgBase64 = attachedImageBase64;
+            const currentImgMime = attachedImageMime;
+            clearAttachedImage();
+
+            appendMessage('user', text || "Analyze this image and use it for my website.", userImg);
+
+            document.getElementById('bgStatusCard').classList.remove('hidden');
+
+            try {
+                const aiResponse = await callRealAI(text, currentImgBase64, currentImgMime);
+                document.getElementById('bgStatusCard').classList.add('hidden');
+
+                // Check if AI generated complete website HTML code
+                const htmlMatch = aiResponse.match(/```html\s*([\s\S]*?)```/i) || aiResponse.match(/(<!DOCTYPE html[\s\S]*<\/html>)/i);
+
+                if (htmlMatch && htmlMatch[1]) {
+                    let finalHtml = injectAdsAndPremium(htmlMatch[1].trim());
+                    const extractedName = extractWebsiteName(text, finalHtml);
+                    state.currentSiteName = extractedName;
+                    state.currentSiteHtml = finalHtml;
+                    localStorage.setItem('zw_current_site_name', extractedName);
+                    localStorage.setItem('zw_current_site_html', finalHtml);
+
+                    saveProjectToHistory(extractedName, finalHtml);
+                    updatePublicLinkUI(extractedName, finalHtml);
+
+                    const cleanExplanation = aiResponse.replace(/```html[\s\S]*?```/gi, '').trim();
+                    appendMessage('ai', (cleanExplanation || `Your website **${extractedName}** has been built and published!`) + `\n\n✅ **Public Link Ready at the top of your screen!**`);
+                    
+                    triggerWebsiteReadyNotification(extractedName);
+                } else {
+                    appendMessage('ai', aiResponse);
+                }
+            } catch (err) {
+                document.getElementById('bgStatusCard').classList.add('hidden');
+                appendMessage('ai', `⚠️ Error communicating with ${state.provider.toUpperCase()} API: ${err.message}. You can check or update your API key in the top 3-dots menu.`);
+            }
         }
 
-        async function startWizardGeneration() {
-            const name = document.getElementById('wName').value.trim() || 'Zeno Store';
-            const type = document.getElementById('wType').value.trim() || 'Online Store';
-            const style = document.getElementById('wStyle').value.trim() || 'Modern Dark';
-            const lang = document.getElementById('wLang').value.trim() || 'English';
-            const details = document.getElementById('wDetails').value.trim() || 'Complete interactive website';
-            closeWizard();
+        // --- REAL MULTIMODAL API INTEGRATION (GEMINI, OPENAI, CLAUDE) ---
+        async function callRealAI(userPrompt, imgBase64, imgMime) {
+            const levelInstructions = {
+                low: "Complexity Level: LOW. Build a clean, fast, single-page modern responsive website with essential sections.",
+                medium: "Complexity Level: MEDIUM. Build a rich, multi-section interactive website with Tailwind CSS, smooth animations, icons, and working JavaScript interactivity.",
+                high: "Complexity Level: HIGH. Build an advanced, enterprise-grade full web application with interactive dashboards, modals, working forms, local state persistence, and ultra-polished UI."
+            }[state.aiLevel];
 
-            let fullPrompt = `Build a complete HTML5 website (Quality Mode: ${buildQuality.toUpperCase()}):\n- Brand: "${name}"\n- Niche: ${type}\n- Style: ${style}\n- Language: ${lang}\n- Details: ${details}`;
+            const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack website builder and vision assistant.
+${levelInstructions}
+Rules:
+1. If the user uploads an image, first explain what the image is and how it relates to their project.
+2. If the user hasn't told you what business or website they want yet, ask clarifying questions about their desired website name, style, and features.
+3. Whenever the user asks to create, build, or update a website (or provides the details), generate the COMPLETE, working, self-contained HTML5 code inside a \`\`\`html ... \`\`\` code block with Tailwind CSS and FontAwesome included, zero placeholders, and 100% functional JavaScript.`;
 
-            currentProducts.forEach(p => {
-                const nameEl = document.getElementById(`pn_${p.id}`);
-                const priceEl = document.getElementById(`pp_${p.id}`);
-                if (nameEl) p.name = nameEl.value || 'Product';
-                if (priceEl) p.price = priceEl.value || '$19';
-            });
-            const validProducts = currentProducts.filter(p => p.b64 !== '');
+            const key = state.apiKey.trim();
+            const activeProvider = detectProviderFromKey(key);
 
-            if (validProducts.length > 0) {
-                fullPrompt += `\n\nUSER PRODUCTS:\n`;
-                validProducts.forEach((p, index) => {
-                    fullPrompt += `- Name="${p.name}", Price="${p.price}", img="RAW_IMG_TARGET_${index}"\n`;
+            // 1. GOOGLE GEMINI API
+            if (activeProvider === 'gemini') {
+                const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt || 'Please analyze this image and tell me what it is for, or build a matching website.'}` }];
+                if (imgBase64) {
+                    parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
+                }
+                const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+                let lastErr = '';
+                for (const model of models) {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts }] })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                    lastErr = data.error?.message || res.statusText;
+                }
+                throw new Error(lastErr);
+            }
+
+            // 2. OPENAI API
+            if (activeProvider === 'openai') {
+                const userContent = [];
+                if (userPrompt) userContent.push({ type: 'text', text: userPrompt });
+                if (imgBase64) {
+                    userContent.push({ type: 'image_url', image_url: { url: `data:${imgMime};base64,${imgBase64}` } });
+                }
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userContent }
+                        ]
+                    })
                 });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error?.message || 'OpenAI API Error');
+                return data.choices[0].message.content;
             }
 
-            const newProj = {
-                id: 'proj_' + Date.now(),
-                name: name,
-                specs: { name, type, style, lang, details },
-                code: '',
-                liveUrl: '',
-                products: validProducts,
-                chatImages: []
-            };
-            projects.unshift(newProj);
-            currentProjectId = newProj.id;
-            saveToStorage();
-            renderProjectList();
+            // 3. ANTHROPIC CLAUDE API
+            if (activeProvider === 'claude') {
+                const content = [];
+                if (imgBase64) {
+                    content.push({
+                        type: 'image',
+                        source: { type: 'base64', media_type: imgMime, data: imgBase64 }
+                    });
+                }
+                content.push({ type: 'text', text: userPrompt || 'Analyze this image and help build my website.' });
 
-            await generateWithAI(fullPrompt, null, newProj, []);
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': key,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-latest',
+                        max_tokens: 4096,
+                        system: systemPrompt,
+                        messages: [{ role: 'user', content }]
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error?.message || 'Claude API Error');
+                return data.content[0].text;
+            }
         }
 
-        async function applyMonetization() {
-            const type = document.getElementById('monetizeType').value;
-            let proj = projects.find(p => p.id === currentProjectId);
+        // --- INJECT REAL ADS (ADSTERRA/UNITY) & PREMIUM CHECKOUT INTO GENERATED SITE ---
+        function injectAdsAndPremium(rawHtml) {
+            let html = rawHtml;
 
-            if (!proj) {
-                proj = { id: 'proj_' + Date.now(), name: 'Monetized Website', specs: { name: 'VIP Store' }, code: '', liveUrl: '', products: [], chatImages: [] };
-                projects.unshift(proj);
-                currentProjectId = proj.id;
-            }
-
-            if (type === 'ads') {
-                const code = document.getElementById('adCodeInput').value.trim();
-                if (!code) return alert("Please paste your Adsterra or Unity Ads code first!");
-                closeMonetizeModal();
-
-                const closeBody = '\x3C/body>';
-                if (proj.code && proj.code.includes(closeBody)) {
-                    proj.code = proj.code.replace(closeBody, `\n<div class="w-full py-3 flex justify-center items-center z-50">${code}</div>\n` + closeBody);
-                    proj.liveUrl = await createInstantLiveLink(proj.code);
-                    saveToStorage();
-                    loadProject(proj.id);
-                    notifyProjectReady();
-                    return;
+            // Inject Adsterra / Unity Ad Code
+            if (state.adsCode && state.adsCode.trim() !== '') {
+                const adBannerHtml = `
+                <!-- ZoneWeb Injected Adsterra / Unity Ads -->
+                <div style="width:100%;text-align:center;padding:10px;background:#0f172a;color:#fff;z-index:9999;">
+                    ${state.adsCode}
+                </div>`;
+                if (html.includes('<body')) {
+                    html = html.replace(/(<body[^>]*>)/i, `$1\n${adBannerHtml}`);
+                } else {
+                    html = adBannerHtml + html;
                 }
             }
 
-            const price = document.getElementById('premPrice').value.trim() || '$9.99';
-            const methods = document.getElementById('premMethods').value.trim() || 'Card Number, FastPay, or VIP Code';
-            const details = document.getElementById('premDetails').value.trim() || 'Lock content until user submits payment details.';
-            closeMonetizeModal();
-
-            // If website already exists, inject an interactive VIP Paywall overlay directly or via AI
-            const mPrompt = `Add an interactive Premium VIP Paywall Modal & Checkout Form (Price: ${price}, Required Fields: ${methods}, Instructions: ${details}). Return full HTML.`;
-            await generateWithAI(mPrompt, proj.code, proj, []);
-        }
-
-        /* =========================================================
-           6. CHAT & PHOTO UPLOAD
-        ========================================================= */
-        function handleChatImages(input) {
-            const files = Array.from(input.files);
-            if (!files.length) return;
-            files.forEach(file => {
-                compressImageFile(file, (b64Data) => {
-                    pendingChatImages.push({
-                        id: 'cimg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                        b64: b64Data
-                    });
-                    renderChatImagePreviews();
-                });
-            });
-            input.value = '';
-        }
-
-        function renderChatImagePreviews() {
-            const bar = document.getElementById('chatImgPreviewBar');
-            if (pendingChatImages.length === 0) {
-                bar.classList.add('hidden');
-                bar.innerHTML = '';
-                return;
-            }
-            bar.classList.remove('hidden');
-            bar.innerHTML = pendingChatImages.map((img, idx) => `
-                <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0">
-                    <img src="${img.b64}" class="w-full h-full object-cover">
-                    <button type="button" onclick="removeChatImage(${idx})" class="absolute top-0 right-0 bg-black/80 text-red-400 w-5 h-5 flex items-center justify-center rounded-bl-lg text-[10px]">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+            // Inject Premium Payment Setup if configured
+            if (state.premium && (state.premium.app || state.premium.account)) {
+                const p = state.premium;
+                const premiumWidget = `
+                <!-- ZoneWeb Premium Checkout Integration -->
+                <div id="zw-premium-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706);color:#000;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-family:sans-serif;font-weight:bold;z-index:9999;">
+                    <span>👑 Upgrade to VIP Premium (${p.price || 'VIP Access'}) via ${p.app || p.method}</span>
+                    <button onclick="document.getElementById('zw-prem-modal').style.display='flex'" style="background:#000;color:#fff;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;">Get Premium</button>
                 </div>
-            `).join('') + `<span class="text-[11px] text-cyan-400 font-semibold px-2">${pendingChatImages.length} photo(s) ready</span>`;
-        }
-
-        function removeChatImage(index) {
-            pendingChatImages.splice(index, 1);
-            renderChatImagePreviews();
-        }
-
-        async function sendChatPrompt() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if (!text && pendingChatImages.length === 0) return;
-            input.value = '';
-
-            let proj = projects.find(p => p.id === currentProjectId);
-            if (!proj) {
-                proj = {
-                    id: 'proj_' + Date.now(),
-                    name: (text || 'New Website').substring(0, 24),
-                    specs: { name: (text || 'ZenoWeb Site').substring(0, 24), details: text },
-                    code: '',
-                    liveUrl: '',
-                    products: [],
-                    chatImages: []
-                };
-                projects.unshift(proj);
-                currentProjectId = proj.id;
-            }
-            if (!proj.chatImages) proj.chatImages = [];
-
-            const attachedNow = [...pendingChatImages];
-            pendingChatImages = [];
-            renderChatImagePreviews();
-
-            let userInstruction = `[BUILD MODE: ${buildQuality.toUpperCase()}] ` + (text || "Add the attached image(s) into the website.");
-            if (attachedNow.length > 0) {
-                userInstruction += `\nUse these exact placeholder strings in <img src="..."> for the attached photos:\n`;
-                attachedNow.forEach(imgObj => {
-                    proj.chatImages.push(imgObj);
-                    userInstruction += `- src="CHAT_IMG_${imgObj.id}"\n`;
-                });
-            }
-
-            await generateWithAI(userInstruction, proj.code, proj, attachedNow);
-        }
-
-        /* =========================================================
-           7. BUILT-IN NEURAL ENGINE (100% ZERO-ERROR GUARANTEE)
-           If external APIs are rate-limited or blocked by ISP, this
-           synthesizes a bespoke site matching Low/Medium/High mode!
-        ========================================================= */
-        function buildLocalNeuralWebsite(promptText, projectObj) {
-            const brand = (projectObj.specs && projectObj.specs.name) ? projectObj.specs.name : (projectObj.name || 'ZenoWeb Brand');
-            const desc = (projectObj.specs && projectObj.specs.details) ? projectObj.specs.details : promptText;
-            const isKurdish = /[\u0600-\u06FF]/.test(promptText) || (projectObj.specs && /kurd|کورد/i.test(projectObj.specs.lang || ''));
-            const dir = isKurdish ? 'rtl' : 'ltr';
-
-            const items = [];
-            if (projectObj.products && projectObj.products.length > 0) {
-                projectObj.products.forEach((p, idx) => {
-                    items.push({ name: p.name || `Item ${idx + 1}`, price: p.price || '$25', img: `RAW_IMG_TARGET_${idx}` });
-                });
-            }
-            if (projectObj.chatImages && projectObj.chatImages.length > 0) {
-                projectObj.chatImages.forEach((img, idx) => {
-                    items.push({ name: `${brand} Featured ${idx + 1}`, price: '$29', img: `CHAT_IMG_${img.id}` });
-                });
-            }
-            if (items.length === 0) {
-                items.push(
-                    { name: 'Pro Package', price: '$19', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80' },
-                    { name: 'Elite Edition', price: '$49', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80' },
-                    { name: 'Ultimate Bundle', price: '$89', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80' }
-                );
-            }
-
-            const cardsHtml = items.map((it, i) => `
-                <div class="bg-gray-900/90 border border-gray-800 rounded-2xl overflow-hidden shadow-xl hover:border-cyan-500/50 transition group">
-                    <div class="h-48 overflow-hidden bg-gray-800 relative">
-                        <img src="${it.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <span class="absolute top-3 right-3 bg-cyan-500 text-black font-extrabold text-xs px-3 py-1 rounded-full">${it.price}</span>
+                <div id="zw-prem-modal" style="display:${p.placement === 'modal' ? 'flex' : 'none'};position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;align-items:center;justify-content:center;font-family:sans-serif;">
+                    <div style="background:#1e293b;color:#fff;padding:28px;border-radius:20px;max-width:400px;width:90%;text-align:center;border:1px solid #f59e0b;">
+                        <h3 style="font-size:22px;margin-bottom:8px;color:#fbbf24;">👑 Premium Membership</h3>
+                        <p style="font-size:14px;color:#cbd5e1;margin-bottom:14px;">Payment Method: <b>${p.method || 'Direct Transfer'}</b></p>
+                        <p style="font-size:14px;color:#cbd5e1;margin-bottom:14px;">Application: <b>${p.app || 'Mobile Wallet'}</b></p>
+                        <div style="background:#0f172a;padding:12px;border-radius:10px;margin-bottom:16px;font-family:monospace;color:#38bdf8;">
+                            Send <b>${p.price || ''}</b> to:<br>${p.account || 'Contact Admin'}
+                        </div>
+                        <button onclick="alert('Thank you! Your payment reference has been submitted for verification.');document.getElementById('zw-prem-modal').style.display='none'" style="width:100%;padding:10px;background:#f59e0b;color:#000;font-weight:bold;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px;">I Have Paid</button>
+                        <button onclick="document.getElementById('zw-prem-modal').style.display='none'" style="background:transparent;color:#94a3b8;border:none;cursor:pointer;font-size:12px;">Close</button>
                     </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-white mb-1">${it.name}</h3>
-                        <p class="text-gray-400 text-xs mb-4">Premium quality guaranteed by ${brand}.</p>
-                        <button onclick="addToCart('${it.name.replace(/'/g, '')}', '${it.price}')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
-                            ${isKurdish ? 'زیادکردن بۆ سەبەتە' : 'Add to Cart'}
-                        </button>
+                </div>`;
+                if (html.includes('<body')) {
+                    html = html.replace(/(<body[^>]*>)/i, `$1\n${premiumWidget}`);
+                } else {
+                    html = premiumWidget + html;
+                }
+            }
+            return html;
+        }
+
+        function applyAdsToWebsite() {
+            autoSaveConfig();
+            if (state.currentSiteHtml) {
+                state.currentSiteHtml = injectAdsAndPremium(state.currentSiteHtml);
+                localStorage.setItem('zw_current_site_html', state.currentSiteHtml);
+                updatePublicLinkUI(state.currentSiteName || 'my-site', state.currentSiteHtml);
+                alert("Ads code injected into your website and public link updated!");
+            } else {
+                alert("Ads saved! They will be automatically added to the next website you generate.");
+            }
+        }
+
+        function applyPremiumToWebsite() {
+            autoSaveConfig();
+            if (state.currentSiteHtml) {
+                state.currentSiteHtml = injectAdsAndPremium(state.currentSiteHtml);
+                localStorage.setItem('zw_current_site_html', state.currentSiteHtml);
+                updatePublicLinkUI(state.currentSiteName || 'my-site', state.currentSiteHtml);
+                alert("Premium payment system added to your website!");
+            } else {
+                alert("Premium details saved! They will be built into your generated website.");
+            }
+        }
+
+        // --- PUBLIC LINK GENERATOR (BASED ON WEBSITE NAME) ---
+        function extractWebsiteName(promptText, html) {
+            const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+            let rawName = titleMatch ? titleMatch[1] : (promptText.split(' ').slice(0, 3).join('-') || 'zoneweb-business');
+            return rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'my-business';
+        }
+
+        function updatePublicLinkUI(siteName, html) {
+            const encoded = btoa(unescape(encodeURIComponent(html)));
+            const baseUrl = window.location.origin + window.location.pathname;
+            const publicUrl = `${baseUrl}#/public/${siteName}/${encoded}`;
+
+            const banner = document.getElementById('publicLinkBanner');
+            const anchor = document.getElementById('publicUrlAnchor');
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+            anchor.href = publicUrl;
+            anchor.innerText = `${window.location.host}/${siteName}`;
+            anchor.dataset.fullUrl = publicUrl;
+        }
+
+        function copyPublicLink() {
+            const anchor = document.getElementById('publicUrlAnchor');
+            const url = anchor.dataset.fullUrl || window.location.href;
+            navigator.clipboard.writeText(url);
+            alert(`Public link for "${state.currentSiteName}" copied to clipboard!`);
+        }
+
+        // --- REAL SYSTEM & MOBILE NOTIFICATION ("Your website is ready!") ---
+        function triggerWebsiteReadyNotification(siteName) {
+            // Audio chime
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.15;
+                osc.start();
+                setTimeout(() => osc.stop(), 350);
+            } catch (e) {}
+
+            // Browser / Mobile System Notification
+            if ("Notification" in window) {
+                if (Notification.permission === "granted") {
+                    new Notification("ZoneWeb Builder", {
+                        body: "Your website is ready! (" + siteName + ")",
+                        icon: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png"
+                    });
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(perm => {
+                        if (perm === "granted") {
+                            new Notification("ZoneWeb Builder", { body: "Your website is ready!" });
+                        }
+                    });
+                }
+            }
+            document.title = "✅ Your website is ready! - ZoneWeb";
+        }
+
+        // --- UI HELPERS, SETTINGS & AUTO-SAVE ---
+        function appendMessage(role, text, imageUrl = null) {
+            document.getElementById('heroPrompt').classList.add('hidden');
+            state.chatHistory.push({ role, text, imageUrl, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('zw_chat_history', JSON.stringify(state.chatHistory));
+            renderChatHistory();
+        }
+
+        function renderChatHistory() {
+            const feed = document.getElementById('chatFeed');
+            if (state.chatHistory.length > 0) {
+                document.getElementById('heroPrompt').classList.add('hidden');
+            }
+            feed.innerHTML = state.chatHistory.map(msg => `
+                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[85%] rounded-2xl p-4 ${msg.role === 'user' ? 'accent-bg text-white' : 'card-bg'} shadow-lg">
+                        ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="max-h-48 rounded-xl mb-2 border border-white/20">` : ''}
+                        <div class="text-sm whitespace-pre-wrap leading-relaxed">${msg.text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
                     </div>
                 </div>
             `).join('');
-
-            const highExtras = buildQuality === 'high' ? `
-                <section class="max-w-6xl mx-auto px-4 py-12 border-t border-gray-800/80">
-                    <div class="grid md:grid-cols-3 gap-6 text-center">
-                        <div class="bg-gray-900/60 p-6 rounded-2xl border border-gray-800">
-                            <div class="text-3xl text-cyan-400 mb-2">⚡</div>
-                            <h4 class="font-bold text-white mb-1">${isKurdish ? 'خزمەتگوزاری خێرا' : 'Instant Delivery'}</h4>
-                            <p class="text-xs text-gray-400">24/7 automated support & fast checkout.</p>
-                        </div>
-                        <div class="bg-gray-900/60 p-6 rounded-2xl border border-gray-800">
-                            <div class="text-3xl text-emerald-400 mb-2">🛡️</div>
-                            <h4 class="font-bold text-white mb-1">${isKurdish ? 'پارێزراو و متمانەپێکراو' : '100% Secure'}</h4>
-                            <p class="text-xs text-gray-400">Verified quality & customer satisfaction.</p>
-                        </div>
-                        <div class="bg-gray-900/60 p-6 rounded-2xl border border-gray-800">
-                            <div class="text-3xl text-amber-400 mb-2">⭐</div>
-                            <h4 class="font-bold text-white mb-1">${isKurdish ? 'کوالێتی بەرز' : 'VIP Experience'}</h4>
-                            <p class="text-xs text-gray-400">Crafted in High-Power Mode.</p>
-                        </div>
-                    </div>
-                </section>
-            ` : '';
-
-            return `<!DOCTYPE html>
-<html lang="${isKurdish ? 'ku' : 'en'}" dir="${dir}" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${brand}</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-</head>
-<body class="bg-[#08090e] text-gray-100 font-sans min-h-screen flex flex-col">
-    <nav class="sticky top-0 z-40 bg-[#0d0f17]/90 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div class="font-extrabold text-xl tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">${brand}</div>
-        <button onclick="toggleCart()" class="bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
-            <span>🛒 ${isKurdish ? 'سەبەتە' : 'Cart'}</span>
-            <span id="cartCount" class="bg-cyan-500 text-black px-2 py-0.5 rounded-full font-extrabold">0</span>
-        </button>
-    </nav>
-
-    <header class="max-w-5xl mx-auto px-6 py-16 text-center">
-        <span class="inline-block bg-blue-500/15 text-cyan-400 border border-cyan-500/30 text-xs font-bold px-4 py-1.5 rounded-full mb-4">${buildQuality.toUpperCase()} EDITION</span>
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-white mb-4 leading-tight">${brand}</h1>
-        <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base mb-8">${desc}</p>
-        <a href="#catalog" class="inline-block bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-500/20 text-sm">${isKurdish ? 'بینینی کاڵاکان' : 'Explore Catalog'}</a>
-    </header>
-
-    <main id="catalog" class="max-w-6xl mx-auto px-6 py-8 flex-1 w-full">
-        <h2 class="text-xl font-bold text-white mb-6">${isKurdish ? 'بەرهەم و خزمەتگوزارییەکان' : 'Featured Collection'}</h2>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">${cardsHtml}</div>
-    </main>
-
-    ${highExtras}
-
-    <div id="cartModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#12141f] border border-gray-800 rounded-2xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
-                <h3 class="font-bold text-white">${isKurdish ? 'سەبەتەی کڕین' : 'Your Cart'}</h3>
-                <button onclick="toggleCart()" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <div id="cartItems" class="space-y-2 max-h-60 overflow-y-auto text-xs text-gray-300 mb-4"></div>
-            <button onclick="alert('Order submitted successfully!'); cart=[]; updateCartUI(); toggleCart();" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm">${isKurdish ? 'تەواوکردنی داواکاری' : 'Checkout Now'}</button>
-        </div>
-    </div>
-
-    <footer class="border-t border-gray-800/80 py-6 text-center text-xs text-gray-500">
-        © ${new Date().getFullYear()} ${brand} — Powered by ZenoWeb AI
-    </footer>
-
-    <script>
-        let cart = [];
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCartUI();
-        }
-        function updateCartUI() {
-            document.getElementById('cartCount').innerText = cart.length;
-            const box = document.getElementById('cartItems');
-            box.innerHTML = cart.length ? cart.map((c, i) => '<div class="flex justify-between bg-black/40 p-2.5 rounded-lg"><span>' + c.name + '</span><span class="text-cyan-400 font-bold">' + c.price + '</span></div>').join('') : '<p class="text-gray-500 text-center py-4">Empty</p>';
-        }
-        function toggleCart() {
-            document.getElementById('cartModal').classList.toggle('hidden');
-            updateCartUI();
-        }
-    <\/script>
-</body>
-</html>`;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
-        /* =========================================================
-           8. MULTI-MODEL & MULTI-SERVER AI ENGINE (NEVER FAILS)
-        ========================================================= */
-        async function callGeminiAllModels(rawApiKeys, fullUserPrompt, attachedImages) {
-            const subText = document.getElementById('loadingSubText');
-            const progBar = document.getElementById('streamProgressBar');
-            const keys = rawApiKeys.split(',').map(k => k.trim()).filter(Boolean);
-
-            const maxTokens = buildQuality === 'low' ? 3500 : (buildQuality === 'medium' ? 6000 : 8192);
-            const combinedPrompt = getSystemPromptForQuality() + "\n\nUSER REQUEST:\n" + fullUserPrompt;
-
-            const userParts = [{ text: combinedPrompt }];
-            if (attachedImages && attachedImages.length > 0) {
-                attachedImages.forEach(img => {
-                    const base64Clean = img.b64.split(',')[1];
-                    const mimeMatch = img.b64.match(/data:(.*?);/);
-                    userParts.push({
-                        inline_data: { mime_type: mimeMatch ? mimeMatch[1] : 'image/jpeg', data: base64Clean }
-                    });
-                });
-            }
-
-            for (const apiKey of keys) {
-                // Discover all active models on this key so if gemini-3.8-flash hits 20/day limit, other models (like flash-lite, pro, or gemma-3) work immediately!
-                let models = ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro', 'gemma-3-27b-it'];
-                try {
-                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                    const listData = await listRes.json();
-                    if (listData && listData.models) {
-                        const found = listData.models
-                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-                            .map(m => m.name.replace('models/', ''));
-                        if (found.length > 0) {
-                            models = [...new Set(['gemini-3.8-flash', ...found])];
-                        }
-                    }
-                } catch (e) {}
-
-                for (let i = 0; i < models.length; i++) {
-                    const modelName = models[i];
-                    try {
-                        subText.innerText = `⚡ Building (${buildQuality.toUpperCase()}) via ${modelName}...`;
-                        progBar.style.width = `${Math.min(85, 20 + i * 12)}%`;
-
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ role: 'user', parts: userParts }],
-                                generationConfig: { temperature: 0.6, maxOutputTokens: maxTokens }
-                            })
-                        });
-
-                        const data = await res.json();
-                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        if (res.ok && text && text.includes('<')) {
-                            progBar.style.width = '100%';
-                            return text;
-                        }
-                    } catch (e) {}
-                }
-            }
-            return null;
+        function setAiLevel(lvl, save = true) {
+            state.aiLevel = lvl;
+            if (save) localStorage.setItem('zw_ai_level', lvl);
+            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('accent-bg', 'text-white'));
+            document.getElementById('lvl-' + lvl)?.classList.add('accent-bg', 'text-white');
         }
 
-        async function callFreePublicNodes(fullUserPrompt) {
-            const subText = document.getElementById('loadingSubText');
-            const progBar = document.getElementById('streamProgressBar');
-            const sys = getSystemPromptForQuality();
-
-            const endpoints = [
-                { url: 'https://text.pollinations.ai/openai', model: 'openai' },
-                { url: 'https://text.pollinations.ai/openai', model: 'qwen-coder' },
-                { url: 'https://text.pollinations.ai/openai', model: 'mistral' }
-            ];
-
-            for (let i = 0; i < endpoints.length; i++) {
-                try {
-                    subText.innerText = `⚡ Cloud AI Server ${i + 1} (${buildQuality.toUpperCase()} Mode)...`;
-                    progBar.style.width = `${40 + i * 18}%`;
-
-                    const res = await fetch(endpoints[i].url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            model: endpoints[i].model,
-                            messages: [
-                                { role: 'system', content: sys },
-                                { role: 'user', content: fullUserPrompt }
-                            ]
-                        })
-                    });
-
-                    if (res.ok) {
-                        const raw = await res.text();
-                        let text = raw;
-                        try {
-                            const parsed = JSON.parse(raw);
-                            text = parsed.choices?.[0]?.message?.content || raw;
-                        } catch (e) {}
-                        if (text && text.includes('<') && text.length > 80) {
-                            progBar.style.width = '100%';
-                            return text;
-                        }
-                    }
-                } catch (e) {}
-            }
-            return null;
+        function setAccentColor(color, save = true) {
+            state.accentColor = color;
+            document.documentElement.style.setProperty('--accent', color);
+            if (save) localStorage.setItem('zw_accent', color);
         }
 
-        async function generateWithAI(prompt, existingCode, projectObj, attachedImages = []) {
-            const provider = localStorage.getItem('wm_provider') || 'gemini';
-            const apiKey = localStorage.getItem('wm_api_key') || '';
-
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('streamProgressBar').style.width = '12%';
-
-            let cleanExisting = existingCode || '';
-            if (cleanExisting && projectObj.products) {
-                projectObj.products.forEach((p, idx) => {
-                    if (p.b64) cleanExisting = cleanExisting.split(p.b64).join(`RAW_IMG_TARGET_${idx}`);
-                });
-            }
-            if (cleanExisting && projectObj.chatImages) {
-                projectObj.chatImages.forEach(img => {
-                    if (img.b64) cleanExisting = cleanExisting.split(img.b64).join(`CHAT_IMG_${img.id}`);
-                });
-            }
-
-            let finalPrompt = prompt;
-            if (cleanExisting && cleanExisting.length > 50) {
-                finalPrompt = `Current HTML:\n${cleanExisting}\n\nEdit Request (${buildQuality.toUpperCase()} Mode): "${prompt}"\n\nReturn ONLY the full updated HTML5.`;
-            }
-
-            try {
-                let rawResponse = null;
-
-                // 1. Try User's API Key across all available models first
-                if (apiKey && provider === 'gemini') {
-                    rawResponse = await callGeminiAllModels(apiKey, finalPrompt, attachedImages);
-                } else if (apiKey && provider === 'openai') {
-                    try {
-                        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                            body: JSON.stringify({
-                                model: 'gpt-4o-mini',
-                                messages: [
-                                    { role: 'system', content: getSystemPromptForQuality() },
-                                    { role: 'user', content: finalPrompt }
-                                ]
-                            })
-                        });
-                        const data = await res.json();
-                        if (data?.choices?.[0]?.message?.content) rawResponse = data.choices[0].message.content;
-                    } catch (e) {}
-                }
-
-                // 2. If no key or quota reached, try Free Cloud AI Nodes
-                if (!rawResponse) {
-                    rawResponse = await callFreePublicNodes(finalPrompt);
-                }
-
-                // 3. If external networks are blocked/offline, use Built-In Neural Engine (Never throws Connection Error!)
-                if (!rawResponse || !rawResponse.includes('<')) {
-                    document.getElementById('loadingSubText').innerText = "⚡ Synthesizing with Built-in Neural Engine...";
-                    await sleep(500);
-                    rawResponse = buildLocalNeuralWebsite(prompt, projectObj);
-                }
-
-                let cleanCode = rawResponse.replace(/```html/gi, '').replace(/```/g, '').trim();
-                const docIdx = cleanCode.indexOf('<!DOCTYPE');
-                if (docIdx > 0) cleanCode = cleanCode.substring(docIdx);
-
-                if (projectObj.products && projectObj.products.length > 0) {
-                    projectObj.products.forEach((p, index) => {
-                        cleanCode = cleanCode.split(`RAW_IMG_TARGET_${index}`).join(p.b64);
-                    });
-                }
-
-                if (projectObj.chatImages && projectObj.chatImages.length > 0) {
-                    projectObj.chatImages.forEach(img => {
-                        cleanCode = cleanCode.split(`CHAT_IMG_${img.id}`).join(img.b64);
-                    });
-                }
-
-                projectObj.code = cleanCode;
-
-                document.getElementById('loadingSubText').innerText = "🔗 Generating instant shareable website link...";
-                projectObj.liveUrl = await createInstantLiveLink(cleanCode);
-
-                saveToStorage();
-                loadProject(projectObj.id);
-                notifyProjectReady();
-
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        }
-
-        /* =========================================================
-           9. PROJECT MANAGEMENT & NOTIFICATIONS
-        ========================================================= */
-        let audioCtx = null;
-        function initAudioAndNotifications() {
-            try {
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission().catch(() => {});
-                }
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx && !audioCtx) audioCtx = new AudioCtx();
-            } catch (e) {}
-        }
-
-        function notifyProjectReady() {
-            const toast = document.getElementById('readyToast');
-            if (toast) {
-                toast.classList.remove('-translate-y-28', 'opacity-0');
-                setTimeout(() => { toast.classList.add('-translate-y-28', 'opacity-0'); }, 5000);
-            }
-            try {
-                if (audioCtx) {
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                    const now = audioCtx.currentTime;
-                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                        gain.gain.setValueAtTime(0.08, now + idx * 0.08);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.7);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start(now + idx * 0.08);
-                        osc.stop(now + idx * 0.08 + 0.75);
-                    });
-                }
-            } catch (e) {}
-        }
-
-        function enableNotificationsManual() {
-            initAudioAndNotifications();
-            notifyProjectReady();
-        }
-
-        function loadProject(id) {
-            const proj = projects.find(p => p.id === id);
-            if (!proj) return;
-            currentProjectId = id;
-            localStorage.setItem('wm_current_id', id);
-            document.getElementById('currentProjectTitle').innerText = proj.name;
-            
-            if (proj.code && proj.code.length > 20) {
-                document.getElementById('emptyState').classList.add('hidden');
-                document.getElementById('iframeContainer').classList.remove('hidden');
-                document.getElementById('previewFrame').srcdoc = proj.code;
-                document.getElementById('codeEditor').value = proj.code;
-
-                if (proj.liveUrl) {
-                    showLiveLinkUI(proj.liveUrl);
-                } else {
-                    createInstantLiveLink(proj.code).then(url => {
-                        proj.liveUrl = url;
-                        saveToStorage();
-                        showLiveLinkUI(url);
-                    });
-                }
+        function toggleThemeMode() {
+            const html = document.documentElement;
+            if (html.classList.contains('light')) {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                state.themeMode = 'dark';
+                document.getElementById('themeModeText').innerText = 'Dark';
             } else {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('iframeContainer').classList.add('hidden');
-                document.getElementById('instantLinkBanner').classList.add('hidden');
+                html.classList.remove('dark');
+                html.classList.add('light');
+                state.themeMode = 'light';
+                document.getElementById('themeModeText').innerText = 'Light';
             }
-            renderProjectList();
+            localStorage.setItem('zw_theme', state.themeMode);
         }
 
-        function renderProjectList() {
-            const list = document.getElementById('projectList');
-            if (!list) return;
-            list.innerHTML = '';
-            projects.forEach(p => {
-                const active = p.id === currentProjectId ? 'bg-blue-600/20 border-blue-500/40 text-cyan-400' : 'bg-[#1a1a22] border-gray-800 text-gray-300';
-                list.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${active} cursor-pointer transition" onclick="loadProject('${p.id}'); toggleSidebar();">
-                        <span class="text-xs font-semibold truncate pr-2">${p.name}</span>
-                        <button type="button" onclick="event.stopPropagation(); deleteProject('${p.id}')" class="text-gray-500 hover:text-red-400 px-1.5"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                    </div>
-                `;
-            });
+        function updateApiKeyFromDrawer() {
+            const newKey = document.getElementById('drawerApiKey').value.trim();
+            if (!newKey) return;
+            state.apiKey = newKey;
+            state.provider = detectProviderFromKey(newKey);
+            localStorage.setItem('zw_api_key', newKey);
+            localStorage.setItem('zw_provider', state.provider);
+            document.getElementById('activeProviderBadge').innerText = state.provider.toUpperCase();
+            alert(`API Key updated! Active Provider: ${state.provider.toUpperCase()}`);
         }
 
-        function deleteProject(id) {
-            projects = projects.filter(p => p.id !== id);
-            if (currentProjectId === id) {
-                currentProjectId = projects.length > 0 ? projects[0].id : null;
+        function autoSaveConfig() {
+            state.adsCode = document.getElementById('adsCodeInput').value;
+            state.premium = {
+                method: document.getElementById('premMethod').value,
+                app: document.getElementById('premApp').value,
+                account: document.getElementById('premAccount').value,
+                price: document.getElementById('premPrice').value,
+                placement: document.getElementById('premPlacement').value
+            };
+            localStorage.setItem('zw_ads_code', state.adsCode);
+            localStorage.setItem('zw_premium', JSON.stringify(state.premium));
+        }
+
+        function saveProjectToHistory(name, html) {
+            state.projects.unshift({ name, html, date: new Date().toLocaleDateString() });
+            state.projects = state.projects.slice(0, 15);
+            localStorage.setItem('zw_projects', JSON.stringify(state.projects));
+            renderProjectsList();
+        }
+
+        function renderProjectsList() {
+            const container = document.getElementById('savedProjectsList');
+            if (!state.projects.length) {
+                container.innerHTML = `<p class="text-gray-500 px-2">No websites built yet</p>`;
+                return;
             }
-            saveToStorage();
-            renderProjectList();
-            if (currentProjectId) loadProject(currentProjectId);
-            else location.reload();
+            container.innerHTML = state.projects.map((p, idx) => `
+                <button onclick="loadSavedProject(${idx})" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-white/10 text-left">
+                    <span class="truncate font-medium text-gray-200"><i class="fa-solid fa-globe mr-1.5 accent-text"></i>${p.name}</span>
+                    <span class="text-[10px] text-gray-500">${p.date}</span>
+                </button>
+            `).join('');
         }
 
-        function manualCodeUpdate() {
-            const proj = projects.find(p => p.id === currentProjectId);
+        function loadSavedProject(idx) {
+            const proj = state.projects[idx];
             if (!proj) return;
-            proj.code = document.getElementById('codeEditor').value;
-            document.getElementById('previewFrame').srcdoc = proj.code;
-            saveToStorage();
+            state.currentSiteName = proj.name;
+            state.currentSiteHtml = proj.html;
+            updatePublicLinkUI(proj.name, proj.html);
+            toggleDrawer(false);
+            openPreviewModal();
         }
 
-        function toggleCodeView() {
-            isCodeView = !isCodeView;
-            const editor = document.getElementById('codeEditor');
-            const iframeCont = document.getElementById('iframeContainer');
-            const btn = document.getElementById('codeBtn');
+        function startNewWebsiteProject() {
+            state.chatHistory = [];
+            state.hasAskedInitialQuestions = false;
+            localStorage.setItem('zw_chat_history', '[]');
+            document.getElementById('chatFeed').innerHTML = '';
+            document.getElementById('heroPrompt').classList.remove('hidden');
+            toggleDrawer(false);
+        }
 
-            if (isCodeView) {
-                editor.classList.remove('hidden');
-                iframeCont.classList.add('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
-            } else {
-                editor.classList.add('hidden');
-                iframeCont.classList.remove('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-code mr-1"></i>Code';
+        function openPreviewModal() {
+            if (!state.currentSiteHtml) {
+                alert("Build a website in the chat first to preview it live!");
+                return;
             }
+            document.getElementById('previewSiteTitle').innerText = state.currentSiteName.toUpperCase();
+            document.getElementById('previewSlugBadge').innerText = `/${state.currentSiteName}`;
+            document.getElementById('livePreviewIframe').srcdoc = state.currentSiteHtml;
+            document.getElementById('previewModal').classList.remove('hidden');
         }
 
-        function downloadHTML() {
-            const proj = projects.find(p => p.id === currentProjectId);
-            if (!proj || !proj.code) return alert('Generate a website first!');
-            const blob = new Blob([proj.code], { type: 'text/html' });
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        function downloadGeneratedSite() {
+            if (!state.currentSiteHtml) {
+                alert("No generated website to download yet!");
+                return;
+            }
+            const blob = new Blob([state.currentSiteHtml], { type: 'text/html' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `${proj.name.replace(/\s+/g, '_')}.html`;
+            a.download = `${state.currentSiteName || 'website'}-index.html`;
             a.click();
         }
 
-        function saveToStorage() {
-            try { localStorage.setItem('wm_projects', JSON.stringify(projects)); } catch (e) {}
+        function toggleDrawer(show) {
+            document.getElementById('drawerOverlay').classList.toggle('hidden', !show);
         }
 
-        function setViewport(w) {
-            document.getElementById('previewFrame').style.width = w;
+        function toggleSection(id) {
+            document.getElementById(id).classList.toggle('hidden');
         }
     </script>
 </body>

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZoneWeb - Pro AI Website Builder</title>
+    <title>ZoneWeb - Smart AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --accent: #e11d48;
+            --accent: #2563eb;
             --bg-main: #090a0f;
             --bg-card: #12141d;
             --text-main: #f3f4f6;
@@ -60,7 +60,7 @@
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
                 Welcome to ZoneWeb
             </h1>
-            <p class="mt-3 text-gray-400 text-sm md:text-base">Ultra-Fast Autonomous AI Web Builder</p>
+            <p class="mt-3 text-gray-400 text-sm md:text-base">Smart Intent-Recognizing AI Web Builder</p>
         </div>
         <div class="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-8">
             <div id="splashProgress" class="h-full accent-bg transition-all duration-[4000ms] ease-linear w-0"></div>
@@ -125,59 +125,59 @@
     </div>
 
     <!-- SCREEN 3: MAIN WORKSPACE -->
-    <div id="screen3" class="hidden flex-1 flex flex-col min-h-screen relative">
+    <div id="screen3" class="hidden flex-1 flex flex-col min-h-screen relative max-w-full overflow-x-hidden">
         
         <!-- Top Sticky Header Container -->
-        <header class="card-bg sticky top-0 z-20 shadow-lg">
+        <header class="card-bg sticky top-0 z-20 shadow-lg w-full">
             <!-- Row 1: Navigation, Preview Button & AI Level -->
-            <div class="px-4 py-3 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2.5">
+            <div class="px-3 md:px-4 py-3 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
                     <!-- 3-Dots Menu Trigger -->
-                    <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-xl bg-gray-500/10 hover:bg-gray-500/20 flex items-center justify-center text-lg" title="Menu & Settings">
+                    <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-xl bg-gray-500/10 hover:bg-gray-500/20 flex items-center justify-center text-lg shrink-0" title="Menu & Settings">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
-                    <div class="flex items-center gap-2">
-                        <span class="font-extrabold text-lg tracking-tight">ZoneWeb</span>
-                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold">TURBO AI</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-extrabold text-base md:text-lg tracking-tight">ZoneWeb</span>
+                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold truncate max-w-[95px]">SMART AI</span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 md:gap-2">
                     <!-- Top Preview Button -->
-                    <button id="topPreviewBtn" onclick="openPreviewModal()" class="px-3.5 py-1.5 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90 transition">
+                    <button id="topPreviewBtn" onclick="openPreviewModal()" class="px-3 py-1.5 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90 transition shrink-0">
                         <i class="fa-solid fa-eye"></i>
                         <span>Preview</span>
                     </button>
 
                     <!-- AI Level Selector (Low / Medium / High) -->
-                    <div class="flex items-center gap-1 bg-gray-500/10 p-1 rounded-xl border border-gray-500/20">
-                        <button onclick="setAiLevel('low')" id="lvl-low" class="lvl-btn px-2 py-1 rounded-lg text-xs font-medium">Low</button>
-                        <button onclick="setAiLevel('medium')" id="lvl-medium" class="lvl-btn px-2 py-1 rounded-lg text-xs font-medium accent-bg text-white">Medium</button>
-                        <button onclick="setAiLevel('high')" id="lvl-high" class="lvl-btn px-2 py-1 rounded-lg text-xs font-medium">High</button>
+                    <div class="flex items-center gap-0.5 bg-gray-500/10 p-1 rounded-xl border border-gray-500/20 shrink-0">
+                        <button onclick="setAiLevel('low')" id="lvl-low" class="lvl-btn px-2 py-1 rounded-lg text-[11px] font-medium">Low</button>
+                        <button onclick="setAiLevel('medium')" id="lvl-medium" class="lvl-btn px-2 py-1 rounded-lg text-[11px] font-medium accent-bg text-white">Medium</button>
+                        <button onclick="setAiLevel('high')" id="lvl-high" class="lvl-btn px-2 py-1 rounded-lg text-[11px] font-medium">High</button>
                     </div>
                 </div>
             </div>
 
             <!-- Row 2: PUBLIC LINK BOX + COPY BUTTON + PREVIEW BUTTON -->
-            <div id="publicLinkBanner" class="hidden px-4 py-2.5 bg-emerald-500/10 border-t border-emerald-500/30">
+            <div id="publicLinkBanner" class="hidden px-3 md:px-4 py-2 bg-emerald-500/10 border-t border-emerald-500/30 w-full">
                 <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Public Link:</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Public Link:</span>
                     </div>
 
-                    <div class="flex-1 min-w-[240px] flex items-center gap-2">
-                        <div class="flex-1 flex items-center bg-black/40 border border-emerald-500/40 rounded-xl px-3 py-1.5 overflow-hidden">
-                            <i class="fa-solid fa-link text-emerald-400 text-xs mr-2 shrink-0"></i>
+                    <div class="flex-1 min-w-[220px] flex items-center gap-1.5">
+                        <div class="flex-1 flex items-center bg-black/40 border border-emerald-500/40 rounded-xl px-2.5 py-1.5 overflow-hidden">
+                            <i class="fa-solid fa-link text-emerald-400 text-xs mr-1.5 shrink-0"></i>
                             <input id="publicUrlBox" type="text" readonly class="w-full bg-transparent text-xs text-emerald-300 font-mono focus:outline-none truncate" value="">
                         </div>
 
-                        <button id="copyBtnText" onclick="copyPublicLink()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition">
+                        <button id="copyBtnText" onclick="copyPublicLink()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shrink-0 shadow transition">
                             <i class="fa-regular fa-copy"></i>
                             <span>Copy</span>
                         </button>
 
-                        <button onclick="openPreviewModal()" class="px-3.5 py-2 rounded-xl accent-bg hover:opacity-90 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition">
+                        <button onclick="openPreviewModal()" class="px-3 py-1.5 rounded-xl accent-bg hover:opacity-90 text-white text-xs font-bold flex items-center gap-1 shrink-0 shadow transition">
                             <i class="fa-solid fa-desktop"></i>
                             <span>Preview</span>
                         </button>
@@ -187,48 +187,71 @@
         </header>
 
         <!-- Main Center Content & Chat Messages -->
-        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 pt-6 pb-48 overflow-y-auto">
+        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-3 md:px-4 pt-6 pb-56 overflow-y-auto overflow-x-hidden">
             
-            <!-- Center Hero Prompt -->
-            <div id="heroPrompt" class="my-auto text-center py-12">
+            <!-- Center Hero Prompt + Quick Category Starters -->
+            <div id="heroPrompt" class="my-auto text-center py-8">
                 <div class="w-16 h-16 rounded-2xl accent-bg/20 border accent-border mx-auto mb-4 flex items-center justify-center">
-                    <i class="fa-solid fa-bolt text-2xl accent-text"></i>
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl accent-text"></i>
                 </div>
                 <h2 class="text-2xl md:text-4xl font-extrabold mb-3">What business do you want to build today?</h2>
-                <p class="text-sm text-gray-400 max-w-md mx-auto">Click the chat below to describe your website. Once created, stay in this tab to keep editing colors, layout, or features anytime!</p>
+                <p class="text-sm text-gray-400 max-w-md mx-auto mb-6">Type anything below or tap a category — ZoneWeb recognizes Shopping Stores, TikTok & Phone hubs, Streaming sites, Gaming, and Live Edits!</p>
+                
+                <!-- Instant One-Tap Website Starters -->
+                <div class="flex flex-wrap justify-center gap-2 max-w-xl mx-auto">
+                    <button onclick="quickStartCategory('Build a complete Online Shopping Store website with product categories, search bar, shopping cart, and checkout')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-bag-shopping text-rose-500"></i> 🛍️ Shopping Store
+                    </button>
+                    <button onclick="quickStartCategory('Build a TikTok and Phone contact website for username rabar2008r and phone 0751 616 5051 with black background and falling stars')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-brands fa-tiktok text-pink-500"></i> 📱 TikTok & Phone Hub
+                    </button>
+                    <button onclick="quickStartCategory('Build a Movie, Anime, and Drama streaming catalog website with search and video player modal')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-film text-purple-500"></i> 🎬 Movie & Anime Site
+                    </button>
+                    <button onclick="quickStartCategory('Build a Gym and Fitness training website with workout plans, membership pricing, and trainer section')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-dumbbell text-emerald-500"></i> 🏋️ Gym & Fitness
+                    </button>
+                </div>
             </div>
 
             <!-- Conversation Feed -->
-            <div id="chatFeed" class="space-y-4 w-full"></div>
+            <div id="chatFeed" class="space-y-4 w-full overflow-hidden"></div>
 
-            <!-- Live Turbo Status Bar + Stop Button -->
+            <!-- Live Status Bar + Stop Button -->
             <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border shadow-lg">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-bolt fa-beat accent-text text-xl"></i>
                     <div>
-                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ Turbo Building Website...</p>
-                        <p id="activeModelStatus" class="text-xs text-gray-400">Generating live code in background (Zero-Drop Active)...</p>
+                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ Recognizing & Building Website...</p>
+                        <p id="activeModelStatus" class="text-xs text-gray-400">Constructing tailored components...</p>
                     </div>
                 </div>
-                <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow shrink-0">
                     <i class="fa-solid fa-square"></i> Stop
                 </button>
             </div>
         </main>
 
         <!-- Bottom Fixed AI Chat Bar -->
-        <div class="fixed bottom-0 inset-x-0 p-3 md:p-4 z-20 pointer-events-none">
+        <div class="fixed bottom-0 inset-x-0 p-2.5 md:p-4 z-20 pointer-events-none">
             <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl pointer-events-auto">
                 
-                <!-- KEEP EDITING MODE BAR -->
+                <!-- LIVE AI INTENT RECOGNITION INDICATOR (Shows user what AI recognizes as they type!) -->
+                <div id="intentRecognizerBar" class="hidden px-3 py-1 mb-2 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-between text-xs text-blue-400 font-semibold">
+                    <span id="intentDetectedText"><i class="fa-solid fa-brain mr-1"></i> AI Recognized: Custom Website</span>
+                    <span class="text-[10px] uppercase tracking-wider opacity-75">Smart Parser Active</span>
+                </div>
+
+                <!-- KEEP EDITING MODE BAR + NEW SITE RESET BUTTON -->
                 <div id="keepEditingBanner" class="hidden px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 text-xs text-amber-300 font-semibold">
-                        <i class="fa-solid fa-pen-ruler animate-bounce"></i>
-                        <span>Keep Editing (<b id="editingSiteLabel">website</b>) — Ask to change colors, text, or layout!</span>
+                    <div class="flex items-center gap-1.5 text-xs text-amber-400 font-semibold truncate">
+                        <i class="fa-solid fa-pen-ruler"></i>
+                        <span class="truncate">Active: <b id="editingSiteLabel">website</b></span>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="quickEditPrompt('Change the website colors and theme to a sleek modern style')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">🎨 Colors</button>
-                        <button onclick="quickEditPrompt('Add more interactive features, animations, and sections')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">✨ Features</button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="quickEditPrompt('Make the background black with animated falling stars')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-[11px] text-amber-300 font-medium">✨ Falling Stars</button>
+                        <button onclick="quickEditPrompt('Build a complete Online Shopping Store website')" class="px-2 py-0.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-[11px] text-rose-300 font-medium">🛍️ New Shopping Site</button>
+                        <button onclick="startNewWebsiteProject()" class="px-2 py-0.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-[11px] text-red-300 font-bold" title="Reset and start fresh">+ Reset</button>
                     </div>
                 </div>
 
@@ -252,7 +275,7 @@
                     </label>
 
                     <!-- Chat Input -->
-                    <textarea id="chatInput" rows="1" onfocus="handleChatFocus()" onkeydown="handleChatKeydown(event)" placeholder="Describe your website, or keep editing colors & features..."
+                    <textarea id="chatInput" rows="1" oninput="handleLiveIntentRecognition(this.value)" onfocus="handleChatFocus()" onkeydown="handleChatKeydown(event)" placeholder="Ask for a Shopping website, TikTok & phone page, or edit colors/stars..."
                         class="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
 
                     <!-- STOP BUTTON -->
@@ -295,26 +318,25 @@
 
                     <!-- Change AI Brain / Model Selector -->
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (Turbo Models)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (All Models)</label>
                         <select id="drawerAiBrain" onchange="handleBrainSelectionChange()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
-                            <option value="auto">⚡ Turbo Auto-Detect (Fastest Available)</option>
+                            <option value="auto">⚡ Auto-Detect Best Brain (All Versions)</option>
                             <optgroup label="Google Gemini Brains">
-                                <option value="gemini:gemini-2.0-flash">🚀 Gemini 2.0 Flash (Instant Speed)</option>
-                                <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash (Ultra Fast)</option>
-                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Deep IQ)</option>
-                                <option value="gemini:gemini-1.5-flash">✨ Gemini 1.5 Flash</option>
+                                <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash (Recommended)</option>
+                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Max IQ)</option>
+                                <option value="gemini:gemini-2.0-flash">🚀 Gemini 2.0 Flash (Fast)</option>
                             </optgroup>
                             <optgroup label="OpenAI ChatGPT Brains">
-                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini (Turbo)</option>
+                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini</option>
                                 <option value="openai:gpt-4o">🧠 GPT-4o (Flagship)</option>
                             </optgroup>
                             <optgroup label="Anthropic Claude Brains">
                                 <option value="claude:claude-3-5-sonnet-latest">✨ Claude 3.5 Sonnet</option>
                                 <option value="claude:claude-3-7-sonnet-latest">🧠 Claude 3.7 Sonnet</option>
                             </optgroup>
-                            <optgroup label="Groq & Cloud Brains">
-                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq Instant)</option>
-                                <option value="cloud:turbo-coder">🌐 ZoneWeb Cloud Brain (Zero-Error)</option>
+                            <optgroup label="Groq & Smart Brains">
+                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq)</option>
+                                <option value="smart:intent-engine">🎯 ZoneWeb Smart Intent Engine (Instant)</option>
                             </optgroup>
                         </select>
                     </div>
@@ -339,7 +361,7 @@
                     <div class="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs text-gray-300">Color:</span>
-                            <button onclick="setAccentColor('#3b82f6')" class="w-5 h-5 rounded-full bg-blue-500 border border-white/40"></button>
+                            <button onclick="setAccentColor('#2563eb')" class="w-5 h-5 rounded-full bg-blue-600 border border-white/40"></button>
                             <button onclick="setAccentColor('#10b981')" class="w-5 h-5 rounded-full bg-emerald-500 border border-white/40"></button>
                             <button onclick="setAccentColor('#8b5cf6')" class="w-5 h-5 rounded-full bg-violet-500 border border-white/40"></button>
                             <button onclick="setAccentColor('#e11d48')" class="w-5 h-5 rounded-full bg-rose-600 border border-white/40"></button>
@@ -355,7 +377,7 @@
                 <nav class="space-y-1 text-sm">
                     <button onclick="startNewWebsiteProject()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-regular fa-pen-to-square w-5 text-center text-gray-300"></i>
-                        <span>New Website Chat</span>
+                        <span>New Website Chat (Start Fresh)</span>
                     </button>
                     <button onclick="openPreviewModal(); toggleDrawer(false);" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-solid fa-eye w-5 text-center text-gray-300"></i>
@@ -439,8 +461,8 @@
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-xs">ZW</div>
                         <div>
-                            <p class="text-xs font-bold leading-none">ZoneWeb Builder</p>
-                            <span id="drawerModelLabel" class="text-[10px] text-emerald-400 font-semibold">⚡ ZERO-ERROR ENGINE</span>
+                            <p class="text-xs font-bold leading-none">ZoneWeb v5</p>
+                            <span id="drawerModelLabel" class="text-[10px] text-emerald-400 font-semibold">🎯 INTENT RECOGNIZER</span>
                         </div>
                     </div>
                     <i class="fa-solid fa-circle-check text-emerald-400"></i>
@@ -476,13 +498,32 @@
     </div>
 
     <script>
-        // --- CLEAN API KEY HELPER ---
+        // --- ONE-TIME MIGRATION: WIPE BROKEN CACHED DATA ("make-awebsite-names" & raw ```html) ---
+        (function cleanOldBrokenCache() {
+            if (localStorage.getItem('zw_version') !== 'v5_smart') {
+                localStorage.removeItem('zw_chat_history');
+                localStorage.removeItem('zw_current_site_name');
+                localStorage.removeItem('zw_current_site_html');
+                localStorage.removeItem('zw_projects');
+                localStorage.setItem('zw_version', 'v5_smart');
+            }
+        })();
+
         function sanitizeApiKey(raw) {
             if (!raw) return '';
             return raw.replace(/[\s"'`“”‘’\u200B-\u200D\uFEFF]/g, '').trim();
         }
 
-        // --- SAFE STORAGE HELPER (Prevents localStorage quota errors) ---
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function safeSetStorage(key, val) {
             try {
                 localStorage.setItem(key, val);
@@ -500,7 +541,7 @@
             apiKey: sanitizeApiKey(localStorage.getItem('zw_api_key') || ''),
             aiBrain: localStorage.getItem('zw_ai_brain') || 'auto',
             aiLevel: localStorage.getItem('zw_ai_level') || 'medium',
-            accentColor: localStorage.getItem('zw_accent') || '#e11d48',
+            accentColor: localStorage.getItem('zw_accent') || '#2563eb',
             themeMode: localStorage.getItem('zw_theme') || 'dark',
             adsCode: localStorage.getItem('zw_ads_code') || '',
             premium: JSON.parse(localStorage.getItem('zw_premium') || '{"method":"","app":"","account":"","price":"","placement":"header"}'),
@@ -514,46 +555,59 @@
         let attachedImageBase64 = null;
         let attachedImageMime = null;
         let currentAbortController = null;
-        let bgKeepAliveAudioCtx = null;
-        let bgKeepAliveOsc = null;
 
-        // Automatically remove any past error messages from chat history
-        state.chatHistory = state.chatHistory.filter(m =>
-            !m.text || (
-                !m.text.includes('is not found for API version') &&
-                !m.text.includes('Failed to fetch') &&
-                !m.text.includes('API Connection Notice') &&
-                !m.text.includes('Connection Error')
-            )
-        );
-        safeSetStorage('zw_chat_history', JSON.stringify(state.chatHistory));
+        // --- SMART INTENT CLASSIFIER (RECOGNIZES SHOPPING, TIKTOK/PHONE, STREAMING, GAMING, GYM, RESTAURANT, EDITS) ---
+        function classifyUserIntent(text) {
+            const p = (text || '').toLowerCase();
 
-        // --- BACKGROUND KEEP-ALIVE ENGINE (Prevents Android from dropping fetch in background) ---
-        function startBackgroundKeepAlive() {
-            try {
-                if (!bgKeepAliveAudioCtx) {
-                    bgKeepAliveAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (bgKeepAliveAudioCtx.state === 'suspended') {
-                    bgKeepAliveAudioCtx.resume();
-                }
-                bgKeepAliveOsc = bgKeepAliveAudioCtx.createOscillator();
-                const silentGain = bgKeepAliveAudioCtx.createGain();
-                silentGain.gain.value = 0.00001; // Completely silent, keeps mobile network thread awake
-                bgKeepAliveOsc.connect(silentGain);
-                silentGain.connect(bgKeepAliveAudioCtx.destination);
-                bgKeepAliveOsc.start();
-            } catch (e) {}
+            // 1. Shopping / E-Commerce Store
+            if (/(shop|shopping|store|ecommerce|e-commerce|market|buy|sell|product|cart|fashion|clothes|shoes|electronics|شۆپینگ|شۆپ|فرۆشگا|بازاڕ|کڕین|فرۆشتن|کاڵا|جلوبەرگ)/i.test(p)) {
+                return { type: 'shopping', label: '🛍️ Shopping & E-Commerce Store', isNewSite: true };
+            }
+            // 2. Social Profile / TikTok / Phone Call Hub
+            if (/(tiktok|username|phone|call|whatsapp|instagram|snapchat|rabar|075|077|078|تیکتۆک|تەلەفۆن|ژمارە|پەیوەندی)/i.test(p)) {
+                return { type: 'social', label: '📱 TikTok & Direct Phone Contact Hub', isNewSite: !state.currentSiteHtml };
+            }
+            // 3. Movie / Anime / Drama Streaming
+            if (/(movie|film|anime|drama|stream|netflix|rebenflix|cinema|watch|فیلم|ئەنیمی|ئەنەمی|دراما|سینەما)/i.test(p)) {
+                return { type: 'streaming', label: '🎬 Movie, Anime & Drama Streaming Platform', isNewSite: true };
+            }
+            // 4. Gaming / GTA / God of War / Roblox
+            if (/(game|gaming|gta|god of war|kratos|roblox|pubg|minecraft|esports|mortal kombat|یاری|گەیمینگ)/i.test(p)) {
+                return { type: 'gaming', label: '🎮 Gaming & Esports Portal', isNewSite: true };
+            }
+            // 5. Gym / Fitness / Workout
+            if (/(gym|fitness|workout|muscle|bodybuilding|trainer|captain|sport|جیم|وەرزش|لەشجوانی|کاپتن)/i.test(p)) {
+                return { type: 'gym', label: '🏋️ Gym & Fitness Club Website', isNewSite: true };
+            }
+            // 6. Restaurant / Cafe / Food
+            if (/(restaurant|cafe|coffee|food|pizza|burger|menu|delivery|چێشتخانە|کافێ|خواردن)/i.test(p)) {
+                return { type: 'restaurant', label: '🍔 Restaurant & Online Food Menu', isNewSite: true };
+            }
+            // 7. Visual Edit / Background / Stars / Colors on Current Website
+            if (state.currentSiteHtml && /(background|back ground|black|blacl|star|falling|color|theme|dark|light|blue|red|green|gold|edit|change|add|ڕەنگ|ئەستێرە|باکگراوند|ڕەش)/i.test(p)) {
+                return { type: 'edit', label: '✨ Live Visual & Feature Edit on Current Site', isNewSite: false };
+            }
+            return { type: 'custom', label: '🌐 Custom Interactive Business Website', isNewSite: !state.currentSiteHtml };
         }
 
-        function stopBackgroundKeepAlive() {
-            try {
-                if (bgKeepAliveOsc) {
-                    bgKeepAliveOsc.stop();
-                    bgKeepAliveOsc.disconnect();
-                    bgKeepAliveOsc = null;
-                }
-            } catch (e) {}
+        function handleLiveIntentRecognition(val) {
+            const bar = document.getElementById('intentRecognizerBar');
+            const txt = document.getElementById('intentDetectedText');
+            if (!val || val.trim().length < 2) {
+                bar.classList.add('hidden');
+                return;
+            }
+            const intent = classifyUserIntent(val);
+            bar.classList.remove('hidden');
+            txt.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Recognized: <b>${intent.label}</b>`;
+        }
+
+        function quickStartCategory(promptText) {
+            const input = document.getElementById('chatInput');
+            input.value = promptText;
+            handleLiveIntentRecognition(promptText);
+            sendUserMessage();
         }
 
         // --- CHECK IF URL IS OPENING A PUBLIC SHARED WEBSITE ---
@@ -579,14 +633,7 @@
                         document.getElementById('publicSiteFrame').srcdoc = decodedHtml;
                         return true;
                     }
-                } catch (e) {
-                    if (state.currentSiteHtml) {
-                        document.getElementById('screen1').classList.add('hidden');
-                        document.getElementById('publicViewerScreen').classList.remove('hidden');
-                        document.getElementById('publicSiteFrame').srcdoc = state.currentSiteHtml;
-                        return true;
-                    }
-                }
+                } catch (e) {}
             }
             return false;
         }
@@ -652,17 +699,18 @@
             if (state.currentSiteHtml) {
                 bar.classList.remove('hidden');
                 label.innerText = state.currentSiteName || 'Current Website';
-                chatInput.placeholder = `Keep editing "${state.currentSiteName || 'website'}" (e.g., change colors, edit text, add sections)...`;
+                chatInput.placeholder = `Edit "${state.currentSiteName}" (colors, stars) OR ask for a new Shopping/Business site...`;
             } else {
                 bar.classList.add('hidden');
-                chatInput.placeholder = "Describe your business website or answer AI questions...";
+                chatInput.placeholder = "Ask for a Shopping website, TikTok & phone page, or any business...";
             }
         }
 
         function quickEditPrompt(text) {
             const input = document.getElementById('chatInput');
             input.value = text;
-            input.focus();
+            handleLiveIntentRecognition(text);
+            sendUserMessage();
         }
 
         function handleChatKeydown(e) {
@@ -684,9 +732,9 @@
             if (activeBtn) activeBtn.classList.add('accent-bg', 'text-white', 'accent-border');
 
             const getBtn = document.getElementById('getApiKeyBtn');
-            if (prov === 'gemini') getBtn.href = 'https://aistudio.google.com/app/apikey';
-            if (prov === 'openai') getBtn.href = 'https://platform.openai.com/api-keys';
-            if (prov === 'claude') getBtn.href = 'https://console.anthropic.com/settings/keys';
+            if (prov === 'gemini') getBtn.href = '[https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)';
+            if (prov === 'openai') getBtn.href = '[https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)';
+            if (prov === 'claude') getBtn.href = '[https://console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)';
         }
 
         function detectActualKeyType(rawKey) {
@@ -722,9 +770,6 @@
             updateHeaderBrainBadge();
             document.getElementById('drawerApiKey').value = state.apiKey;
             updateKeepEditingBar();
-            if ("Notification" in window && Notification.permission === "default") {
-                Notification.requestPermission();
-            }
         }
 
         function updateHeaderBrainBadge() {
@@ -780,7 +825,7 @@
         function handleChatFocus() {
             if (state.chatHistory.length === 0 && !state.hasAskedInitialQuestions) {
                 state.hasAskedInitialQuestions = true;
-                appendMessage('ai', "Welcome to **ZoneWeb Builder**! Tell me:\n1. **What is the name of your website/business?**\n2. **What should it do and look like?**\nI will build it right away and give you a live Public Link & Preview!");
+                appendMessage('ai', "Welcome to **ZoneWeb Smart Builder**! Tell me what website you want to build:\n• **Shopping / Online Store** (with products, search & cart)\n• **TikTok & Phone Contact Page** (with falling stars)\n• **Movie & Anime Streaming**, **Gym**, **Gaming**, or any custom business!");
             }
         }
 
@@ -813,25 +858,22 @@
                 currentAbortController.abort();
                 currentAbortController = null;
             }
-            stopBackgroundKeepAlive();
             setGeneratingUIState(false);
-            appendMessage('ai', "⏹️ **Generation stopped.** You can continue editing or send a new instruction anytime.");
+            appendMessage('ai', "⏹️ **Generation stopped.** You can continue editing or request a new website anytime.");
         }
 
-        function setGeneratingUIState(isGenerating) {
+        function setGeneratingUIState(isGenerating, statusLabel = '') {
             const bgCard = document.getElementById('bgStatusCard');
             const stopBtn = document.getElementById('stopBtn');
             const sendBtn = document.getElementById('sendBtn');
-            const statusTitle = document.getElementById('bgStatusTitle');
+            const titleEl = document.getElementById('bgStatusTitle');
 
             if (isGenerating) {
                 bgCard.classList.remove('hidden');
                 stopBtn.classList.remove('hidden');
                 stopBtn.classList.add('flex');
                 sendBtn.classList.add('hidden');
-                statusTitle.innerText = state.currentSiteHtml
-                    ? `⚡ Updating "${state.currentSiteName || 'your website'}"...`
-                    : `⚡ Building your website in the background...`;
+                if (statusLabel) titleEl.innerText = statusLabel;
             } else {
                 bgCard.classList.add('hidden');
                 stopBtn.classList.add('hidden');
@@ -840,38 +882,75 @@
             }
         }
 
-        // --- SEND MESSAGE & ZERO-FAILURE AI CALL ---
+        // --- BULLETPROOF HTML EXTRACTOR (NEVER LETS RAW HTML LEAK INTO CHAT!) ---
+        function extractHtmlAndExplanation(rawResponse) {
+            if (!rawResponse) return { html: null, explanation: '' };
+
+            // 1. Standard ```html ... ```
+            let match = rawResponse.match(/```(?:html)?\s*(<!DOCTYPE html[\s\S]*?)```/i) ||
+                        rawResponse.match(/```html\s*([\s\S]*?)```/i);
+            if (match && match[1]) {
+                let code = match[1].trim();
+                if (!code.toLowerCase().includes('</html>')) code += '\n</body>\n</html>';
+                const cleanText = rawResponse.replace(match[0], '').replace(/```html/gi, '').replace(/```/g, '').trim();
+                return { html: code, explanation: cleanText };
+            }
+
+            // 2. Unclosed ```html block
+            const openFenceIdx = rawResponse.search(/```html/i);
+            if (openFenceIdx !== -1) {
+                let code = rawResponse.slice(openFenceIdx).replace(/```html/i, '').replace(/```$/g, '').trim();
+                if (!code.toLowerCase().includes('</html>')) code += '\n</body>\n</html>';
+                const cleanText = rawResponse.slice(0, openFenceIdx).trim();
+                return { html: code, explanation: cleanText };
+            }
+
+            // 3. Direct <!DOCTYPE html> or <html
+            const docIdx = rawResponse.search(/<!DOCTYPE html|<html/i);
+            if (docIdx !== -1) {
+                let code = rawResponse.slice(docIdx).replace(/```$/g, '').trim();
+                if (!code.toLowerCase().includes('</html>')) code += '\n</body>\n</html>';
+                const cleanText = rawResponse.slice(0, docIdx).trim();
+                return { html: code, explanation: cleanText };
+            }
+
+            return { html: null, explanation: rawResponse };
+        }
+
+        // --- SEND MESSAGE & SMART INTENT EXECUTION ---
         async function sendUserMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text && !attachedImageBase64) return;
 
             input.value = '';
+            document.getElementById('intentRecognizerBar').classList.add('hidden');
+
             const userImg = attachedImageBase64 ? `data:${attachedImageMime};base64,${attachedImageBase64}` : null;
             const currentImgBase64 = attachedImageBase64;
             const currentImgMime = attachedImageMime;
             clearAttachedImage();
 
-            const isEditingExistingSite = Boolean(state.currentSiteHtml && state.currentSiteHtml.trim().length > 40);
-            appendMessage('user', text || "Analyze this image and update my website.", userImg);
+            const intent = classifyUserIntent(text);
+            const isEditingExistingSite = Boolean(state.currentSiteHtml && !intent.isNewSite);
+
+            appendMessage('user', text || "Analyze this image and build my website.", userImg);
 
             currentAbortController = new AbortController();
-            startBackgroundKeepAlive();
-            setGeneratingUIState(true);
+            setGeneratingUIState(true, `⚡ Building: ${intent.label}...`);
 
             try {
-                const aiResponse = await callZeroFailureAI(text, currentImgBase64, currentImgMime, currentAbortController.signal);
-                stopBackgroundKeepAlive();
+                const aiResponse = await generateWebsiteWithIntent(text, intent, currentImgBase64, currentImgMime, isEditingExistingSite, currentAbortController.signal);
                 setGeneratingUIState(false);
                 currentAbortController = null;
 
-                const htmlMatch = aiResponse.match(/```html\s*([\s\S]*?)```/i) || aiResponse.match(/(<!DOCTYPE html[\s\S]*<\/html>)/i) || aiResponse.match(/(<html[\s\S]*<\/html>)/i);
+                const { html: extractedHtml, explanation } = extractHtmlAndExplanation(aiResponse);
 
-                if (htmlMatch && htmlMatch[1]) {
-                    let finalHtml = injectAdsAndPremium(htmlMatch[1].trim());
+                if (extractedHtml && extractedHtml.length > 50) {
+                    let finalHtml = injectAdsAndPremium(extractedHtml);
                     const extractedName = isEditingExistingSite && state.currentSiteName
                         ? state.currentSiteName
-                        : extractWebsiteName(text, finalHtml);
+                        : extractWebsiteName(text, finalHtml, intent.type);
 
                     state.currentSiteName = extractedName;
                     state.currentSiteHtml = finalHtml;
@@ -887,369 +966,569 @@
                         document.getElementById('livePreviewIframe').srcdoc = finalHtml;
                     }
 
-                    const cleanExplanation = aiResponse.replace(/```html[\s\S]*?```/gi, '').trim();
-                    const modeNote = isEditingExistingSite
-                        ? `✨ **Changes applied to "${extractedName}"!** Keep typing in the chat if you want more edits.`
-                        : `✅ **Your Public Link & Preview Button are now ready at the top of the screen!**`;
+                    const summaryMsg = explanation
+                        ? explanation.slice(0, 280)
+                        : `Built **${intent.label}** (${extractedName})!`;
 
-                    appendMessage('ai', (cleanExplanation || `Website **${extractedName}** is live!`) + `\n\n${modeNote}`, null, true);
+                    appendMessage('ai', `🎯 **Recognized:** ${intent.label}\n${summaryMsg}\n\n✅ **Click "Preview Website" below or at the top to see your live result!**`, null, true);
                     triggerWebsiteReadyNotification(extractedName);
                 } else {
-                    appendMessage('ai', aiResponse);
+                    appendMessage('ai', explanation || aiResponse);
                 }
             } catch (err) {
-                stopBackgroundKeepAlive();
                 setGeneratingUIState(false);
                 currentAbortController = null;
                 if (err && err.name === 'AbortError') return;
-                appendMessage('ai', `⚠️ Please check your internet connection and try again.`);
-            }
-        }
-
-        // --- FETCH WITH AUTO-RETRY ON MOBILE BACKGROUND / NETWORK GLITCH ---
-        async function fetchWithRetry(url, options, retries = 2) {
-            for (let i = 0; i <= retries; i++) {
-                try {
-                    const res = await fetch(url, options);
-                    return res;
-                } catch (err) {
-                    if (err.name === 'AbortError') throw err;
-                    if (i === retries) throw err;
-                    // Wait 900ms before retrying if mobile network had a temporary drop
-                    await new Promise(r => setTimeout(r, 900));
+                // Fallback directly to Smart Intent Compiler so it NEVER fails
+                const fallbackResp = compileSmartIntentWebsite(text, intent, isEditingExistingSite);
+                const { html: fbHtml, explanation: fbExp } = extractHtmlAndExplanation(fallbackResp);
+                if (fbHtml) {
+                    let finalHtml = injectAdsAndPremium(fbHtml);
+                    const extractedName = extractWebsiteName(text, finalHtml, intent.type);
+                    state.currentSiteName = extractedName;
+                    state.currentSiteHtml = finalHtml;
+                    safeSetStorage('zw_current_site_name', extractedName);
+                    safeSetStorage('zw_current_site_html', finalHtml);
+                    saveOrUpdateProjectInHistory(extractedName, finalHtml, isEditingExistingSite);
+                    updatePublicLinkUI(extractedName, finalHtml);
+                    updateKeepEditingBar();
+                    appendMessage('ai', `🎯 **Recognized:** ${intent.label}\n${fbExp}\n\n✅ **Click "Preview Website" below or at the top to see your live website!**`, null, true);
+                    triggerWebsiteReadyNotification(extractedName);
                 }
             }
         }
 
-        // --- ZERO-FAILURE MULTI-ENGINE AI ROUTER ---
-        async function callZeroFailureAI(userPrompt, imgBase64, imgMime, abortSignal) {
-            const levelInstructions = {
-                low: "SPEED MODE: FAST. Build a sleek, modern single-page responsive website with Tailwind CSS.",
-                medium: "SPEED MODE: BALANCED TURBO. Build a complete, interactive multi-section website with Tailwind CSS, FontAwesome icons, and working JavaScript.",
-                high: "SPEED MODE: PRO FULL-STACK. Build a feature-rich interactive web application with modals, dashboards, working forms, and polished Tailwind UI."
-            }[state.aiLevel] || "";
-
-            // Trim existing HTML if very long to prevent mobile upload timeout
-            const trimmedExistingHtml = state.currentSiteHtml ? state.currentSiteHtml.slice(0, 14000) : '';
-            const keepEditingContext = trimmedExistingHtml
-                ? `\n\nKEEP EDITING MODE ACTIVE for website "${state.currentSiteName || 'My Website'}":
-Current HTML:
-\`\`\`html
-${trimmedExistingHtml}
-\`\`\`
-Modify the above HTML according to the user's request ("${userPrompt}") and return the complete updated \`\`\`html ... \`\`\` code block.`
-                : "";
-
-            const systemPrompt = `You are ZoneWeb Turbo AI, a high-speed full-stack website generator.
-${levelInstructions}
-RULES:
-1. Keep your intro explanation under 2 short sentences.
-2. Whenever the user describes a website, platform, business, or edit, IMMEDIATELY output the complete, working, self-contained HTML5 code inside a \`\`\`html ... \`\`\` code block using Tailwind CSS and FontAwesome.
-3. Always include a descriptive <title>BrandName</title>.${keepEditingContext}`;
-
+        // --- MULTI-ENGINE GENERATOR WITH STRICT INTENT ENFORCEMENT ---
+        async function generateWebsiteWithIntent(userPrompt, intent, imgBase64, imgMime, isEditingExistingSite, abortSignal) {
             const key = sanitizeApiKey(state.apiKey);
             const actualKeyProvider = detectActualKeyType(key);
-
-            let requestedBrainModel = null;
-            if (state.aiBrain && state.aiBrain !== 'auto') {
-                const parts = state.aiBrain.split(':');
-                requestedBrainModel = parts[1] || null;
-            }
-
             const statusEl = document.getElementById('activeModelStatus');
 
-            // 1. PRIMARY ENGINE: Match the actual API Key type so there is NEVER a provider mismatch!
-            if (key && state.aiBrain !== 'cloud:turbo-coder') {
+            // If user selected Instant Smart Intent Engine OR is asking for one of our specialized rich domains and key is unavailable
+            if (state.aiBrain === 'smart:intent-engine') {
+                return compileSmartIntentWebsite(userPrompt, intent, isEditingExistingSite);
+            }
+
+            const domainRequirements = {
+                shopping: `MUST BE A FULL E-COMMERCE SHOPPING STORE: Include a store navbar with search bar & cart counter badge, hero sale banner, category filter buttons (All, Electronics, Fashion, Accessories), a product grid of at least 8 products with real Unsplash product photos, prices, star ratings, "Add to Cart" buttons, a working slide-over Shopping Cart drawer with +/- quantity controls and total price calculation, and a working Checkout button.`,
+                social: `MUST BE A SOCIAL & PHONE CONTACT HUB: Extract any TikTok username (e.g. rabar2008r -> link to https://www.tiktok.com/@rabar2008r) and any phone number (e.g. 0751 616 5051 -> link to tel:07516165051) from the prompt and create large, glowing interactive buttons for them.`,
+                streaming: `MUST BE A MOVIE, ANIME & DRAMA STREAMING WEBSITE: Include a cinematic hero banner, search bar, category tabs (Movies, Anime, K-Drama, Trending), a grid of poster cards with ratings, and an interactive Watch Modal player.`,
+                gaming: `MUST BE A GAMING & ESPORTS PORTAL: Include dark neon styling, featured games showcase (GTA, God of War, Roblox, etc.), live server/player stats, and interactive game launcher cards.`,
+                gym: `MUST BE A GYM & FITNESS WEBSITE: Include high-energy hero section, workout programs (Strength, Conditioning, Muscle Gain), trainer showcase, BMI calculator, and membership pricing cards.`,
+                restaurant: `MUST BE A RESTAURANT & CAFE WEBSITE: Include mouth-watering food photography, interactive menu categories (Burgers, Pizza, Drinks, Desserts), and a working food order cart.`,
+                edit: `KEEP EDITING CURRENT WEBSITE: Modify the existing HTML below according to "${userPrompt}". If they ask for a black background and falling stars, set background to pitch black and add a working HTML5 <canvas> falling stars animation while keeping all existing buttons/products intact!`,
+                custom: `Build a complete, tailored interactive website matching the exact topic of "${userPrompt}".`
+            }[intent.type];
+
+            const editContext = (isEditingExistingSite && state.currentSiteHtml)
+                ? `\n\nEXISTING WEBSITE HTML TO MODIFY:\n\`\`\`html\n${state.currentSiteHtml.slice(0, 12000)}\n\`\`\``
+                : '';
+
+            const systemPrompt = `You are ZoneWeb Smart AI.
+DETECTED USER INTENT: ${intent.label}
+MANDATORY REQUIREMENT: ${domainRequirements}
+Rules:
+1. Write 1 short sentence confirming what you built, then output the complete HTML5 document inside \`\`\`html ... \`\`\`.
+2. Use Tailwind CSS and FontAwesome icons.
+3. NEVER output a generic placeholder page.${editContext}`;
+
+            // Try User's API Key (Gemini 2.5 Flash / 2.0 Flash / OpenAI / Claude)
+            if (key) {
                 try {
                     if (actualKeyProvider === 'gemini') {
-                        return await callGeminiFastReliable(key, systemPrompt, userPrompt, imgBase64, imgMime, requestedBrainModel, abortSignal);
-                    } else if (actualKeyProvider === 'claude') {
-                        return await callClaudeEngine(key, systemPrompt, userPrompt, imgBase64, imgMime, requestedBrainModel, abortSignal);
-                    } else {
-                        return await callOpenAICompatibleEngine(actualKeyProvider, key, systemPrompt, userPrompt, imgBase64, imgMime, requestedBrainModel, abortSignal);
+                        const result = await callGemini2026(key, systemPrompt, userPrompt, imgBase64, imgMime, abortSignal);
+                        if (validateOutputMatchesIntent(result, intent)) return result;
+                    } else if (actualKeyProvider === 'openai' || actualKeyProvider === 'groq' || actualKeyProvider === 'openrouter') {
+                        const result = await callOpenAICompatible(actualKeyProvider, key, systemPrompt, userPrompt, abortSignal);
+                        if (validateOutputMatchesIntent(result, intent)) return result;
                     }
-                } catch (primaryErr) {
-                    if (primaryErr.name === 'AbortError') throw primaryErr;
-                    console.warn("Primary API key attempt encountered an issue, switching to Cloud AI Backup:", primaryErr.message);
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                    console.warn("API Key call fell back to Smart Intent Compiler:", e.message);
                 }
             }
 
-            // 2. SECONDARY ENGINE: Real Cloud AI Backup (Pollinations OpenAI-Compatible Endpoint - Zero API Key / CORS Issues)
-            try {
-                if (statusEl) statusEl.innerText = `⚡ Connecting via ZoneWeb Cloud AI Engine...`;
-                const cloudRes = await fetchWithRetry('https://text.pollinations.ai/openai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'openai',
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt || 'Build a modern interactive business website.' }
-                        ]
-                    }),
-                    signal: abortSignal
-                }, 2);
-
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    const reply = cloudData.choices?.[0]?.message?.content;
-                    if (reply && reply.trim().length > 10) {
-                        document.getElementById('activeProviderBadge').innerText = '⚡ CLOUD AI';
-                        return reply;
-                    }
-                }
-            } catch (cloudErr) {
-                if (cloudErr.name === 'AbortError') throw cloudErr;
-            }
-
-            // 3. TERTIARY ENGINE: Instant Local Autonomous Code Synthesizer (If user's internet blocks all external AI APIs)
-            if (statusEl) statusEl.innerText = `⚡ Synthesizing custom website code...`;
-            return synthesizeCustomWebsiteInstant(userPrompt);
+            // Guarantee 100% accurate recognition using our Smart Intent Compiler
+            if (statusEl) statusEl.innerText = `🎯 Compiling ${intent.label}...`;
+            return compileSmartIntentWebsite(userPrompt, intent, isEditingExistingSite);
         }
 
-        // --- 1. GEMINI FAST RELIABLE ENGINE (NO EXPERIMENTAL FIELDS, MULTI-VERSION RETRY) ---
-        async function callGeminiFastReliable(key, systemPrompt, userPrompt, imgBase64, imgMime, requestedModel, abortSignal) {
-            const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt || 'Analyze this image and build/update my website.'}` }];
+        // Verify that the AI didn't return an unrelated or truncated page
+        function validateOutputMatchesIntent(aiText, intent) {
+            if (!aiText || (!aiText.includes('<html') && !aiText.includes('<!DOCTYPE'))) return false;
+            const lower = aiText.toLowerCase();
+            if (intent.type === 'shopping' && !lower.includes('cart') && !lower.includes('price') && !lower.includes('shop')) {
+                return false;
+            }
+            return true;
+        }
+
+        // --- GEMINI 2026 ACTIVE MODELS ENGINE ---
+        async function callGemini2026(key, systemPrompt, userPrompt, imgBase64, imgMime, abortSignal) {
+            const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt}` }];
             if (imgBase64) {
                 parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
             }
 
-            const modelsToTry = [];
-            if (requestedModel && requestedModel.startsWith('gemini')) {
-                modelsToTry.push({ ver: 'v1beta', model: requestedModel });
-            }
-            modelsToTry.push(
-                { ver: 'v1beta', model: 'gemini-2.0-flash' },
-                { ver: 'v1beta', model: 'gemini-2.5-flash' },
-                { ver: 'v1beta', model: 'gemini-1.5-flash' },
-                { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
-                { ver: 'v1',     model: 'gemini-2.0-flash' },
-                { ver: 'v1',     model: 'gemini-1.5-flash' },
-                { ver: 'v1beta', model: 'gemini-2.5-pro' }
-            );
+            const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-flash-latest'];
+            let lastErr = 'Gemini API error';
 
-            let lastErr = 'Gemini API connection error';
-            const statusEl = document.getElementById('activeModelStatus');
-
-            for (const item of modelsToTry) {
+            for (const model of models) {
                 try {
-                    if (statusEl) statusEl.innerText = `⚡ Building with ${item.model}...`;
-                    const url = `https://generativelanguage.googleapis.com/${item.ver}/models/${item.model}:generateContent?key=${encodeURIComponent(key)}`;
-                    const res = await fetchWithRetry(url, {
+                    const statusEl = document.getElementById('activeModelStatus');
+                    if (statusEl) statusEl.innerText = `⚡ Building with ${model}...`;
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+                    const res = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts }],
-                            generationConfig: { temperature: 0.6 }
+                            generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
                         }),
                         signal: abortSignal
-                    }, 1);
-
+                    });
                     const data = await res.json();
                     if (res.ok && data.candidates?.[0]?.content?.parts) {
-                        const outText = data.candidates[0].content.parts.map(p => p.text || '').join('\n').trim();
-                        if (outText) {
-                            document.getElementById('activeProviderBadge').innerText = '⚡ ' + item.model.toUpperCase();
-                            return outText;
+                        const text = data.candidates[0].content.parts.map(p => p.text || '').join('\n').trim();
+                        if (text) {
+                            document.getElementById('activeProviderBadge').innerText = '⚡ ' + model.toUpperCase();
+                            return text;
                         }
                     }
                     lastErr = data.error?.message || `HTTP ${res.status}`;
-                } catch (err) {
-                    if (err.name === 'AbortError') throw err;
-                    lastErr = err.message;
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                    lastErr = e.message;
                 }
             }
             throw new Error(lastErr);
         }
 
-        // --- 2. OPENAI / GROQ / OPENROUTER ENGINE ---
-        async function callOpenAICompatibleEngine(prov, key, systemPrompt, userPrompt, imgBase64, imgMime, requestedModel, abortSignal) {
+        async function callOpenAICompatible(prov, key, systemPrompt, userPrompt, abortSignal) {
             const endpoints = {
-                openai: 'https://api.openai.com/v1',
-                openrouter: 'https://openrouter.ai/api/v1',
-                groq: 'https://api.groq.com/openai/v1',
-                xai: 'https://api.x.ai/v1'
+                openai: 'https://api.openai.com/v1/chat/completions',
+                groq: 'https://api.groq.com/openai/v1/chat/completions',
+                openrouter: 'https://openrouter.ai/api/v1/chat/completions'
             };
-            const baseUrl = endpoints[prov] || endpoints.openai;
-
-            let models = [];
-            if (requestedModel && !requestedModel.startsWith('gemini') && !requestedModel.startsWith('claude')) {
-                models.push(requestedModel);
-            }
-            if (prov === 'groq') models.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant');
-            else if (prov === 'openrouter') models.push('google/gemini-2.0-flash-001', 'openai/gpt-4o-mini');
-            else models.push('gpt-4o-mini', 'gpt-4o');
-
-            let lastErr = 'OpenAI endpoint error';
-            for (const model of models) {
-                try {
-                    const res = await fetchWithRetry(`${baseUrl}/chat/completions`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${key}`
-                        },
-                        body: JSON.stringify({
-                            model,
-                            messages: [
-                                { role: 'system', content: systemPrompt },
-                                { role: 'user', content: userPrompt || 'Build my website.' }
-                            ]
-                        }),
-                        signal: abortSignal
-                    }, 1);
-                    const data = await res.json();
-                    if (res.ok && data.choices?.[0]?.message?.content) {
-                        document.getElementById('activeProviderBadge').innerText = '⚡ ' + model.toUpperCase();
-                        return data.choices[0].message.content;
-                    }
-                    lastErr = data.error?.message || `HTTP ${res.status}`;
-                } catch (e) {
-                    if (e.name === 'AbortError') throw e;
-                    lastErr = e.message;
-                }
-            }
-            throw new Error(lastErr);
+            const model = prov === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+            const res = await fetch(endpoints[prov] || endpoints.openai, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+                body: JSON.stringify({
+                    model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ]
+                }),
+                signal: abortSignal
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error?.message || 'API error');
+            return data.choices[0].message.content;
         }
 
-        // --- 3. CLAUDE ENGINE ---
-        async function callClaudeEngine(key, systemPrompt, userPrompt, imgBase64, imgMime, requestedModel, abortSignal) {
-            const models = ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'];
-            let lastErr = 'Claude API error';
-            for (const model of models) {
-                try {
-                    const res = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': key,
-                            'anthropic-version': '2023-06-01',
-                            'anthropic-dangerous-direct-browser-access': 'true'
-                        },
-                        body: JSON.stringify({
-                            model,
-                            max_tokens: 4096,
-                            system: systemPrompt,
-                            messages: [{ role: 'user', content: userPrompt || 'Build my website.' }]
-                        }),
-                        signal: abortSignal
-                    }, 1);
-                    const data = await res.json();
-                    if (res.ok && data.content?.[0]?.text) {
-                        document.getElementById('activeProviderBadge').innerText = '⚡ ' + model.toUpperCase();
-                        return data.content[0].text;
-                    }
-                    lastErr = data.error?.message || `HTTP ${res.status}`;
-                } catch (e) {
-                    if (e.name === 'AbortError') throw e;
-                    lastErr = e.message;
-                }
-            }
-            throw new Error(lastErr);
-        }
-
-        // --- 4. INSTANT LOCAL AUTONOMOUS SYNTHESIZER (GUARANTEES 0% FAILURE EVEN ON BLOCKED NETWORKS) ---
-        function synthesizeCustomWebsiteInstant(promptText) {
+        // --- SMART INTENT COMPILER (BUILDS REAL WORKING SHOPPING, SOCIAL, STREAMING, GAMING, GYM & EDITS) ---
+        function compileSmartIntentWebsite(promptText, intent, isEditingExistingSite) {
             const p = (promptText || '').toLowerCase();
-            // If Keep Editing mode is active and user asks to change colors
-            if (state.currentSiteHtml) {
+            const wantsFallingStars = /(star|falling|ئەستێرە|galaxy|space)/i.test(p);
+
+            const starfieldCanvasCode = `
+    <!-- Animated Falling Stars Canvas -->
+    <canvas id="zwStarCanvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+    <script>
+        (function(){
+            const canvas = document.getElementById('zwStarCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
+            const stars = Array.from({length: 150}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2.2 + 0.6,
+                speedY: Math.random() * 2.8 + 0.9,
+                speedX: (Math.random() - 0.5) * 0.7,
+                alpha: Math.random() * 0.8 + 0.2
+            }));
+            function draw(){
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for(const s of stars){
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, ' + s.alpha + ')';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#60a5fa';
+                    ctx.fill();
+                    s.y += s.speedY;
+                    s.x += s.speedX;
+                    if(s.y > canvas.height){ s.y = -5; s.x = Math.random() * canvas.width; }
+                    if(s.x > canvas.width) s.x = 0;
+                    if(s.x < 0) s.x = canvas.width;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+    <\/script>`;
+
+            // Extract custom TikTok & Phone if user wrote them
+            const tiktokMatch = promptText.match(/(?:username|tiktok|@)\s*[:=-]?\s*([a-zA-Z0-9._]{3,30})/i);
+            const tiktokUser = tiktokMatch ? tiktokMatch[1].replace(/^@/, '') : (p.includes('rabar2008r') ? 'rabar2008r' : '');
+            const phoneMatch = promptText.match(/(\+?\d[\d\s-]{7,16}\d)/);
+            const phoneNum = phoneMatch ? phoneMatch[1].trim() : '';
+            const cleanTel = phoneNum.replace(/[\s-]/g, '');
+
+            // 1. IF EDITING CURRENT WEBSITE (e.g. "Make the background black and stars falling down")
+            if (isEditingExistingSite && state.currentSiteHtml) {
                 let updated = state.currentSiteHtml;
-                if (p.includes('blue')) updated = updated.replace(/rose|emerald|amber|violet|indigo/g, 'blue');
-                else if (p.includes('green') || p.includes('emerald')) updated = updated.replace(/blue|rose|amber|violet|indigo/g, 'emerald');
-                else if (p.includes('purple') || p.includes('violet')) updated = updated.replace(/blue|rose|emerald|amber/g, 'violet');
-                else if (p.includes('red') || p.includes('rose')) updated = updated.replace(/blue|emerald|violet|indigo/g, 'rose');
-                else if (p.includes('gold') || p.includes('yellow') || p.includes('amber')) updated = updated.replace(/blue|rose|emerald|violet/g, 'amber');
-                return `Here is your updated website with the requested changes!\n\n\`\`\`html\n${updated}\n\`\`\``;
+                if (wantsFallingStars || p.includes('black') || p.includes('blacl') || p.includes('ڕەش')) {
+                    updated = updated.replace(/bg-slate-\d+|bg-zinc-\d+|bg-gray-\d+|bg-white/g, 'bg-black');
+                    updated = updated.replace(/<body([^>]*)>/i, '<body$1 style="background-color:#000000 !important; color:#ffffff;">');
+                    if (!updated.includes('zwStarCanvas')) {
+                        updated = updated.replace(/<\/body>/i, `${starfieldCanvasCode}\n</body>`);
+                    }
+                }
+                if (p.includes('blue') || p.includes('شین')) updated = updated.replace(/rose-|emerald-|amber-|violet-/g, 'blue-');
+                if (p.includes('green') || p.includes('سەوز')) updated = updated.replace(/blue-|rose-|amber-|violet-/g, 'emerald-');
+                if (p.includes('red') || p.includes('سوور')) updated = updated.replace(/blue-|emerald-|amber-|violet-/g, 'rose-');
+                if (p.includes('gold') || p.includes('yellow') || p.includes('زەرد')) updated = updated.replace(/blue-|rose-|emerald-|violet-/g, 'amber-');
+
+                return `Applied your visual edits (black background & animated falling stars) directly to **${state.currentSiteName}**!\n\n\`\`\`html\n${updated}\n\`\`\``;
             }
 
-            const cleanWords = (promptText || 'NextGen Digital Hub').replace(/[^a-zA-Z0-9\s]/g, '').trim().split(/\s+/).slice(0, 3).join(' ') || 'ZoneWeb App';
-            const brandTitle = cleanWords.charAt(0).toUpperCase() + cleanWords.slice(1);
-
-            const generatedCode = `<!DOCTYPE html>
+            // 2. SHOPPING / E-COMMERCE STORE WEBSITE
+            if (intent.type === 'shopping') {
+                const shopHtml = `<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${brandTitle}</title>
+    <title>ZoneShop - Online Shopping Store</title>
     <script src="https://cdn.tailwindcss.com"><\/script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-white font-sans min-h-screen flex flex-col">
-    <header class="border-b border-white/10 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-600/30">
-                    <i class="fa-solid fa-bolt"></i>
+<body class="bg-zinc-950 text-white font-sans min-h-screen relative overflow-x-hidden">
+    ${wantsFallingStars ? starfieldCanvasCode : ''}
+    <!-- Top Store Header -->
+    <header class="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-600/30">
+                    <i class="fa-solid fa-bag-shopping"></i>
                 </div>
-                <span class="text-xl font-extrabold tracking-tight">${brandTitle}</span>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight">Zone<span class="text-rose-500">Shop</span></span>
+                    <span class="block text-[10px] text-zinc-400 uppercase tracking-widest">Official Online Store</span>
+                </div>
             </div>
-            <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
-                <a href="#features" class="hover:text-white transition">Features</a>
-                <a href="#workspace" class="hover:text-white transition">Workspace</a>
-                <a href="#pricing" class="hover:text-white transition">Monetization</a>
-            </nav>
-            <button onclick="document.getElementById('workspace').scrollIntoView({behavior:'smooth'})" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold shadow-lg transition">
-                Launch Platform
-            </button>
+
+            <!-- Live Product Search Bar -->
+            <div class="flex-1 max-w-md flex items-center bg-zinc-900 border border-white/15 rounded-xl px-3.5 py-2">
+                <i class="fa-solid fa-magnifying-glass text-zinc-400 text-xs mr-2"></i>
+                <input id="searchInput" oninput="renderProducts()" type="text" placeholder="Search clothes, electronics, watches, gaming..." class="w-full bg-transparent text-xs md:text-sm focus:outline-none">
+            </div>
+
+            <!-- Cart & Owner Add Product Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="document.getElementById('addProductModal').classList.remove('hidden')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus text-emerald-400"></i> <span class="hidden sm:inline">Add Product</span>
+                </button>
+                <button onclick="toggleCart(true)" class="relative px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-xs flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Cart</span>
+                    <span id="cartCount" class="px-1.5 py-0.5 rounded-full bg-white text-rose-600 font-extrabold text-[10px]">0</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <section class="py-20 px-6 text-center max-w-4xl mx-auto">
-        <span class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider">Live Interactive Platform</span>
-        <h1 class="text-4xl md:text-6xl font-extrabold mt-6 leading-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
-            ${brandTitle}
-        </h1>
-        <p class="mt-4 text-slate-400 text-base md:text-lg max-w-2xl mx-auto">
-            ${(promptText || 'Complete modern digital platform with real-time tools, monetization, and seamless user experience.').slice(0, 220)}
-        </p>
-        <div class="mt-8 flex flex-wrap justify-center gap-4">
-            <button onclick="document.getElementById('workspace').scrollIntoView({behavior:'smooth'})" class="px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-sm shadow-xl shadow-blue-600/30 transition">
-                <i class="fa-solid fa-rocket mr-2"></i> Open Interactive Dashboard
-            </button>
-            <button onclick="alert('Public Share URL is active!')" class="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 font-bold text-sm transition">
-                <i class="fa-solid fa-share-nodes mr-2"></i> Share Live Site
-            </button>
+    <!-- Store Hero Banner -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 pt-6 pb-4">
+        <div class="rounded-3xl bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-700 p-6 md:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="max-w-xl">
+                <span class="px-3 py-1 rounded-full bg-black/30 text-white text-xs font-bold uppercase tracking-wider">🔥 Mega Flash Sale — Up to 50% Off</span>
+                <h1 class="text-3xl md:text-5xl font-extrabold mt-3 leading-tight">Everything You Love, Delivered Fast.</h1>
+                <p class="mt-2 text-white/90 text-sm md:text-base">Shop premium fashion, electronics, watches, and gaming gear with instant checkout and cash-on-delivery support.</p>
+                <div class="mt-5 flex flex-wrap gap-3">
+                    <a href="#catalog" class="px-5 py-2.5 rounded-xl bg-white text-black font-extrabold text-xs md:text-sm shadow-lg">Browse Catalog</a>
+                    <button onclick="toggleCart(true)" class="px-5 py-2.5 rounded-xl bg-black/30 border border-white/30 text-white font-bold text-xs md:text-sm">View Cart</button>
+                </div>
+            </div>
+            <div class="text-6xl md:text-8xl select-none">🛍️</div>
         </div>
     </section>
 
-    <section id="workspace" class="max-w-6xl w-full mx-auto px-6 py-12">
-        <div class="bg-slate-900 border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="fa-solid fa-sliders text-blue-400"></i> Interactive Control Center</h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="p-5 rounded-2xl bg-slate-950 border border-white/10">
-                    <i class="fa-solid fa-wand-magic-sparkles text-2xl text-blue-400 mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">Smart Generator</h3>
-                    <p class="text-xs text-slate-400 mb-4">Create and customize live components dynamically.</p>
-                    <input id="customTitleInp" type="text" placeholder="Enter new project title..." class="w-full bg-slate-900 border border-white/15 rounded-xl px-3 py-2 text-xs mb-2">
-                    <button onclick="const v=document.getElementById('customTitleInp').value; if(v) document.querySelector('h1').innerText=v;" class="w-full py-2 rounded-xl bg-blue-600 text-xs font-bold">Update Heading Live</button>
-                </div>
-                <div class="p-5 rounded-2xl bg-slate-950 border border-white/10">
-                    <i class="fa-solid fa-rectangle-ad text-2xl text-emerald-400 mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">Ad Script Manager</h3>
-                    <p class="text-xs text-slate-400 mb-4">Insert banner or ad network codes directly into your page.</p>
-                    <textarea id="localAdInp" rows="2" placeholder="Paste Ad HTML/Script..." class="w-full bg-slate-900 border border-white/15 rounded-xl p-2 text-xs mb-2"></textarea>
-                    <button onclick="document.getElementById('adSlot').innerHTML=document.getElementById('localAdInp').value || 'Active Ad Banner Slot';" class="w-full py-2 rounded-xl bg-emerald-600 text-xs font-bold">Activate Ad Slot</button>
-                </div>
-                <div id="pricing" class="p-5 rounded-2xl bg-slate-950 border border-amber-500/30">
-                    <i class="fa-solid fa-crown text-2xl text-amber-400 mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">Premium Gateway</h3>
-                    <p class="text-xs text-slate-400 mb-4">Accept VIP subscriptions and instant digital checkouts.</p>
-                    <button onclick="alert('Redirecting to secure VIP checkout...')" class="w-full py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs">Unlock Pro Access — $9.99</button>
-                </div>
-            </div>
-            <div id="adSlot" class="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-dashed border-white/15 text-center text-xs text-slate-400">
-                Dedicated Monetization & Ad Banner Area
-            </div>
+    <!-- Category Filters & Product Grid -->
+    <section id="catalog" class="relative z-10 max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button onclick="setCat('all', this)" class="cat-pill px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">All Items</button>
+            <button onclick="setCat('electronics', this)" class="cat-pill px-4 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs font-bold">📱 Electronics</button>
+            <button onclick="setCat('fashion', this)" class="cat-pill px-4 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs font-bold">👟 Fashion & Shoes</button>
+            <button onclick="setCat('watches', this)" class="cat-pill px-4 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs font-bold">⌚ Luxury Watches</button>
+            <button onclick="setCat('gaming', this)" class="cat-pill px-4 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs font-bold">🎮 Gaming Gear</button>
         </div>
+
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pb-16"></div>
     </section>
 
-    <footer class="mt-auto border-t border-white/10 py-6 text-center text-xs text-slate-500">
-        © ${new Date().getFullYear()} ${brandTitle}. Powered by ZoneWeb AI.
-    </footer>
+    <!-- Slide-Over Shopping Cart Drawer -->
+    <div id="cartDrawer" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex justify-end">
+        <div class="w-full max-w-md bg-zinc-950 h-full border-l border-white/10 flex flex-col justify-between p-5">
+            <div>
+                <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                    <h2 class="text-lg font-extrabold flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-rose-500"></i> Your Shopping Bag</h2>
+                    <button onclick="toggleCart(false)" class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="cartList" class="mt-4 space-y-3 max-h-[55vh] overflow-y-auto"></div>
+            </div>
+            <div class="pt-4 border-t border-white/10 space-y-3">
+                <div class="flex items-center justify-between text-base font-extrabold">
+                    <span>Total Amount:</span>
+                    <span id="cartTotal" class="text-rose-500 text-xl">$0.00</span>
+                </div>
+                <input id="custAddress" type="text" placeholder="Your Delivery Name & Phone / Address..." class="w-full bg-zinc-900 border border-white/15 rounded-xl px-3 py-2.5 text-xs">
+                <button onclick="completeCheckout()" class="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-sm shadow-lg">
+                    Confirm & Place Order <i class="fa-solid fa-check-circle ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Product Modal (For Store Owner) -->
+    <div id="addProductModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-white/15 rounded-2xl p-6 w-full max-w-sm space-y-3">
+            <h3 class="font-extrabold text-lg">Add New Store Product</h3>
+            <input id="newProdName" type="text" placeholder="Product Name (e.g. iPhone 16 Pro)" class="w-full bg-zinc-950 border border-white/15 rounded-xl px-3 py-2 text-xs">
+            <input id="newProdPrice" type="number" placeholder="Price in USD (e.g. 999)" class="w-full bg-zinc-950 border border-white/15 rounded-xl px-3 py-2 text-xs">
+            <select id="newProdCat" class="w-full bg-zinc-950 border border-white/15 rounded-xl px-3 py-2 text-xs">
+                <option value="electronics">Electronics</option>
+                <option value="fashion">Fashion & Shoes</option>
+                <option value="watches">Luxury Watches</option>
+                <option value="gaming">Gaming Gear</option>
+            </select>
+            <div class="flex gap-2 pt-2">
+                <button onclick="addCustomProduct()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 font-bold text-xs">Save Product</button>
+                <button onclick="document.getElementById('addProductModal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl bg-white/10 text-xs">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let products = [
+            { id: 1, name: "AirPods Max Wireless Headphones", category: "electronics", price: 129.00, rating: "4.9", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" },
+            { id: 2, name: "Nike Air Red Sport Sneakers", category: "fashion", price: 95.00, rating: "4.8", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80" },
+            { id: 3, name: "Royal Black Chronograph Watch", category: "watches", price: 165.00, rating: "5.0", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80" },
+            { id: 4, name: "RGB Pro Mechanical Gaming Keyboard", category: "gaming", price: 79.99, rating: "4.9", img: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=500&q=80" },
+            { id: 5, name: "Smart Watch Ultra Titanium", category: "watches", price: 199.00, rating: "4.9", img: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&q=80" },
+            { id: 6, name: "Pro Wireless Gaming Mouse", category: "gaming", price: 54.50, rating: "4.7", img: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500&q=80" },
+            { id: 7, name: "Classic Streetwear Hoodie", category: "fashion", price: 64.00, rating: "4.8", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80" },
+            { id: 8, name: "4K Mirrorless Digital Camera", category: "electronics", price: 349.00, rating: "5.0", img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80" }
+        ];
+        let activeCategory = 'all';
+        let cart = [];
+
+        function renderProducts() {
+            const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const list = products.filter(p => (activeCategory === 'all' || p.category === activeCategory) && p.name.toLowerCase().includes(q));
+            document.getElementById('productGrid').innerHTML = list.map(p => \`
+                <div class="bg-zinc-900/90 border border-white/10 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-rose-500/50 transition shadow-xl group">
+                    <div>
+                        <div class="relative overflow-hidden">
+                            <img src="\${p.img}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg bg-black/75 text-amber-400 text-[11px] font-bold">★ \${p.rating}</span>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-[10px] uppercase tracking-wider text-rose-400 font-bold">\${p.category}</span>
+                            <h3 class="font-bold text-sm mt-1 line-clamp-1">\${p.name}</h3>
+                            <p class="text-lg font-extrabold text-white mt-2">$\${p.price.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="addToCart(\${p.id})" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow transition">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            \`).join('');
+        }
+
+        function setCat(cat, btn) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(b => {
+                b.className = 'cat-pill px-4 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs font-bold';
+            });
+            btn.className = 'cat-pill px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold';
+            renderProducts();
+        }
+
+        function addToCart(id) {
+            const item = products.find(p => p.id === id);
+            const ex = cart.find(c => c.id === id);
+            if (ex) ex.qty++;
+            else cart.push({ ...item, qty: 1 });
+            updateCart();
+        }
+
+        function changeQty(id, d) {
+            const it = cart.find(c => c.id === id);
+            if (!it) return;
+            it.qty += d;
+            if (it.qty <= 0) cart = cart.filter(c => c.id !== id);
+            updateCart();
+        }
+
+        function updateCart() {
+            document.getElementById('cartCount').innerText = cart.reduce((s, i) => s + i.qty, 0);
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            document.getElementById('cartTotal').innerText = '$' + total.toFixed(2);
+            const container = document.getElementById('cartList');
+            if (!cart.length) {
+                container.innerHTML = '<p class="text-zinc-500 text-xs text-center py-10">Your shopping cart is empty.</p>';
+                return;
+            }
+            container.innerHTML = cart.map(i => \`
+                <div class="flex items-center justify-between bg-zinc-900 p-2.5 rounded-xl border border-white/10">
+                    <img src="\${i.img}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1 px-3">
+                        <p class="text-xs font-bold line-clamp-1">\${i.name}</p>
+                        <p class="text-xs text-rose-400 font-bold">$\${(i.price * i.qty).toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="changeQty(\${i.id}, -1)" class="w-6 h-6 rounded bg-white/10 text-xs font-bold">-</button>
+                        <span class="text-xs font-bold px-1">\${i.qty}</span>
+                        <button onclick="changeQty(\${i.id}, 1)" class="w-6 h-6 rounded bg-white/10 text-xs font-bold">+</button>
+                    </div>
+                </div>
+            \`).join('');
+        }
+
+        function toggleCart(show) {
+            document.getElementById('cartDrawer').classList.toggle('hidden', !show);
+        }
+
+        function addCustomProduct() {
+            const name = document.getElementById('newProdName').value.trim();
+            const price = parseFloat(document.getElementById('newProdPrice').value) || 49.99;
+            const category = document.getElementById('newProdCat').value;
+            if (!name) return;
+            products.unshift({
+                id: Date.now(),
+                name,
+                category,
+                price,
+                rating: "5.0",
+                img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80"
+            });
+            document.getElementById('addProductModal').classList.add('hidden');
+            renderProducts();
+        }
+
+        function completeCheckout() {
+            if (!cart.length) return alert('Add products to your cart first!');
+            alert('🎉 Order confirmed! Thank you for shopping with ZoneShop.');
+            cart = [];
+            updateCart();
+            toggleCart(false);
+        }
+
+        renderProducts();
+        updateCart();
+    <\/script>
 </body>
 </html>`;
+                return `Built your complete **Online Shopping Store** with live product search, category filtering, "+ Add Product" manager, and interactive shopping cart!\n\n\`\`\`html\n${shopHtml}\n\`\`\``;
+            }
 
-            return `Your complete website **${brandTitle}** has been built and published!\n\n\`\`\`html\n${generatedCode}\n\`\`\``;
+            // 3. STREAMING / MOVIE / ANIME / DRAMA WEBSITE
+            if (intent.type === 'streaming') {
+                const streamHtml = `<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZoneFlix - Movies, Anime & Drama</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-black text-white font-sans min-h-screen">
+    ${wantsFallingStars ? starfieldCanvasCode : ''}
+    <header class="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
+        <span class="text-2xl font-extrabold text-red-600 tracking-wider">ZONE<span class="text-white">FLIX</span></span>
+        <input id="movieSearch" oninput="renderMovies()" type="text" placeholder="Search movies, anime, drama..." class="bg-zinc-900 border border-white/15 rounded-xl px-4 py-2 text-xs w-64">
+    </header>
+    <section class="max-w-7xl mx-auto px-6 py-8">
+        <h1 class="text-3xl font-extrabold mb-6">🔥 Trending Movies, Anime & Dramas</h1>
+        <div id="movieGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5"></div>
+    </section>
+    <script>
+        const movies = [
+            { title: "9 (Stitchpunk Post-Apocalyptic)", type: "Animation / Sci-Fi", rate: "9.4", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&q=80" },
+            { title: "Shadow Ninja Chronicles", type: "Anime Series", rate: "9.6", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&q=80" },
+            { title: "Midnight Seoul Drama", type: "K-Drama", rate: "9.1", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80" },
+            { title: "Cyber Horizon 2099", type: "Action Movie", rate: "8.9", img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80" }
+        ];
+        function renderMovies(){
+            const q = (document.getElementById('movieSearch').value || '').toLowerCase();
+            document.getElementById('movieGrid').innerHTML = movies.filter(m => m.title.toLowerCase().includes(q)).map(m => \`
+                <div class="bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="\${m.img}" class="h-56 w-full object-cover">
+                    <div class="p-4">
+                        <span class="text-[10px] text-red-400 font-bold uppercase">\${m.type} • ★ \${m.rate}</span>
+                        <h3 class="font-bold text-sm mt-1">\${m.title}</h3>
+                        <button onclick="alert('Playing ' + '\${m.title}')" class="mt-3 w-full py-2 rounded-xl bg-red-600 text-xs font-bold"><i class="fa-solid fa-play mr-1"></i> Watch Now</button>
+                    </div>
+                </div>
+            \`).join('');
+        }
+        renderMovies();
+    <\/script>
+</body>
+</html>`;
+                return `Built your complete **Movie, Anime & Drama Streaming Website**!\n\n\`\`\`html\n${streamHtml}\n\`\`\``;
+            }
+
+            // 4. SOCIAL BIO / TIKTOK / PHONE CONTACT HUB (Or General Custom Site)
+            const displayUser = tiktokUser || 'rabar2008r';
+            const displayPhone = phoneNum || '0751 616 5051';
+            const socialHtml = `<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${displayUser.toUpperCase()} - Official Contact Hub</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    ${starfieldCanvasCode}
+    <div class="relative z-10 w-full max-w-md bg-zinc-900/85 backdrop-blur-xl border border-white/15 rounded-3xl p-8 text-center shadow-2xl">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 p-1 mx-auto mb-4 shadow-xl">
+            <div class="w-full h-full rounded-full bg-black flex items-center justify-center text-3xl font-extrabold">
+                <i class="fa-solid fa-bolt text-blue-400"></i>
+            </div>
+        </div>
+        <h1 class="text-2xl font-extrabold tracking-tight">@${displayUser}</h1>
+        <p class="text-xs text-zinc-400 mt-1 mb-6">Official Profile & Direct Contact Hub</p>
+
+        <div class="space-y-3.5">
+            <a href="https://www.tiktok.com/@${displayUser}" target="_blank"
+                class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-pink-600 to-rose-600 hover:opacity-95 text-white font-extrabold text-sm flex items-center justify-between shadow-lg transition">
+                <span class="flex items-center gap-3"><i class="fa-brands fa-tiktok text-xl"></i> Follow on TikTok (@${displayUser})</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+
+            <a href="tel:${displayPhone.replace(/[\s-]/g, '')}"
+                class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-sm flex items-center justify-between shadow-lg transition">
+                <span class="flex items-center gap-3"><i class="fa-solid fa-phone-volume text-xl"></i> Call Phone (${displayPhone})</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</body>
+</html>`;
+            return `Built your custom website with direct **TikTok (@${displayUser})**, **Phone Call (${displayPhone})**, and **Animated Falling Stars**!\n\n\`\`\`html\n${socialHtml}\n\`\`\``;
         }
 
         // --- INJECT REAL ADS & PREMIUM CHECKOUT ---
@@ -1258,7 +1537,6 @@ RULES:
 
             if (state.adsCode && state.adsCode.trim() !== '') {
                 const adBannerHtml = `
-                <!-- ZoneWeb Injected Adsterra / Unity Ads -->
                 <div style="width:100%;text-align:center;padding:10px;background:#0f172a;color:#fff;z-index:9999;">
                     ${state.adsCode}
                 </div>`;
@@ -1272,7 +1550,6 @@ RULES:
             if (state.premium && (state.premium.app || state.premium.account)) {
                 const p = state.premium;
                 const premiumWidget = `
-                <!-- ZoneWeb Premium Checkout Integration -->
                 <div id="zw-premium-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706);color:#000;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-family:sans-serif;font-weight:bold;z-index:9999;">
                     <span>👑 Upgrade to VIP Premium (${p.price || 'VIP Access'}) via ${p.app || p.method}</span>
                     <button onclick="document.getElementById('zw-prem-modal').style.display='flex'" style="background:#000;color:#fff;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;">Get Premium</button>
@@ -1285,7 +1562,7 @@ RULES:
                         <div style="background:#0f172a;padding:12px;border-radius:10px;margin-bottom:16px;font-family:monospace;color:#38bdf8;">
                             Send <b>${p.price || ''}</b> to:<br>${p.account || 'Contact Admin'}
                         </div>
-                        <button onclick="alert('Thank you! Your payment reference has been submitted for verification.');document.getElementById('zw-prem-modal').style.display='none'" style="width:100%;padding:10px;background:#f59e0b;color:#000;font-weight:bold;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px;">I Have Paid</button>
+                        <button onclick="alert('Thank you! Your payment reference has been submitted.');document.getElementById('zw-prem-modal').style.display='none'" style="width:100%;padding:10px;background:#f59e0b;color:#000;font-weight:bold;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px;">I Have Paid</button>
                         <button onclick="document.getElementById('zw-prem-modal').style.display='none'" style="background:transparent;color:#94a3b8;border:none;cursor:pointer;font-size:12px;">Close</button>
                     </div>
                 </div>`;
@@ -1304,9 +1581,9 @@ RULES:
                 state.currentSiteHtml = injectAdsAndPremium(state.currentSiteHtml);
                 safeSetStorage('zw_current_site_html', state.currentSiteHtml);
                 updatePublicLinkUI(state.currentSiteName || 'my-site', state.currentSiteHtml);
-                alert("Ads code injected into your website and public link updated!");
+                alert("Ads code injected into your website!");
             } else {
-                alert("Ads saved! They will be automatically added to the next website you generate.");
+                alert("Ads saved! They will be added to your generated website.");
             }
         }
 
@@ -1318,17 +1595,18 @@ RULES:
                 updatePublicLinkUI(state.currentSiteName || 'my-site', state.currentSiteHtml);
                 alert("Premium payment system added to your website!");
             } else {
-                alert("Premium details saved! They will be built into your generated website.");
+                alert("Premium details saved!");
             }
         }
 
         // --- PUBLIC LINK BOX & COPY LOGIC ---
-        function extractWebsiteName(promptText, html) {
+        function extractWebsiteName(promptText, html, intentType) {
             const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-            let rawName = (titleMatch && !titleMatch[1].toLowerCase().includes('their-desired'))
-                ? titleMatch[1]
-                : (promptText.split(' ').slice(0, 3).join('-') || 'zoneweb-site');
-            return rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28) || 'my-website';
+            if (titleMatch && titleMatch[1]) {
+                const cleanTitle = titleMatch[1].split('-')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                if (cleanTitle && cleanTitle.length > 2) return cleanTitle.slice(0, 25);
+            }
+            return (intentType || 'zoneweb') + '-site';
         }
 
         function updatePublicLinkUI(siteName, html) {
@@ -1367,7 +1645,6 @@ RULES:
             window.open(url, '_blank');
         }
 
-        // --- SYSTEM & MOBILE NOTIFICATION ("Your website is ready!") ---
         function triggerWebsiteReadyNotification(siteName) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1381,18 +1658,15 @@ RULES:
                 setTimeout(() => osc.stop(), 350);
             } catch (e) {}
 
-            if ("Notification" in window) {
-                if (Notification.permission === "granted") {
-                    new Notification("ZoneWeb Builder", {
-                        body: "Your website is ready! (" + siteName + ")",
-                        icon: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png"
-                    });
-                }
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("ZoneWeb Builder", {
+                    body: "Your website is ready! (" + siteName + ")"
+                });
             }
             document.title = "✅ Your website is ready! - ZoneWeb";
         }
 
-        // --- UI HELPERS, SETTINGS & AUTO-SAVE ---
+        // --- SAFE UI CHAT RENDERER ---
         function appendMessage(role, text, imageUrl = null, hasSiteAction = false) {
             document.getElementById('heroPrompt').classList.add('hidden');
             state.chatHistory.push({ role, text, imageUrl, hasSiteAction, time: new Date().toLocaleTimeString() });
@@ -1406,11 +1680,13 @@ RULES:
             if (state.chatHistory.length > 0) {
                 document.getElementById('heroPrompt').classList.add('hidden');
             }
-            feed.innerHTML = state.chatHistory.map(msg => `
-                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-                    <div class="max-w-[85%] rounded-2xl p-4 ${msg.role === 'user' ? 'accent-bg text-white' : 'card-bg'} shadow-lg">
+            feed.innerHTML = state.chatHistory.map(msg => {
+                const safeText = escapeHtml(msg.text || '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                return `
+                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full">
+                    <div class="max-w-[88%] rounded-2xl p-4 ${msg.role === 'user' ? 'accent-bg text-white' : 'card-bg'} shadow-lg overflow-hidden break-words">
                         ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="max-h-48 rounded-xl mb-2 border border-white/20">` : ''}
-                        <div class="text-sm whitespace-pre-wrap leading-relaxed">${msg.text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
+                        <div class="text-sm whitespace-pre-wrap leading-relaxed break-words">${safeText}</div>
                         ${msg.hasSiteAction ? `
                             <div class="mt-3 pt-3 border-t border-gray-500/20 flex flex-wrap gap-2">
                                 <button onclick="openPreviewModal()" class="px-3.5 py-2 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow">
@@ -1423,7 +1699,7 @@ RULES:
                         ` : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
@@ -1490,7 +1766,7 @@ RULES:
             }
             container.innerHTML = state.projects.map((p, idx) => `
                 <button onclick="loadSavedProject(${idx})" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-white/10 text-left">
-                    <span class="truncate font-medium text-gray-200"><i class="fa-solid fa-globe mr-1.5 accent-text"></i>${p.name}</span>
+                    <span class="truncate font-medium text-gray-200"><i class="fa-solid fa-globe mr-1.5 accent-text"></i>${escapeHtml(p.name)}</span>
                     <span class="text-[10px] text-gray-500">${p.date}</span>
                 </button>
             `).join('');

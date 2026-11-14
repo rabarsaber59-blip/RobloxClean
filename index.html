@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZoneWeb - AI Website Builder</title>
+    <title>ZoneWeb - Turbo AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -60,7 +60,7 @@
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
                 Welcome to ZoneWeb
             </h1>
-            <p class="mt-3 text-gray-400 text-sm md:text-base">Next-Generation Autonomous AI Web Builder</p>
+            <p class="mt-3 text-gray-400 text-sm md:text-base">Ultra-Fast Autonomous AI Web Builder</p>
         </div>
         <div class="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-8">
             <div id="splashProgress" class="h-full accent-bg transition-all duration-[4000ms] ease-linear w-0"></div>
@@ -76,7 +76,7 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold">Connect Your AI Engine</h2>
-                    <p class="text-xs text-gray-400">Supports ALL versions of Gemini, OpenAI, Claude, OpenRouter & Groq</p>
+                    <p class="text-xs text-gray-400">Turbo-charged support for Gemini, OpenAI, Claude, OpenRouter & Groq</p>
                 </div>
             </div>
 
@@ -138,7 +138,7 @@
                     </button>
                     <div class="flex items-center gap-2">
                         <span class="font-extrabold text-lg tracking-tight">ZoneWeb</span>
-                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold">AI</span>
+                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold">TURBO AI</span>
                     </div>
                 </div>
 
@@ -192,22 +192,22 @@
             <!-- Center Hero Prompt -->
             <div id="heroPrompt" class="my-auto text-center py-12">
                 <div class="w-16 h-16 rounded-2xl accent-bg/20 border accent-border mx-auto mb-4 flex items-center justify-center">
-                    <i class="fa-solid fa-wand-magic-sparkles text-2xl accent-text"></i>
+                    <i class="fa-solid fa-bolt text-2xl accent-text"></i>
                 </div>
                 <h2 class="text-2xl md:text-4xl font-extrabold mb-3">What business do you want to build today?</h2>
-                <p class="text-sm text-gray-400 max-w-md mx-auto">Click the chat box below to start. Once built, stay in this tab and keep chatting to edit colors, sections, or features anytime!</p>
+                <p class="text-sm text-gray-400 max-w-md mx-auto">Turbo Streaming Engine active! Describe your website below and watch it build at high speed.</p>
             </div>
 
             <!-- Conversation Feed -->
             <div id="chatFeed" class="space-y-4 w-full"></div>
 
-            <!-- Live Background Status Bar + Stop Button -->
+            <!-- Live Turbo Streaming Status Bar + Stop Button -->
             <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border shadow-lg">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-spinner fa-spin accent-text text-xl"></i>
+                    <i class="fa-solid fa-bolt fa-beat accent-text text-xl"></i>
                     <div>
-                        <p id="bgStatusTitle" class="text-sm font-semibold">Building your website in the background...</p>
-                        <p id="activeModelStatus" class="text-xs text-gray-400">Auto-connecting to selected AI brain...</p>
+                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ Turbo Building Website...</p>
+                        <p id="activeModelStatus" class="text-xs text-gray-400">Streaming live code chunks...</p>
                     </div>
                 </div>
                 <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
@@ -220,15 +220,15 @@
         <div class="fixed bottom-0 inset-x-0 p-3 md:p-4 z-20 pointer-events-none">
             <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl pointer-events-auto">
                 
-                <!-- KEEP EDITING MODE BAR (Automatically active when a website exists in current tab) -->
+                <!-- KEEP EDITING MODE BAR -->
                 <div id="keepEditingBanner" class="hidden px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2 text-xs text-amber-300 font-semibold">
                         <i class="fa-solid fa-pen-ruler animate-bounce"></i>
-                        <span>Keep Editing Mode Active (<b id="editingSiteLabel">website</b>) — Ask to change colors, text, or layout!</span>
+                        <span>Keep Editing (<b id="editingSiteLabel">website</b>) — Ask to change colors, text, or layout!</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button onclick="quickEditPrompt('Change the website colors and theme to look more modern')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">🎨 Change Colors</button>
-                        <button onclick="quickEditPrompt('Add more interactive animations and a new section')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">✨ Add Features</button>
+                        <button onclick="quickEditPrompt('Change the website colors and theme to look more modern')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">🎨 Colors</button>
+                        <button onclick="quickEditPrompt('Add more interactive features and sections')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">✨ Features</button>
                     </div>
                 </div>
 
@@ -255,7 +255,7 @@
                     <textarea id="chatInput" rows="1" onfocus="handleChatFocus()" onkeydown="handleChatKeydown(event)" placeholder="Describe your website, or keep editing colors & features..."
                         class="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
 
-                    <!-- STOP BUTTON (Shown inside chat while AI is generating) -->
+                    <!-- STOP BUTTON -->
                     <button id="stopBtn" onclick="stopAiGeneration()" class="hidden px-4 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs items-center justify-center gap-1.5 shrink-0 transition shadow-lg">
                         <i class="fa-solid fa-stop"></i>
                         <span>Stop</span>
@@ -283,7 +283,7 @@
                     </button>
                 </div>
 
-                <!-- TOP SETTINGS (AI Brain Switcher + API Key Update + Save + Colors + Dark/Light) -->
+                <!-- TOP SETTINGS -->
                 <div class="mb-5 bg-white/5 rounded-2xl p-3.5 border border-white/10 space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 text-sm font-bold accent-text">
@@ -295,27 +295,25 @@
 
                     <!-- Change AI Brain / Model Selector -->
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (Provider & Model)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (Turbo Models)</label>
                         <select id="drawerAiBrain" onchange="handleBrainSelectionChange()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
-                            <option value="auto">⚡ Auto-Detect Best Brain (All Versions)</option>
+                            <option value="auto">⚡ Turbo Auto-Detect (Fastest Available)</option>
                             <optgroup label="Google Gemini Brains">
-                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Max IQ)</option>
-                                <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash (Fast & Smart)</option>
-                                <option value="gemini:gemini-2.0-flash">✨ Gemini 2.0 Flash</option>
-                                <option value="gemini:gemini-1.5-pro-latest">🔮 Gemini 1.5 Pro Latest</option>
+                                <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash (Ultra Fast)</option>
+                                <option value="gemini:gemini-2.0-flash">🚀 Gemini 2.0 Flash (Instant Speed)</option>
+                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Deep IQ)</option>
+                                <option value="gemini:gemini-1.5-flash-latest">✨ Gemini 1.5 Flash</option>
                             </optgroup>
                             <optgroup label="OpenAI ChatGPT Brains">
-                                <option value="openai:gpt-4o">🧠 GPT-4o (Flagship Brain)</option>
-                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini (Fast)</option>
-                                <option value="openai:gpt-4-turbo">🚀 GPT-4 Turbo</option>
+                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini (Turbo)</option>
+                                <option value="openai:gpt-4o">🧠 GPT-4o (Flagship)</option>
                             </optgroup>
                             <optgroup label="Anthropic Claude Brains">
-                                <option value="claude:claude-3-7-sonnet-latest">🧠 Claude 3.7 Sonnet (Coding Pro)</option>
                                 <option value="claude:claude-3-5-sonnet-latest">✨ Claude 3.5 Sonnet</option>
-                                <option value="claude:claude-3-5-haiku-latest">⚡ Claude 3.5 Haiku</option>
+                                <option value="claude:claude-3-5-haiku-latest">⚡ Claude 3.5 Haiku (Fast)</option>
                             </optgroup>
                             <optgroup label="Groq & OpenRouter Brains">
-                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq Ultra-Fast)</option>
+                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq Instant)</option>
                                 <option value="openrouter:google/gemini-2.5-flash">🌐 OpenRouter Universal</option>
                             </optgroup>
                         </select>
@@ -383,7 +381,7 @@
             <!-- BOTTOM OF 3-DOTS MENU: 2 MAIN BUTTONS (ADS & PREMIUM) -->
             <div class="pt-4 border-t border-white/10 space-y-3">
                 
-                <!-- BUTTON 1: GET ADS (Adsterra & Unity + Code Paste Box Below) -->
+                <!-- BUTTON 1: GET ADS -->
                 <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
                     <button onclick="toggleSection('adsPanel')" class="w-full py-2 px-3 rounded-xl accent-bg text-white font-bold text-xs flex items-center justify-between">
                         <span><i class="fa-solid fa-rectangle-ad mr-1.5"></i> 1. Add Ads (Adsterra & Unity)</span>
@@ -442,7 +440,7 @@
                         <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-xs">ZW</div>
                         <div>
                             <p class="text-xs font-bold leading-none">ZoneWeb Builder</p>
-                            <span id="drawerModelLabel" class="text-[10px] text-blue-400 font-semibold">PRO KEEP-EDITING</span>
+                            <span id="drawerModelLabel" class="text-[10px] text-emerald-400 font-semibold">⚡ TURBO STREAMING</span>
                         </div>
                     </div>
                     <i class="fa-solid fa-circle-check text-emerald-400"></i>
@@ -478,10 +476,16 @@
     </div>
 
     <script>
+        // --- CLEAN API KEY HELPER (Prevents invisible mobile paste characters causing Failed to fetch) ---
+        function sanitizeApiKey(raw) {
+            if (!raw) return '';
+            return raw.replace(/[\s"'`“”‘’\u200B-\u200D\uFEFF]/g, '').trim();
+        }
+
         // --- STATE & AUTO-SAVE STORAGE ---
         let state = {
             provider: localStorage.getItem('zw_provider') || 'gemini',
-            apiKey: localStorage.getItem('zw_api_key') || '',
+            apiKey: sanitizeApiKey(localStorage.getItem('zw_api_key') || ''),
             aiBrain: localStorage.getItem('zw_ai_brain') || 'auto',
             aiLevel: localStorage.getItem('zw_ai_level') || 'medium',
             accentColor: localStorage.getItem('zw_accent') || '#e11d48',
@@ -492,6 +496,7 @@
             projects: JSON.parse(localStorage.getItem('zw_projects') || '[]'),
             currentSiteName: localStorage.getItem('zw_current_site_name') || '',
             currentSiteHtml: localStorage.getItem('zw_current_site_html') || '',
+            cachedFastModel: localStorage.getItem('zw_cached_fast_model') || '',
             hasAskedInitialQuestions: false
         };
 
@@ -499,8 +504,13 @@
         let attachedImageMime = null;
         let currentAbortController = null;
 
-        // Clean out old error messages or placeholder project names automatically
-        state.chatHistory = state.chatHistory.filter(m => !m.text || !m.text.includes('is not found for API version'));
+        // Clean out old error notices (including Failed to fetch) automatically
+        state.chatHistory = state.chatHistory.filter(m =>
+            !m.text || (
+                !m.text.includes('is not found for API version') &&
+                !m.text.includes('Failed to fetch')
+            )
+        );
         localStorage.setItem('zw_chat_history', JSON.stringify(state.chatHistory));
 
         // --- CHECK IF URL IS OPENING A PUBLIC SHARED WEBSITE ---
@@ -552,7 +562,7 @@
 
             setTimeout(() => {
                 document.getElementById('screen1').classList.add('hidden');
-                if (state.apiKey && state.apiKey.trim().length > 5) {
+                if (state.apiKey && state.apiKey.length > 5) {
                     launchScreen3();
                 } else {
                     document.getElementById('screen2').classList.remove('hidden');
@@ -632,7 +642,7 @@
         }
 
         function detectProviderFromKey(rawKey) {
-            const k = rawKey.trim();
+            const k = sanitizeApiKey(rawKey);
             if (k.startsWith('AIza')) return 'gemini';
             if (k.startsWith('sk-ant-')) return 'claude';
             if (k.startsWith('sk-or-')) return 'openrouter';
@@ -643,7 +653,7 @@
         }
 
         function saveApiKeyAndContinue() {
-            const key = document.getElementById('apiKeyInput').value.trim().replace(/\s+/g, '');
+            const key = sanitizeApiKey(document.getElementById('apiKeyInput').value);
             if (key.length < 6) {
                 const err = document.getElementById('apiErrorMsg');
                 err.innerText = "Please enter a valid API key.";
@@ -652,8 +662,10 @@
             }
             state.provider = detectProviderFromKey(key);
             state.apiKey = key;
+            state.cachedFastModel = '';
             localStorage.setItem('zw_api_key', key);
             localStorage.setItem('zw_provider', state.provider);
+            localStorage.removeItem('zw_cached_fast_model');
 
             document.getElementById('screen2').classList.add('hidden');
             launchScreen3();
@@ -673,15 +685,17 @@
             const badge = document.getElementById('activeProviderBadge');
             if (state.aiBrain && state.aiBrain !== 'auto') {
                 const parts = state.aiBrain.split(':');
-                badge.innerText = (parts[1] || parts[0]).toUpperCase();
+                badge.innerText = '⚡ ' + (parts[1] || parts[0]).toUpperCase();
             } else {
-                badge.innerText = state.provider.toUpperCase();
+                badge.innerText = '⚡ ' + state.provider.toUpperCase();
             }
         }
 
         function handleBrainSelectionChange() {
             const selected = document.getElementById('drawerAiBrain').value;
             state.aiBrain = selected;
+            state.cachedFastModel = '';
+            localStorage.removeItem('zw_cached_fast_model');
             if (selected !== 'auto') {
                 const prov = selected.split(':')[0];
                 state.provider = prov;
@@ -704,11 +718,13 @@
         }
 
         function saveBrainAndKeyFromDrawer() {
-            const newKey = document.getElementById('drawerApiKey').value.trim().replace(/\s+/g, '');
+            const newKey = sanitizeApiKey(document.getElementById('drawerApiKey').value);
             const selectedBrain = document.getElementById('drawerAiBrain').value;
 
             state.aiBrain = selectedBrain;
+            state.cachedFastModel = '';
             localStorage.setItem('zw_ai_brain', selectedBrain);
+            localStorage.removeItem('zw_cached_fast_model');
 
             if (newKey) {
                 state.apiKey = newKey;
@@ -731,7 +747,7 @@
         function handleChatFocus() {
             if (state.chatHistory.length === 0 && !state.hasAskedInitialQuestions) {
                 state.hasAskedInitialQuestions = true;
-                appendMessage('ai', "Welcome to **ZoneWeb Builder**! To build your complete live website right now, please tell me:\n1. **What is the name of your website/business?**\n2. **What should the website do and look like?** (Colors, sections, features)\n3. Once built, stay in this tab and **keep chatting** anytime to edit colors, text, or layout!");
+                appendMessage('ai', "Welcome to **ZoneWeb Turbo Builder**! Tell me:\n1. **What is the name of your website/business?**\n2. **What should it do and look like?**\nI will build it at high speed and give you a live Public Link & Preview!");
             }
         }
 
@@ -765,7 +781,7 @@
                 currentAbortController = null;
             }
             setGeneratingUIState(false);
-            appendMessage('ai', "⏹️ **Generation stopped.** You can continue editing or send a new instruction whenever you're ready.");
+            appendMessage('ai', "⏹️ **Generation stopped.** You can continue editing or send a new instruction anytime.");
         }
 
         function setGeneratingUIState(isGenerating) {
@@ -780,8 +796,8 @@
                 stopBtn.classList.add('flex');
                 sendBtn.classList.add('hidden');
                 statusTitle.innerText = state.currentSiteHtml
-                    ? `Keep Editing: Updating "${state.currentSiteName || 'your website'}"...`
-                    : `Building your website in the background...`;
+                    ? `⚡ Turbo Editing "${state.currentSiteName || 'your website'}"...`
+                    : `⚡ Turbo Building your website...`;
             } else {
                 bgCard.classList.add('hidden');
                 stopBtn.classList.add('hidden');
@@ -790,7 +806,7 @@
             }
         }
 
-        // --- SEND MESSAGE & REAL AI CALL (WITH KEEP EDITING MEMORY) ---
+        // --- SEND MESSAGE & TURBO AI CALL ---
         async function sendUserMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -830,7 +846,6 @@
                     updatePublicLinkUI(extractedName, finalHtml);
                     updateKeepEditingBar();
 
-                    // Refresh live preview iframe if open
                     const previewModal = document.getElementById('previewModal');
                     if (!previewModal.classList.contains('hidden')) {
                         document.getElementById('livePreviewIframe').srcdoc = finalHtml;
@@ -838,8 +853,8 @@
 
                     const cleanExplanation = aiResponse.replace(/```html[\s\S]*?```/gi, '').trim();
                     const modeNote = isEditingExistingSite
-                        ? `✨ **Changes applied to "${extractedName}"!** Keep typing in the chat if you want more edits to colors, text, or features.`
-                        : `✅ **Your Public Link & Preview Button are now ready at the top of the screen!** Keep chatting here anytime to edit colors or features.`;
+                        ? `✨ **Changes applied to "${extractedName}"!** Keep typing in the chat if you want more edits.`
+                        : `✅ **Your Public Link & Preview Button are now ready at the top of the screen!**`;
 
                     appendMessage('ai', (cleanExplanation || `Website **${extractedName}** is live!`) + `\n\n${modeNote}`, null, true);
                     triggerWebsiteReadyNotification(extractedName);
@@ -850,41 +865,37 @@
                 setGeneratingUIState(false);
                 currentAbortController = null;
                 if (err.name === 'AbortError') return;
-                appendMessage('ai', `⚠️ API Connection Notice: ${err.message}\nYou can switch the AI Brain or update your API key in the top 3-dots menu.`);
+                appendMessage('ai', `⚠️ Connection Error: ${err.message}\nPlease check your internet connection or verify your API key in the top 3-dots menu.`);
             }
         }
 
-        // --- UNIVERSAL MULTI-VERSION AI ENGINE WITH KEEP EDITING CONTEXT ---
+        // --- TURBO UNIVERSAL AI ENGINE (ZERO-DELAY + STREAMING TO PREVENT "FAILED TO FETCH") ---
         async function callUniversalAI(userPrompt, imgBase64, imgMime, abortSignal) {
             const levelInstructions = {
-                low: "Complexity Level: LOW. Build a clean, fast, single-page modern responsive website.",
-                medium: "Complexity Level: MEDIUM. Build a rich, multi-section interactive website with Tailwind CSS, smooth animations, icons, and working JavaScript.",
-                high: "Complexity Level: HIGH. Build an advanced, enterprise-grade full web application with interactive dashboards, modals, working forms, local state persistence, and ultra-polished UI."
+                low: "SPEED MODE: FAST. Build a sleek, modern single-page responsive website with clean Tailwind CSS.",
+                medium: "SPEED MODE: BALANCED TURBO. Build a complete, interactive multi-section website with Tailwind CSS, FontAwesome icons, and working JavaScript.",
+                high: "SPEED MODE: PRO FULL-STACK. Build a feature-rich interactive web application with modals, dashboards, working forms, and polished Tailwind UI."
             }[state.aiLevel] || "";
 
             const keepEditingContext = state.currentSiteHtml
-                ? `\n\n--- KEEP EDITING MODE (ACTIVE) ---
-The user already has an active website built in this tab named "${state.currentSiteName || 'My Website'}".
-Here is the current HTML code of their website:
+                ? `\n\nKEEP EDITING MODE ACTIVE for website "${state.currentSiteName || 'My Website'}":
+Current HTML:
 \`\`\`html
 ${state.currentSiteHtml}
 \`\`\`
-IMPORTANT KEEP EDITING RULE: Modify, style, recolor, or expand the ABOVE existing website HTML based on the user's new instruction ("${userPrompt}"). Keep everything that already works unless asked to remove it, and return the FULL updated HTML document inside a \`\`\`html ... \`\`\` code block.`
+Update the above HTML according to the user's request ("${userPrompt}") and return the complete updated \`\`\`html ... \`\`\` code block.`
                 : "";
 
-            const recentConversation = state.chatHistory.slice(-6).map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
-
-            const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack website builder and iterative design editor.
+            const systemPrompt = `You are ZoneWeb Turbo AI, a high-speed full-stack website generator.
 ${levelInstructions}
-Rules:
-1. Always set a real, specific <title>BrandName</title> matching the user's business name.
-2. If the user uploads an image, explain what it is and incorporate its theme/purpose into the website.
-3. If the user already built a website in this tab (Keep Editing Mode), apply their requested edits (colors, layout, text, new features) directly to the existing website HTML and return the complete updated \`\`\`html ... \`\`\` code block.
-4. Always output 100% real, working HTML5 with Tailwind CSS and FontAwesome with zero placeholders.${keepEditingContext}`;
+CRITICAL SPEED RULES:
+1. Keep conversational text under 2 short sentences so generation finishes as fast as possible.
+2. Immediately output the complete, working, self-contained HTML5 code inside a \`\`\`html ... \`\`\` block using Tailwind CSS and FontAwesome.
+3. Include a clear <title>BrandName</title>.${keepEditingContext}`;
 
-            const fullUserPrompt = `Recent Chat Context:\n${recentConversation}\n\nLatest User Instruction: ${userPrompt || 'Analyze this image and update my website.'}`;
+            const key = sanitizeApiKey(state.apiKey);
+            if (!key) throw new Error("API Key is missing. Please add it in the 3-dots menu.");
 
-            const key = state.apiKey.trim().replace(/\s+/g, '');
             let preferredProv = detectProviderFromKey(key);
             let forcedModel = null;
 
@@ -894,129 +905,190 @@ Rules:
                 forcedModel = parts[1] || null;
             }
 
-            const providerOrder = [preferredProv, 'gemini', 'openai', 'claude', 'openrouter', 'groq'].filter((v, i, a) => a.indexOf(v) === i);
-            let lastError = null;
-
-            for (const prov of providerOrder) {
-                try {
-                    if (prov === 'gemini') {
-                        return await callGeminiAllVersions(key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
-                    } else if (prov === 'claude') {
-                        return await callClaudeAllVersions(key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
-                    } else {
-                        return await callOpenAICompatibleAllVersions(prov, key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
-                    }
-                } catch (err) {
-                    if (err.name === 'AbortError') throw err;
-                    lastError = err;
-                    if (
-                        (prov === 'gemini' && key.startsWith('AIza')) ||
-                        (prov === 'claude' && key.startsWith('sk-ant-')) ||
-                        (prov === 'openrouter' && key.startsWith('sk-or-')) ||
-                        (prov === 'groq' && key.startsWith('gsk_'))
-                    ) {
-                        throw err;
-                    }
-                }
+            if (preferredProv === 'gemini') {
+                return await callGeminiTurbo(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
+            } else if (preferredProv === 'claude') {
+                return await callClaudeAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
+            } else {
+                return await callOpenAICompatibleAllVersions(preferredProv, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
             }
-            throw lastError || new Error("Could not authenticate API key with any provider.");
         }
 
-        // --- 1. GEMINI ALL-VERSIONS & DYNAMIC LISTMODELS ENGINE ---
-        async function callGeminiAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
-            const parts = [{ text: `${systemPrompt}\n\n${userPrompt}` }];
+        // --- 1. GEMINI TURBO ENGINE (DIRECT FAST MODELS + STREAMING + ZERO THINKING DELAY) ---
+        async function callGeminiTurbo(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt || 'Analyze this image and build/update my website.'}` }];
             if (imgBase64) {
                 parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
             }
 
+            // Fast priority list — NO ListModels round-trip beforehand!
             let candidateTargets = [];
             if (forcedModel) {
                 candidateTargets.push({ apiVer: 'v1beta', model: forcedModel });
-                candidateTargets.push({ apiVer: 'v1', model: forcedModel });
+            } else if (state.cachedFastModel) {
+                candidateTargets.push({ apiVer: 'v1beta', model: state.cachedFastModel });
             }
 
-            for (const apiVer of ['v1beta', 'v1']) {
+            const turboDefaults = state.aiLevel === 'high'
+                ? [
+                    { apiVer: 'v1beta', model: 'gemini-2.5-flash' },
+                    { apiVer: 'v1beta', model: 'gemini-2.0-flash' },
+                    { apiVer: 'v1beta', model: 'gemini-2.5-pro' },
+                    { apiVer: 'v1beta', model: 'gemini-flash-latest' }
+                  ]
+                : [
+                    { apiVer: 'v1beta', model: 'gemini-2.0-flash' },
+                    { apiVer: 'v1beta', model: 'gemini-2.5-flash' },
+                    { apiVer: 'v1beta', model: 'gemini-flash-latest' },
+                    { apiVer: 'v1beta', model: 'gemini-2.5-pro' }
+                  ];
+
+            for (const t of turboDefaults) {
+                if (!candidateTargets.some(c => c.model === t.model)) {
+                    candidateTargets.push(t);
+                }
+            }
+
+            let lastErrText = 'Network or API key issue';
+
+            for (const target of candidateTargets) {
+                const statusEl = document.getElementById('activeModelStatus');
+                if (statusEl) statusEl.innerText = `⚡ Turbo streaming with ${target.model}...`;
+
+                // Build payload: disable slow thinking delay on 2.5-flash for instant speed
+                const payload = {
+                    contents: [{ parts }],
+                    generationConfig: { temperature: 0.5 }
+                };
+                if (target.model === 'gemini-2.5-flash' && state.aiLevel !== 'high') {
+                    payload.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+                }
+
+                // Attempt 1: SSE Streaming (Keeps mobile connection alive, zero "Failed to fetch" timeout!)
                 try {
-                    const listRes = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models?key=${encodeURIComponent(key)}`, { signal: abortSignal });
-                    if (listRes.ok) {
-                        const listData = await listRes.json();
-                        if (Array.isArray(listData.models)) {
-                            const supported = listData.models.filter(m =>
-                                Array.isArray(m.supportedGenerationMethods) &&
-                                m.supportedGenerationMethods.includes('generateContent') &&
-                                !m.name.includes('embedding') &&
-                                !m.name.includes('aqa') &&
-                                !m.name.includes('imagen') &&
-                                !m.name.includes('veo') &&
-                                !m.name.includes('tts')
-                            );
-                            for (const m of supported) {
-                                const shortName = m.name.replace(/^models\//, '');
-                                if (!candidateTargets.some(c => c.apiVer === apiVer && c.model === shortName)) {
-                                    candidateTargets.push({ apiVer, model: shortName });
+                    const streamUrl = `https://generativelanguage.googleapis.com/${target.apiVer}/models/${target.model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
+                    const res = await fetch(streamUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        signal: abortSignal
+                    });
+
+                    if (res.ok && res.body) {
+                        const reader = res.body.getReader();
+                        const decoder = new TextDecoder();
+                        let fullText = '';
+                        let buffer = '';
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop() || '';
+
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    const jsonStr = line.slice(6).trim();
+                                    if (!jsonStr || jsonStr === '[DONE]') continue;
+                                    try {
+                                        const chunk = JSON.parse(jsonStr);
+                                        const chunkParts = chunk.candidates?.[0]?.content?.parts || [];
+                                        for (const p of chunkParts) {
+                                            if (p.text) fullText += p.text;
+                                        }
+                                        if (statusEl && fullText.length > 0) {
+                                            const linesCount = fullText.split('\n').length;
+                                            statusEl.innerText = `⚡ ${target.model}: Generated ${linesCount} lines of code...`;
+                                        }
+                                    } catch (e) {}
                                 }
                             }
                         }
+
+                        if (fullText.trim().length > 0) {
+                            state.cachedFastModel = target.model;
+                            localStorage.setItem('zw_cached_fast_model', target.model);
+                            document.getElementById('activeProviderBadge').innerText = '⚡ ' + target.model.toUpperCase();
+                            return fullText.trim();
+                        }
+                    } else {
+                        const errData = await res.json().catch(() => ({}));
+                        lastErrText = errData.error?.message || `HTTP ${res.status}`;
+                        if (lastErrText.toLowerCase().includes('api key not valid')) {
+                            throw new Error(lastErrText);
+                        }
                     }
-                } catch (e) {
-                    if (e.name === 'AbortError') throw e;
+                } catch (streamErr) {
+                    if (streamErr.name === 'AbortError') throw streamErr;
+                    if (streamErr.message.toLowerCase().includes('api key not valid')) throw streamErr;
+                    lastErrText = streamErr.message;
                 }
-            }
 
-            const fallbackModels = [
-                { apiVer: 'v1beta', model: 'gemini-2.5-flash' },
-                { apiVer: 'v1beta', model: 'gemini-2.5-pro' },
-                { apiVer: 'v1beta', model: 'gemini-2.0-flash' },
-                { apiVer: 'v1',     model: 'gemini-2.5-flash' },
-                { apiVer: 'v1beta', model: 'gemini-1.5-pro-latest' },
-                { apiVer: 'v1beta', model: 'gemini-1.5-flash-latest' }
-            ];
-
-            for (const fb of fallbackModels) {
-                if (!candidateTargets.some(c => c.apiVer === fb.apiVer && c.model === fb.model)) {
-                    candidateTargets.push(fb);
-                }
-            }
-
-            let lastErrText = 'Unable to reach Gemini models.';
-            for (const target of candidateTargets) {
+                // Attempt 2: Fast Standard generateContent fallback (without thinkingConfig in case model rejects it)
                 try {
-                    const statusEl = document.getElementById('activeModelStatus');
-                    if (statusEl) statusEl.innerText = `Active Brain: ${target.model} (${target.apiVer})...`;
-
-                    const url = `https://generativelanguage.googleapis.com/${target.apiVer}/models/${target.model}:generateContent?key=${encodeURIComponent(key)}`;
-                    const res = await fetch(url, {
+                    const stdUrl = `https://generativelanguage.googleapis.com/${target.apiVer}/models/${target.model}:generateContent?key=${encodeURIComponent(key)}`;
+                    const stdRes = await fetch(stdUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts }] }),
                         signal: abortSignal
                     });
-                    const data = await res.json();
-
-                    if (res.ok && data.candidates?.[0]?.content?.parts) {
-                        const outText = data.candidates[0].content.parts.map(p => p.text || '').join('\n').trim();
+                    const stdData = await stdRes.json();
+                    if (stdRes.ok && stdData.candidates?.[0]?.content?.parts) {
+                        const outText = stdData.candidates[0].content.parts.map(p => p.text || '').join('\n').trim();
                         if (outText) {
-                            document.getElementById('activeProviderBadge').innerText = target.model.toUpperCase();
+                            state.cachedFastModel = target.model;
+                            localStorage.setItem('zw_cached_fast_model', target.model);
+                            document.getElementById('activeProviderBadge').innerText = '⚡ ' + target.model.toUpperCase();
                             return outText;
                         }
                     }
-
-                    const errMsg = data.error?.message || res.statusText;
-                    lastErrText = errMsg;
-
-                    if (errMsg.toLowerCase().includes('api key not valid') || (res.status === 400 && errMsg.toLowerCase().includes('key'))) {
-                        throw new Error(errMsg);
+                    if (stdData.error?.message) {
+                        lastErrText = stdData.error.message;
+                        if (lastErrText.toLowerCase().includes('api key not valid')) throw new Error(lastErrText);
                     }
-                } catch (innerErr) {
-                    if (innerErr.name === 'AbortError') throw innerErr;
-                    lastErrText = innerErr.message;
-                    if (lastErrText.toLowerCase().includes('api key not valid')) throw innerErr;
+                } catch (stdErr) {
+                    if (stdErr.name === 'AbortError') throw stdErr;
+                    if (stdErr.message.toLowerCase().includes('api key not valid')) throw stdErr;
+                    lastErrText = stdErr.message;
                 }
             }
+
+            // Last-resort dynamic model discovery ONLY if all default fast models failed
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`, { signal: abortSignal });
+                if (listRes.ok) {
+                    const listData = await listRes.json();
+                    const firstValid = (listData.models || []).find(m =>
+                        Array.isArray(m.supportedGenerationMethods) &&
+                        m.supportedGenerationMethods.includes('generateContent') &&
+                        m.name.includes('gemini')
+                    );
+                    if (firstValid) {
+                        const mName = firstValid.name.replace(/^models\//, '');
+                        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${encodeURIComponent(key)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts }] }),
+                            signal: abortSignal
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.candidates?.[0]?.content?.parts?.[0]?.text) {
+                            state.cachedFastModel = mName;
+                            localStorage.setItem('zw_cached_fast_model', mName);
+                            return d.candidates[0].content.parts.map(p => p.text || '').join('\n');
+                        }
+                    }
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') throw e;
+            }
+
             throw new Error(lastErrText);
         }
 
-        // --- 2. OPENAI / OPENROUTER / GROQ / XAI ALL-VERSIONS ENGINE ---
+        // --- 2. OPENAI / OPENROUTER / GROQ / XAI ENGINE ---
         async function callOpenAICompatibleAllVersions(prov, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
             const endpoints = {
                 openai: 'https://api.openai.com/v1',
@@ -1028,22 +1100,21 @@ Rules:
 
             let modelsToTry = forcedModel ? [forcedModel] : [];
             if (prov === 'openai') {
-                modelsToTry.push('gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo');
+                modelsToTry.push('gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo');
             } else if (prov === 'openrouter') {
-                modelsToTry.push('google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'anthropic/claude-3.5-sonnet');
+                modelsToTry.push('google/gemini-2.5-flash', 'openai/gpt-4o-mini');
             } else if (prov === 'groq') {
-                modelsToTry.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768');
+                modelsToTry.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant');
             } else if (prov === 'xai') {
-                modelsToTry.push('grok-2-latest', 'grok-beta');
+                modelsToTry.push('grok-2-latest');
             }
-
             modelsToTry = modelsToTry.filter((v, i, a) => a.indexOf(v) === i);
 
             let lastErr = 'OpenAI-compatible endpoint error';
             for (const model of modelsToTry) {
                 try {
                     const statusEl = document.getElementById('activeModelStatus');
-                    if (statusEl) statusEl.innerText = `Active Brain: ${model}...`;
+                    if (statusEl) statusEl.innerText = `⚡ Turbo Brain: ${model}...`;
 
                     const userContent = [];
                     if (userPrompt) userContent.push({ type: 'text', text: userPrompt });
@@ -1068,7 +1139,7 @@ Rules:
                     });
                     const data = await res.json();
                     if (res.ok && data.choices?.[0]?.message?.content) {
-                        document.getElementById('activeProviderBadge').innerText = model.toUpperCase();
+                        document.getElementById('activeProviderBadge').innerText = '⚡ ' + model.toUpperCase();
                         return data.choices[0].message.content;
                     }
                     lastErr = data.error?.message || res.statusText;
@@ -1084,12 +1155,7 @@ Rules:
         // --- 3. CLAUDE ALL-VERSIONS ENGINE ---
         async function callClaudeAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
             let models = forcedModel ? [forcedModel] : [];
-            models.push(
-                'claude-3-7-sonnet-latest',
-                'claude-3-5-sonnet-latest',
-                'claude-3-5-haiku-latest',
-                'claude-3-haiku-20240307'
-            );
+            models.push('claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-7-sonnet-latest');
             models = models.filter((v, i, a) => a.indexOf(v) === i);
 
             const content = [];
@@ -1105,7 +1171,7 @@ Rules:
             for (const model of models) {
                 try {
                     const statusEl = document.getElementById('activeModelStatus');
-                    if (statusEl) statusEl.innerText = `Active Brain: ${model}...`;
+                    if (statusEl) statusEl.innerText = `⚡ Turbo Brain: ${model}...`;
 
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
                         method: 'POST',
@@ -1125,7 +1191,7 @@ Rules:
                     });
                     const data = await res.json();
                     if (res.ok && data.content?.[0]?.text) {
-                        document.getElementById('activeProviderBadge').innerText = model.toUpperCase();
+                        document.getElementById('activeProviderBadge').innerText = '⚡ ' + model.toUpperCase();
                         return data.content[0].text;
                     }
                     lastErr = data.error?.message || res.statusText;

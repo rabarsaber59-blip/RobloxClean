@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --accent: #3b82f6;
+            --accent: #e11d48;
             --bg-main: #090a0f;
             --bg-card: #12141d;
             --text-main: #f3f4f6;
@@ -54,7 +54,7 @@
     <!-- SCREEN 1: 4-SECOND WELCOME SPLASH -->
     <div id="screen1" class="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#07080c] text-white px-4">
         <div class="welcome-anim text-center">
-            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl accent-bg flex items-center justify-center shadow-2xl shadow-blue-500/40">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl accent-bg flex items-center justify-center shadow-2xl">
                 <i class="fa-solid fa-bolt text-4xl text-white"></i>
             </div>
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
@@ -76,7 +76,7 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold">Connect Your AI Engine</h2>
-                    <p class="text-xs text-gray-400">Supports ALL versions of Gemini (Pro/Flash), OpenAI, Claude, OpenRouter & Groq</p>
+                    <p class="text-xs text-gray-400">Supports ALL versions of Gemini, OpenAI, Claude, OpenRouter & Groq</p>
                 </div>
             </div>
 
@@ -143,7 +143,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <!-- Top Preview Button (Always accessible at the top) -->
+                    <!-- Top Preview Button -->
                     <button id="topPreviewBtn" onclick="openPreviewModal()" class="px-3.5 py-1.5 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90 transition">
                         <i class="fa-solid fa-eye"></i>
                         <span>Preview</span>
@@ -158,7 +158,7 @@
                 </div>
             </div>
 
-            <!-- Row 2: PUBLIC LINK BOX + COPY BUTTON + PREVIEW BUTTON (Appears at the top when website is built) -->
+            <!-- Row 2: PUBLIC LINK BOX + COPY BUTTON + PREVIEW BUTTON -->
             <div id="publicLinkBanner" class="hidden px-4 py-2.5 bg-emerald-500/10 border-t border-emerald-500/30">
                 <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
@@ -166,20 +166,17 @@
                         <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Public Link:</span>
                     </div>
 
-                    <!-- Box holding the Public URL + Copy Button + Preview Button -->
                     <div class="flex-1 min-w-[240px] flex items-center gap-2">
                         <div class="flex-1 flex items-center bg-black/40 border border-emerald-500/40 rounded-xl px-3 py-1.5 overflow-hidden">
                             <i class="fa-solid fa-link text-emerald-400 text-xs mr-2 shrink-0"></i>
                             <input id="publicUrlBox" type="text" readonly class="w-full bg-transparent text-xs text-emerald-300 font-mono focus:outline-none truncate" value="">
                         </div>
 
-                        <!-- Copy Link Button -->
                         <button id="copyBtnText" onclick="copyPublicLink()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition">
                             <i class="fa-regular fa-copy"></i>
                             <span>Copy</span>
                         </button>
 
-                        <!-- Direct Preview Button Next to Public Link -->
                         <button onclick="openPreviewModal()" class="px-3.5 py-2 rounded-xl accent-bg hover:opacity-90 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition">
                             <i class="fa-solid fa-desktop"></i>
                             <span>Preview</span>
@@ -190,7 +187,7 @@
         </header>
 
         <!-- Main Center Content & Chat Messages -->
-        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 pt-6 pb-40 overflow-y-auto">
+        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 pt-6 pb-48 overflow-y-auto">
             
             <!-- Center Hero Prompt -->
             <div id="heroPrompt" class="my-auto text-center py-12">
@@ -198,27 +195,43 @@
                     <i class="fa-solid fa-wand-magic-sparkles text-2xl accent-text"></i>
                 </div>
                 <h2 class="text-2xl md:text-4xl font-extrabold mb-3">What business do you want to build today?</h2>
-                <p class="text-sm text-gray-400 max-w-md mx-auto">Click the chat box below to start. I will ask you about your website name, style, and features, or analyze any image you send.</p>
+                <p class="text-sm text-gray-400 max-w-md mx-auto">Click the chat box below to start. Once built, stay in this tab and keep chatting to edit colors, sections, or features anytime!</p>
             </div>
 
             <!-- Conversation Feed -->
             <div id="chatFeed" class="space-y-4 w-full"></div>
 
-            <!-- Live Background Status Bar -->
+            <!-- Live Background Status Bar + Stop Button -->
             <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border shadow-lg">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-spinner fa-spin accent-text text-xl"></i>
                     <div>
-                        <p class="text-sm font-semibold">Building your website in the background...</p>
-                        <p id="activeModelStatus" class="text-xs text-gray-400">Auto-connecting to best available model version...</p>
+                        <p id="bgStatusTitle" class="text-sm font-semibold">Building your website in the background...</p>
+                        <p id="activeModelStatus" class="text-xs text-gray-400">Auto-connecting to selected AI brain...</p>
                     </div>
                 </div>
+                <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-square"></i> Stop
+                </button>
             </div>
         </main>
 
         <!-- Bottom Fixed AI Chat Bar -->
         <div class="fixed bottom-0 inset-x-0 p-3 md:p-4 z-20 pointer-events-none">
             <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl pointer-events-auto">
+                
+                <!-- KEEP EDITING MODE BAR (Automatically active when a website exists in current tab) -->
+                <div id="keepEditingBanner" class="hidden px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 text-xs text-amber-300 font-semibold">
+                        <i class="fa-solid fa-pen-ruler animate-bounce"></i>
+                        <span>Keep Editing Mode Active (<b id="editingSiteLabel">website</b>) — Ask to change colors, text, or layout!</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="quickEditPrompt('Change the website colors and theme to look more modern')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">🎨 Change Colors</button>
+                        <button onclick="quickEditPrompt('Add more interactive animations and a new section')" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-gray-200">✨ Add Features</button>
+                    </div>
+                </div>
+
                 <!-- Attached Image Preview -->
                 <div id="imagePreviewContainer" class="hidden px-3 pt-2 pb-2 flex items-center gap-3 border-b border-gray-500/20 mb-2">
                     <img id="attachedImageThumb" src="" class="w-14 h-14 object-cover rounded-xl border border-gray-500/30">
@@ -239,10 +252,16 @@
                     </label>
 
                     <!-- Chat Input -->
-                    <textarea id="chatInput" rows="1" onfocus="handleChatFocus()" placeholder="Describe your business website or answer AI questions..."
+                    <textarea id="chatInput" rows="1" onfocus="handleChatFocus()" onkeydown="handleChatKeydown(event)" placeholder="Describe your website, or keep editing colors & features..."
                         class="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
 
-                    <!-- Send Button -->
+                    <!-- STOP BUTTON (Shown inside chat while AI is generating) -->
+                    <button id="stopBtn" onclick="stopAiGeneration()" class="hidden px-4 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs items-center justify-center gap-1.5 shrink-0 transition shadow-lg">
+                        <i class="fa-solid fa-stop"></i>
+                        <span>Stop</span>
+                    </button>
+
+                    <!-- SEND BUTTON -->
                     <button onclick="sendUserMessage()" id="sendBtn" class="w-11 h-11 rounded-xl accent-bg text-white flex items-center justify-center shrink-0 hover:opacity-90 transition">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
@@ -255,7 +274,7 @@
     <div id="drawerOverlay" class="hidden fixed inset-0 z-50 drawer-backdrop flex">
         <div class="w-80 max-w-[88vw] bg-[#0b0c10] text-white h-full flex flex-col justify-between p-4 border-r border-white/10 overflow-y-auto">
             
-            <!-- Top Section: Brand + Settings at Top -->
+            <!-- Top Section: Brand + Top Settings -->
             <div>
                 <div class="flex items-center justify-between pb-4 mb-3 border-b border-white/10">
                     <span class="text-xl font-bold tracking-wide">ZoneWeb</span>
@@ -264,19 +283,57 @@
                     </button>
                 </div>
 
-                <!-- SETTINGS AT THE TOP -->
-                <div class="mb-5 bg-white/5 rounded-2xl p-3.5 border border-white/10">
-                    <div class="flex items-center gap-2 text-sm font-bold mb-3 accent-text">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Top Settings</span>
+                <!-- TOP SETTINGS (AI Brain Switcher + API Key Update + Save + Colors + Dark/Light) -->
+                <div class="mb-5 bg-white/5 rounded-2xl p-3.5 border border-white/10 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm font-bold accent-text">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Top Settings</span>
+                        </div>
+                        <span id="saveConfirmBadge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Saved ✓</span>
                     </div>
 
-                    <!-- Change API Key -->
-                    <div class="mb-3">
+                    <!-- Change AI Brain / Model Selector -->
+                    <div>
+                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (Provider & Model)</label>
+                        <select id="drawerAiBrain" onchange="handleBrainSelectionChange()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
+                            <option value="auto">⚡ Auto-Detect Best Brain (All Versions)</option>
+                            <optgroup label="Google Gemini Brains">
+                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Max IQ)</option>
+                                <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash (Fast & Smart)</option>
+                                <option value="gemini:gemini-2.0-flash">✨ Gemini 2.0 Flash</option>
+                                <option value="gemini:gemini-1.5-pro-latest">🔮 Gemini 1.5 Pro Latest</option>
+                            </optgroup>
+                            <optgroup label="OpenAI ChatGPT Brains">
+                                <option value="openai:gpt-4o">🧠 GPT-4o (Flagship Brain)</option>
+                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini (Fast)</option>
+                                <option value="openai:gpt-4-turbo">🚀 GPT-4 Turbo</option>
+                            </optgroup>
+                            <optgroup label="Anthropic Claude Brains">
+                                <option value="claude:claude-3-7-sonnet-latest">🧠 Claude 3.7 Sonnet (Coding Pro)</option>
+                                <option value="claude:claude-3-5-sonnet-latest">✨ Claude 3.5 Sonnet</option>
+                                <option value="claude:claude-3-5-haiku-latest">⚡ Claude 3.5 Haiku</option>
+                            </optgroup>
+                            <optgroup label="Groq & OpenRouter Brains">
+                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq Ultra-Fast)</option>
+                                <option value="openrouter:google/gemini-2.5-flash">🌐 OpenRouter Universal</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Update API Key + Save Button -->
+                    <div>
                         <label class="text-[11px] text-gray-400 block mb-1">Update API Key (All Providers & Versions)</label>
                         <div class="flex gap-1.5">
-                            <input id="drawerApiKey" type="password" placeholder="Paste any API Key..." class="flex-1 bg-black/40 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white">
-                            <button onclick="updateApiKeyFromDrawer()" class="px-3 py-1.5 rounded-lg accent-bg text-xs font-semibold text-white">Save</button>
+                            <div class="relative flex-1">
+                                <input id="drawerApiKey" type="password" placeholder="Paste new API Key..." class="w-full bg-black/40 border border-white/15 rounded-lg pl-2.5 pr-7 py-2 text-xs text-white focus:outline-none">
+                                <button type="button" onclick="toggleKeyVisibility()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs">
+                                    <i id="keyEyeIcon" class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                            <button onclick="saveBrainAndKeyFromDrawer()" class="px-3.5 py-2 rounded-lg accent-bg text-xs font-bold text-white shadow hover:opacity-90 transition">
+                                Save
+                            </button>
                         </div>
                     </div>
 
@@ -385,7 +442,7 @@
                         <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-xs">ZW</div>
                         <div>
                             <p class="text-xs font-bold leading-none">ZoneWeb Builder</p>
-                            <span id="drawerModelLabel" class="text-[10px] text-blue-400 font-semibold">PRO MULTI-VERSION</span>
+                            <span id="drawerModelLabel" class="text-[10px] text-blue-400 font-semibold">PRO KEEP-EDITING</span>
                         </div>
                     </div>
                     <i class="fa-solid fa-circle-check text-emerald-400"></i>
@@ -425,8 +482,9 @@
         let state = {
             provider: localStorage.getItem('zw_provider') || 'gemini',
             apiKey: localStorage.getItem('zw_api_key') || '',
+            aiBrain: localStorage.getItem('zw_ai_brain') || 'auto',
             aiLevel: localStorage.getItem('zw_ai_level') || 'medium',
-            accentColor: localStorage.getItem('zw_accent') || '#3b82f6',
+            accentColor: localStorage.getItem('zw_accent') || '#e11d48',
             themeMode: localStorage.getItem('zw_theme') || 'dark',
             adsCode: localStorage.getItem('zw_ads_code') || '',
             premium: JSON.parse(localStorage.getItem('zw_premium') || '{"method":"","app":"","account":"","price":"","placement":"header"}'),
@@ -439,8 +497,9 @@
 
         let attachedImageBase64 = null;
         let attachedImageMime = null;
+        let currentAbortController = null;
 
-        // Clean out old error messages automatically
+        // Clean out old error messages or placeholder project names automatically
         state.chatHistory = state.chatHistory.filter(m => !m.text || !m.text.includes('is not found for API version'));
         localStorage.setItem('zw_chat_history', JSON.stringify(state.chatHistory));
 
@@ -510,6 +569,9 @@
             }
             setAiLevel(state.aiLevel, false);
 
+            const brainSelect = document.getElementById('drawerAiBrain');
+            if (brainSelect) brainSelect.value = state.aiBrain || 'auto';
+
             document.getElementById('adsCodeInput').value = state.adsCode;
             document.getElementById('premMethod').value = state.premium.method || '';
             document.getElementById('premApp').value = state.premium.app || '';
@@ -521,10 +583,38 @@
             renderProjectsList();
             if (state.currentSiteHtml && state.currentSiteName) {
                 updatePublicLinkUI(state.currentSiteName, state.currentSiteHtml);
+                updateKeepEditingBar();
             }
         }
 
-        // --- UNIVERSAL PROVIDER DETECTION ---
+        function updateKeepEditingBar() {
+            const bar = document.getElementById('keepEditingBanner');
+            const label = document.getElementById('editingSiteLabel');
+            const chatInput = document.getElementById('chatInput');
+            if (state.currentSiteHtml) {
+                bar.classList.remove('hidden');
+                label.innerText = state.currentSiteName || 'Current Website';
+                chatInput.placeholder = `Keep editing "${state.currentSiteName || 'website'}" (e.g., change colors, edit text, add sections)...`;
+            } else {
+                bar.classList.add('hidden');
+                chatInput.placeholder = "Describe your business website or answer AI questions...";
+            }
+        }
+
+        function quickEditPrompt(text) {
+            const input = document.getElementById('chatInput');
+            input.value = text;
+            input.focus();
+        }
+
+        function handleChatKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendUserMessage();
+            }
+        }
+
+        // --- UNIVERSAL PROVIDER & AI BRAIN SELECTION ---
         function selectProvider(prov) {
             state.provider = prov;
             localStorage.setItem('zw_provider', prov);
@@ -571,17 +661,77 @@
 
         function launchScreen3() {
             document.getElementById('screen3').classList.remove('hidden');
-            document.getElementById('activeProviderBadge').innerText = state.provider.toUpperCase();
+            updateHeaderBrainBadge();
             document.getElementById('drawerApiKey').value = state.apiKey;
+            updateKeepEditingBar();
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
         }
 
+        function updateHeaderBrainBadge() {
+            const badge = document.getElementById('activeProviderBadge');
+            if (state.aiBrain && state.aiBrain !== 'auto') {
+                const parts = state.aiBrain.split(':');
+                badge.innerText = (parts[1] || parts[0]).toUpperCase();
+            } else {
+                badge.innerText = state.provider.toUpperCase();
+            }
+        }
+
+        function handleBrainSelectionChange() {
+            const selected = document.getElementById('drawerAiBrain').value;
+            state.aiBrain = selected;
+            if (selected !== 'auto') {
+                const prov = selected.split(':')[0];
+                state.provider = prov;
+                localStorage.setItem('zw_provider', prov);
+            }
+            localStorage.setItem('zw_ai_brain', selected);
+            updateHeaderBrainBadge();
+        }
+
+        function toggleKeyVisibility() {
+            const input = document.getElementById('drawerApiKey');
+            const icon = document.getElementById('keyEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        function saveBrainAndKeyFromDrawer() {
+            const newKey = document.getElementById('drawerApiKey').value.trim().replace(/\s+/g, '');
+            const selectedBrain = document.getElementById('drawerAiBrain').value;
+
+            state.aiBrain = selectedBrain;
+            localStorage.setItem('zw_ai_brain', selectedBrain);
+
+            if (newKey) {
+                state.apiKey = newKey;
+                localStorage.setItem('zw_api_key', newKey);
+                if (selectedBrain === 'auto') {
+                    state.provider = detectProviderFromKey(newKey);
+                } else {
+                    state.provider = selectedBrain.split(':')[0];
+                }
+                localStorage.setItem('zw_provider', state.provider);
+            }
+
+            updateHeaderBrainBadge();
+
+            const confirmBadge = document.getElementById('saveConfirmBadge');
+            confirmBadge.classList.remove('hidden');
+            setTimeout(() => confirmBadge.classList.add('hidden'), 2500);
+        }
+
         function handleChatFocus() {
             if (state.chatHistory.length === 0 && !state.hasAskedInitialQuestions) {
                 state.hasAskedInitialQuestions = true;
-                appendMessage('ai', "Welcome to **ZoneWeb Builder**! To build your complete live website right now, please tell me:\n1. **What is the name of your website/business?**\n2. **What should the website do and look like?** (Colors, sections, features)\n3. Feel free to **attach any image/logo** using the image button so I can recognize and include its style!");
+                appendMessage('ai', "Welcome to **ZoneWeb Builder**! To build your complete live website right now, please tell me:\n1. **What is the name of your website/business?**\n2. **What should the website do and look like?** (Colors, sections, features)\n3. Once built, stay in this tab and **keep chatting** anytime to edit colors, text, or layout!");
             }
         }
 
@@ -608,7 +758,39 @@
             document.getElementById('imagePreviewContainer').classList.add('hidden');
         }
 
-        // --- SEND MESSAGE & REAL AI CALL ---
+        // --- STOP AI GENERATION ---
+        function stopAiGeneration() {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            setGeneratingUIState(false);
+            appendMessage('ai', "⏹️ **Generation stopped.** You can continue editing or send a new instruction whenever you're ready.");
+        }
+
+        function setGeneratingUIState(isGenerating) {
+            const bgCard = document.getElementById('bgStatusCard');
+            const stopBtn = document.getElementById('stopBtn');
+            const sendBtn = document.getElementById('sendBtn');
+            const statusTitle = document.getElementById('bgStatusTitle');
+
+            if (isGenerating) {
+                bgCard.classList.remove('hidden');
+                stopBtn.classList.remove('hidden');
+                stopBtn.classList.add('flex');
+                sendBtn.classList.add('hidden');
+                statusTitle.innerText = state.currentSiteHtml
+                    ? `Keep Editing: Updating "${state.currentSiteName || 'your website'}"...`
+                    : `Building your website in the background...`;
+            } else {
+                bgCard.classList.add('hidden');
+                stopBtn.classList.add('hidden');
+                stopBtn.classList.remove('flex');
+                sendBtn.classList.remove('hidden');
+            }
+        }
+
+        // --- SEND MESSAGE & REAL AI CALL (WITH KEEP EDITING MEMORY) ---
         async function sendUserMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -620,71 +802,112 @@
             const currentImgMime = attachedImageMime;
             clearAttachedImage();
 
-            appendMessage('user', text || "Analyze this image and use it for my website.", userImg);
-            document.getElementById('bgStatusCard').classList.remove('hidden');
+            const isEditingExistingSite = Boolean(state.currentSiteHtml && state.currentSiteHtml.trim().length > 40);
+            appendMessage('user', text || "Analyze this image and update my website.", userImg);
+
+            currentAbortController = new AbortController();
+            setGeneratingUIState(true);
 
             try {
-                const aiResponse = await callUniversalAI(text, currentImgBase64, currentImgMime);
-                document.getElementById('bgStatusCard').classList.add('hidden');
+                const aiResponse = await callUniversalAI(text, currentImgBase64, currentImgMime, currentAbortController.signal);
+                setGeneratingUIState(false);
+                currentAbortController = null;
 
-                // Extract HTML code block if generated
                 const htmlMatch = aiResponse.match(/```html\s*([\s\S]*?)```/i) || aiResponse.match(/(<!DOCTYPE html[\s\S]*<\/html>)/i) || aiResponse.match(/(<html[\s\S]*<\/html>)/i);
 
                 if (htmlMatch && htmlMatch[1]) {
                     let finalHtml = injectAdsAndPremium(htmlMatch[1].trim());
-                    const extractedName = extractWebsiteName(text, finalHtml);
+                    const extractedName = isEditingExistingSite && state.currentSiteName
+                        ? state.currentSiteName
+                        : extractWebsiteName(text, finalHtml);
+
                     state.currentSiteName = extractedName;
                     state.currentSiteHtml = finalHtml;
                     localStorage.setItem('zw_current_site_name', extractedName);
                     localStorage.setItem('zw_current_site_html', finalHtml);
 
-                    saveProjectToHistory(extractedName, finalHtml);
+                    saveOrUpdateProjectInHistory(extractedName, finalHtml, isEditingExistingSite);
                     updatePublicLinkUI(extractedName, finalHtml);
+                    updateKeepEditingBar();
+
+                    // Refresh live preview iframe if open
+                    const previewModal = document.getElementById('previewModal');
+                    if (!previewModal.classList.contains('hidden')) {
+                        document.getElementById('livePreviewIframe').srcdoc = finalHtml;
+                    }
 
                     const cleanExplanation = aiResponse.replace(/```html[\s\S]*?```/gi, '').trim();
-                    appendMessage('ai', (cleanExplanation || `Your website **${extractedName}** has been built and published!`) + `\n\n✅ **Your Public Link & Preview Button are now ready at the top of the screen!**`, null, true);
-                    
+                    const modeNote = isEditingExistingSite
+                        ? `✨ **Changes applied to "${extractedName}"!** Keep typing in the chat if you want more edits to colors, text, or features.`
+                        : `✅ **Your Public Link & Preview Button are now ready at the top of the screen!** Keep chatting here anytime to edit colors or features.`;
+
+                    appendMessage('ai', (cleanExplanation || `Website **${extractedName}** is live!`) + `\n\n${modeNote}`, null, true);
                     triggerWebsiteReadyNotification(extractedName);
                 } else {
                     appendMessage('ai', aiResponse);
                 }
             } catch (err) {
-                document.getElementById('bgStatusCard').classList.add('hidden');
-                appendMessage('ai', `⚠️ API Connection Notice: ${err.message}\nPlease verify your API key in the top 3-dots menu.`);
+                setGeneratingUIState(false);
+                currentAbortController = null;
+                if (err.name === 'AbortError') return;
+                appendMessage('ai', `⚠️ API Connection Notice: ${err.message}\nYou can switch the AI Brain or update your API key in the top 3-dots menu.`);
             }
         }
 
-        // --- UNIVERSAL MULTI-VERSION AI ENGINE ---
-        async function callUniversalAI(userPrompt, imgBase64, imgMime) {
+        // --- UNIVERSAL MULTI-VERSION AI ENGINE WITH KEEP EDITING CONTEXT ---
+        async function callUniversalAI(userPrompt, imgBase64, imgMime, abortSignal) {
             const levelInstructions = {
-                low: "Complexity Level: LOW. Build a clean, fast, single-page modern responsive website with essential sections.",
-                medium: "Complexity Level: MEDIUM. Build a rich, multi-section interactive website with Tailwind CSS, smooth animations, icons, and working JavaScript interactivity.",
+                low: "Complexity Level: LOW. Build a clean, fast, single-page modern responsive website.",
+                medium: "Complexity Level: MEDIUM. Build a rich, multi-section interactive website with Tailwind CSS, smooth animations, icons, and working JavaScript.",
                 high: "Complexity Level: HIGH. Build an advanced, enterprise-grade full web application with interactive dashboards, modals, working forms, local state persistence, and ultra-polished UI."
             }[state.aiLevel] || "";
 
-            const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack website builder and vision assistant.
+            const keepEditingContext = state.currentSiteHtml
+                ? `\n\n--- KEEP EDITING MODE (ACTIVE) ---
+The user already has an active website built in this tab named "${state.currentSiteName || 'My Website'}".
+Here is the current HTML code of their website:
+\`\`\`html
+${state.currentSiteHtml}
+\`\`\`
+IMPORTANT KEEP EDITING RULE: Modify, style, recolor, or expand the ABOVE existing website HTML based on the user's new instruction ("${userPrompt}"). Keep everything that already works unless asked to remove it, and return the FULL updated HTML document inside a \`\`\`html ... \`\`\` code block.`
+                : "";
+
+            const recentConversation = state.chatHistory.slice(-6).map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
+
+            const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack website builder and iterative design editor.
 ${levelInstructions}
 Rules:
-1. If the user uploads an image, first explain what the image is and how it relates to their project.
-2. If the user hasn't told you what business or website they want yet, ask clarifying questions about their desired website name, style, and features.
-3. Whenever the user asks to create, build, or update a website (or provides the details), generate the COMPLETE, working, self-contained HTML5 code inside a \`\`\`html ... \`\`\` code block with Tailwind CSS and FontAwesome included, zero placeholders, and 100% functional JavaScript.`;
+1. Always set a real, specific <title>BrandName</title> matching the user's business name.
+2. If the user uploads an image, explain what it is and incorporate its theme/purpose into the website.
+3. If the user already built a website in this tab (Keep Editing Mode), apply their requested edits (colors, layout, text, new features) directly to the existing website HTML and return the complete updated \`\`\`html ... \`\`\` code block.
+4. Always output 100% real, working HTML5 with Tailwind CSS and FontAwesome with zero placeholders.${keepEditingContext}`;
+
+            const fullUserPrompt = `Recent Chat Context:\n${recentConversation}\n\nLatest User Instruction: ${userPrompt || 'Analyze this image and update my website.'}`;
 
             const key = state.apiKey.trim().replace(/\s+/g, '');
-            const detected = detectProviderFromKey(key);
+            let preferredProv = detectProviderFromKey(key);
+            let forcedModel = null;
 
-            const providerOrder = [detected, 'gemini', 'openai', 'claude', 'openrouter', 'groq'].filter((v, i, a) => a.indexOf(v) === i);
+            if (state.aiBrain && state.aiBrain !== 'auto') {
+                const parts = state.aiBrain.split(':');
+                preferredProv = parts[0];
+                forcedModel = parts[1] || null;
+            }
+
+            const providerOrder = [preferredProv, 'gemini', 'openai', 'claude', 'openrouter', 'groq'].filter((v, i, a) => a.indexOf(v) === i);
             let lastError = null;
 
             for (const prov of providerOrder) {
                 try {
                     if (prov === 'gemini') {
-                        return await callGeminiAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime);
+                        return await callGeminiAllVersions(key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
                     } else if (prov === 'claude') {
-                        return await callClaudeAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime);
+                        return await callClaudeAllVersions(key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
                     } else {
-                        return await callOpenAICompatibleAllVersions(prov, key, systemPrompt, userPrompt, imgBase64, imgMime);
+                        return await callOpenAICompatibleAllVersions(prov, key, systemPrompt, fullUserPrompt, imgBase64, imgMime, forcedModel, abortSignal);
                     }
                 } catch (err) {
+                    if (err.name === 'AbortError') throw err;
                     lastError = err;
                     if (
                         (prov === 'gemini' && key.startsWith('AIza')) ||
@@ -700,16 +923,21 @@ Rules:
         }
 
         // --- 1. GEMINI ALL-VERSIONS & DYNAMIC LISTMODELS ENGINE ---
-        async function callGeminiAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime) {
-            const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt || 'Analyze this image and help build my website.'}` }];
+        async function callGeminiAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            const parts = [{ text: `${systemPrompt}\n\n${userPrompt}` }];
             if (imgBase64) {
                 parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
             }
 
             let candidateTargets = [];
+            if (forcedModel) {
+                candidateTargets.push({ apiVer: 'v1beta', model: forcedModel });
+                candidateTargets.push({ apiVer: 'v1', model: forcedModel });
+            }
+
             for (const apiVer of ['v1beta', 'v1']) {
                 try {
-                    const listRes = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models?key=${encodeURIComponent(key)}`);
+                    const listRes = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models?key=${encodeURIComponent(key)}`, { signal: abortSignal });
                     if (listRes.ok) {
                         const listData = await listRes.json();
                         if (Array.isArray(listData.models)) {
@@ -724,45 +952,24 @@ Rules:
                             );
                             for (const m of supported) {
                                 const shortName = m.name.replace(/^models\//, '');
-                                candidateTargets.push({ apiVer, model: shortName });
+                                if (!candidateTargets.some(c => c.apiVer === apiVer && c.model === shortName)) {
+                                    candidateTargets.push({ apiVer, model: shortName });
+                                }
                             }
                         }
                     }
-                } catch (e) {}
-            }
-
-            const scoreModel = (name) => {
-                let s = 0;
-                if (name.includes('2.5')) s += 50;
-                else if (name.includes('2.0')) s += 40;
-                else if (name.includes('latest')) s += 30;
-                else if (name.includes('1.5')) s += 20;
-
-                if (state.aiLevel === 'high') {
-                    if (name.includes('pro')) s += 25;
-                    if (name.includes('flash')) s += 10;
-                } else {
-                    if (name.includes('flash')) s += 25;
-                    if (name.includes('pro')) s += 15;
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
                 }
-                if (name.includes('preview') || name.includes('exp')) s -= 5;
-                return s;
-            };
-
-            candidateTargets.sort((a, b) => scoreModel(b.model) - scoreModel(a.model));
+            }
 
             const fallbackModels = [
                 { apiVer: 'v1beta', model: 'gemini-2.5-flash' },
                 { apiVer: 'v1beta', model: 'gemini-2.5-pro' },
                 { apiVer: 'v1beta', model: 'gemini-2.0-flash' },
                 { apiVer: 'v1',     model: 'gemini-2.5-flash' },
-                { apiVer: 'v1',     model: 'gemini-2.5-pro' },
-                { apiVer: 'v1',     model: 'gemini-2.0-flash' },
-                { apiVer: 'v1beta', model: 'gemini-flash-latest' },
-                { apiVer: 'v1beta', model: 'gemini-pro-latest' },
                 { apiVer: 'v1beta', model: 'gemini-1.5-pro-latest' },
-                { apiVer: 'v1beta', model: 'gemini-1.5-flash-latest' },
-                { apiVer: 'v1',     model: 'gemini-pro' }
+                { apiVer: 'v1beta', model: 'gemini-1.5-flash-latest' }
             ];
 
             for (const fb of fallbackModels) {
@@ -775,13 +982,14 @@ Rules:
             for (const target of candidateTargets) {
                 try {
                     const statusEl = document.getElementById('activeModelStatus');
-                    if (statusEl) statusEl.innerText = `Using ${target.model} (${target.apiVer})...`;
+                    if (statusEl) statusEl.innerText = `Active Brain: ${target.model} (${target.apiVer})...`;
 
                     const url = `https://generativelanguage.googleapis.com/${target.apiVer}/models/${target.model}:generateContent?key=${encodeURIComponent(key)}`;
                     const res = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts }] })
+                        body: JSON.stringify({ contents: [{ parts }] }),
+                        signal: abortSignal
                     });
                     const data = await res.json();
 
@@ -800,6 +1008,7 @@ Rules:
                         throw new Error(errMsg);
                     }
                 } catch (innerErr) {
+                    if (innerErr.name === 'AbortError') throw innerErr;
                     lastErrText = innerErr.message;
                     if (lastErrText.toLowerCase().includes('api key not valid')) throw innerErr;
                 }
@@ -808,7 +1017,7 @@ Rules:
         }
 
         // --- 2. OPENAI / OPENROUTER / GROQ / XAI ALL-VERSIONS ENGINE ---
-        async function callOpenAICompatibleAllVersions(prov, key, systemPrompt, userPrompt, imgBase64, imgMime) {
+        async function callOpenAICompatibleAllVersions(prov, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
             const endpoints = {
                 openai: 'https://api.openai.com/v1',
                 openrouter: 'https://openrouter.ai/api/v1',
@@ -817,39 +1026,25 @@ Rules:
             };
             const baseUrl = endpoints[prov] || endpoints.openai;
 
-            let modelsToTry = [];
+            let modelsToTry = forcedModel ? [forcedModel] : [];
             if (prov === 'openai') {
-                modelsToTry = state.aiLevel === 'high'
-                    ? ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo']
-                    : ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+                modelsToTry.push('gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo');
             } else if (prov === 'openrouter') {
-                modelsToTry = ['google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'anthropic/claude-3.5-sonnet'];
+                modelsToTry.push('google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'anthropic/claude-3.5-sonnet');
             } else if (prov === 'groq') {
-                modelsToTry = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
+                modelsToTry.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768');
             } else if (prov === 'xai') {
-                modelsToTry = ['grok-2-latest', 'grok-beta'];
+                modelsToTry.push('grok-2-latest', 'grok-beta');
             }
 
-            try {
-                const mRes = await fetch(`${baseUrl}/models`, {
-                    headers: { 'Authorization': `Bearer ${key}` }
-                });
-                if (mRes.ok) {
-                    const mData = await mRes.json();
-                    if (Array.isArray(mData.data)) {
-                        const ids = mData.data.map(x => x.id).filter(id =>
-                            id.includes('gpt-4') || id.includes('gpt-3.5') || id.includes('llama') || id.includes('gemini') || id.includes('claude') || id.includes('grok')
-                        );
-                        for (const id of ids.slice(0, 6)) {
-                            if (!modelsToTry.includes(id)) modelsToTry.push(id);
-                        }
-                    }
-                }
-            } catch (e) {}
+            modelsToTry = modelsToTry.filter((v, i, a) => a.indexOf(v) === i);
 
             let lastErr = 'OpenAI-compatible endpoint error';
             for (const model of modelsToTry) {
                 try {
+                    const statusEl = document.getElementById('activeModelStatus');
+                    if (statusEl) statusEl.innerText = `Active Brain: ${model}...`;
+
                     const userContent = [];
                     if (userPrompt) userContent.push({ type: 'text', text: userPrompt });
                     if (imgBase64) {
@@ -866,9 +1061,10 @@ Rules:
                             model,
                             messages: [
                                 { role: 'system', content: systemPrompt },
-                                { role: 'user', content: imgBase64 ? userContent : (userPrompt || 'Help build my website.') }
+                                { role: 'user', content: imgBase64 ? userContent : userPrompt }
                             ]
-                        })
+                        }),
+                        signal: abortSignal
                     });
                     const data = await res.json();
                     if (res.ok && data.choices?.[0]?.message?.content) {
@@ -878,6 +1074,7 @@ Rules:
                     lastErr = data.error?.message || res.statusText;
                     if (res.status === 401) throw new Error(lastErr);
                 } catch (e) {
+                    if (e.name === 'AbortError') throw e;
                     lastErr = e.message;
                 }
             }
@@ -885,14 +1082,15 @@ Rules:
         }
 
         // --- 3. CLAUDE ALL-VERSIONS ENGINE ---
-        async function callClaudeAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime) {
-            const models = [
+        async function callClaudeAllVersions(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            let models = forcedModel ? [forcedModel] : [];
+            models.push(
                 'claude-3-7-sonnet-latest',
                 'claude-3-5-sonnet-latest',
                 'claude-3-5-haiku-latest',
-                'claude-3-haiku-20240307',
-                'claude-3-opus-latest'
-            ];
+                'claude-3-haiku-20240307'
+            );
+            models = models.filter((v, i, a) => a.indexOf(v) === i);
 
             const content = [];
             if (imgBase64) {
@@ -901,11 +1099,14 @@ Rules:
                     source: { type: 'base64', media_type: imgMime, data: imgBase64 }
                 });
             }
-            content.push({ type: 'text', text: userPrompt || 'Analyze this image and help build my website.' });
+            content.push({ type: 'text', text: userPrompt });
 
             let lastErr = 'Claude API error';
             for (const model of models) {
                 try {
+                    const statusEl = document.getElementById('activeModelStatus');
+                    if (statusEl) statusEl.innerText = `Active Brain: ${model}...`;
+
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
                         method: 'POST',
                         headers: {
@@ -919,7 +1120,8 @@ Rules:
                             max_tokens: 4096,
                             system: systemPrompt,
                             messages: [{ role: 'user', content }]
-                        })
+                        }),
+                        signal: abortSignal
                     });
                     const data = await res.json();
                     if (res.ok && data.content?.[0]?.text) {
@@ -929,6 +1131,7 @@ Rules:
                     lastErr = data.error?.message || res.statusText;
                     if (res.status === 401) throw new Error(lastErr);
                 } catch (e) {
+                    if (e.name === 'AbortError') throw e;
                     lastErr = e.message;
                 }
             }
@@ -1008,8 +1211,10 @@ Rules:
         // --- PUBLIC LINK BOX & COPY LOGIC ---
         function extractWebsiteName(promptText, html) {
             const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-            let rawName = titleMatch ? titleMatch[1] : (promptText.split(' ').slice(0, 3).join('-') || 'zoneweb-business');
-            return rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'my-business';
+            let rawName = (titleMatch && !titleMatch[1].toLowerCase().includes('their-desired'))
+                ? titleMatch[1]
+                : (promptText.split(' ').slice(0, 3).join('-') || 'zoneweb-site');
+            return rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28) || 'my-website';
         }
 
         function updatePublicLinkUI(siteName, html) {
@@ -1064,12 +1269,6 @@ Rules:
                     new Notification("ZoneWeb Builder", {
                         body: "Your website is ready! (" + siteName + ")",
                         icon: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png"
-                    });
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(perm => {
-                        if (perm === "granted") {
-                            new Notification("ZoneWeb Builder", { body: "Your website is ready!" });
-                        }
                     });
                 }
             }
@@ -1139,17 +1338,6 @@ Rules:
             localStorage.setItem('zw_theme', state.themeMode);
         }
 
-        function updateApiKeyFromDrawer() {
-            const newKey = document.getElementById('drawerApiKey').value.trim().replace(/\s+/g, '');
-            if (!newKey) return;
-            state.apiKey = newKey;
-            state.provider = detectProviderFromKey(newKey);
-            localStorage.setItem('zw_api_key', newKey);
-            localStorage.setItem('zw_provider', state.provider);
-            document.getElementById('activeProviderBadge').innerText = state.provider.toUpperCase();
-            alert(`API Key saved! Auto-detected provider: ${state.provider.toUpperCase()}`);
-        }
-
         function autoSaveConfig() {
             state.adsCode = document.getElementById('adsCodeInput').value;
             state.premium = {
@@ -1163,8 +1351,14 @@ Rules:
             localStorage.setItem('zw_premium', JSON.stringify(state.premium));
         }
 
-        function saveProjectToHistory(name, html) {
-            state.projects.unshift({ name, html, date: new Date().toLocaleDateString() });
+        function saveOrUpdateProjectInHistory(name, html, isUpdate) {
+            const existingIdx = state.projects.findIndex(p => p.name === name);
+            if (isUpdate && existingIdx !== -1) {
+                state.projects[existingIdx].html = html;
+                state.projects[existingIdx].date = new Date().toLocaleDateString();
+            } else {
+                state.projects.unshift({ name, html, date: new Date().toLocaleDateString() });
+            }
             state.projects = state.projects.slice(0, 15);
             localStorage.setItem('zw_projects', JSON.stringify(state.projects));
             renderProjectsList();
@@ -1192,16 +1386,24 @@ Rules:
             localStorage.setItem('zw_current_site_name', proj.name);
             localStorage.setItem('zw_current_site_html', proj.html);
             updatePublicLinkUI(proj.name, proj.html);
+            updateKeepEditingBar();
             toggleDrawer(false);
             openPreviewModal();
         }
 
         function startNewWebsiteProject() {
+            if (currentAbortController) stopAiGeneration();
             state.chatHistory = [];
+            state.currentSiteName = '';
+            state.currentSiteHtml = '';
             state.hasAskedInitialQuestions = false;
             localStorage.setItem('zw_chat_history', '[]');
+            localStorage.removeItem('zw_current_site_name');
+            localStorage.removeItem('zw_current_site_html');
             document.getElementById('chatFeed').innerHTML = '';
+            document.getElementById('publicLinkBanner').classList.add('hidden');
             document.getElementById('heroPrompt').classList.remove('hidden');
+            updateKeepEditingBar();
             toggleDrawer(false);
         }
 

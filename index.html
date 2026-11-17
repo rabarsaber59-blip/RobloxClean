@@ -138,7 +138,7 @@
 
                 <!-- Top Right Controls: Templates + Preview + AI Level -->
                 <div class="flex items-center gap-1.5 md:gap-2 flex-wrap">
-                    <button id="topTemplatesBtn" onclick="window.TemplatesStudio ? window.TemplatesStudio.openStudio() : alert('Please load templates.js next!')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md hover:opacity-95 transition shrink-0">
+                    <button id="topTemplatesBtn" onclick="openTemplatesImmediately()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md hover:opacity-95 transition shrink-0">
                         <i class="fa-solid fa-layer-group"></i>
                         <span>Templates</span>
                     </button>
@@ -195,23 +195,10 @@
             </div>
 
             <div id="chatFeed" class="space-y-4 w-full overflow-hidden"></div>
-
-            <!-- Live Generation Status Card -->
-            <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border shadow-lg">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-spinner fa-spin accent-text text-xl"></i>
-                    <div>
-                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ AI is building your website...</p>
-                        <p id="activeModelStatus" class="text-xs text-gray-400">Executing live request with your API key...</p>
-                    </div>
-                </div>
-                <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow shrink-0">
-                    <i class="fa-solid fa-square"></i> Stop
-                </button>
-            </div>
+            <div id="bgStatusCard" class="hidden"></div>
         </main>
 
-        <!-- Bottom Fixed AI Chat Bar (Hidden automatically when Templates Studio is open) -->
+        <!-- Bottom Fixed AI Chat Bar -->
         <div id="bottomChatBarContainer" class="fixed bottom-0 inset-x-0 p-2.5 md:p-4 z-20 pointer-events-none">
             <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl pointer-events-auto">
                 
@@ -338,7 +325,7 @@
                         <i class="fa-regular fa-pen-to-square w-5 text-center text-gray-300"></i>
                         <span>New Website Chat</span>
                     </button>
-                    <button onclick="toggleDrawer(false); window.TemplatesStudio && window.TemplatesStudio.openStudio();" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                    <button onclick="toggleDrawer(false); openTemplatesImmediately();" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-solid fa-layer-group w-5 text-center text-violet-400"></i>
                         <span>Open Templates Studio</span>
                     </button>
@@ -459,6 +446,20 @@
         let attachedImageBase64 = null;
         let attachedImageMime = null;
         let currentAbortController = null;
+
+        // Opens Templates Studio immediately (and auto-loads templates.js if not yet loaded)
+        function openTemplatesImmediately() {
+            if (window.TemplatesStudio && typeof window.TemplatesStudio.openStudio === 'function') {
+                window.TemplatesStudio.openStudio();
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = 'templates.js?v=' + Date.now();
+            s.onload = () => {
+                if (window.TemplatesStudio) window.TemplatesStudio.openStudio();
+            };
+            document.body.appendChild(s);
+        }
 
         function checkPublicSiteRoute() {
             const hash = window.location.hash;
@@ -660,15 +661,22 @@
             appendMessage('ai', "⏹️ **Generation stopped.** Ready for your next instruction.");
         }
 
-        function setGeneratingUIState(isGenerating, label = '') {
-            document.getElementById('bgStatusCard').classList.toggle('hidden', !isGenerating);
+        // Triggers the dedicated loading.js indicator
+        function setGeneratingUIState(isGenerating, label = 'AI is building your website...') {
             document.getElementById('stopBtn').classList.toggle('hidden', !isGenerating);
             document.getElementById('stopBtn').classList.toggle('flex', isGenerating);
             document.getElementById('sendBtn').classList.toggle('hidden', isGenerating);
-            if (label) document.getElementById('bgStatusTitle').innerText = label;
+
+            if (window.ZenoLoading) {
+                if (isGenerating) {
+                    window.ZenoLoading.start(label);
+                } else {
+                    window.ZenoLoading.stop();
+                }
+            }
         }
 
-        // --- SEND USER MESSAGE & EXECUTE REAL API KEY ---
+        // --- SEND USER MESSAGE & START LOADING IMMEDIATELY ---
         async function sendUserMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -682,31 +690,21 @@
 
             appendMessage('user', text || "Analyze this image and build a matching website.", userImg);
 
-            // Check if ZenoEngine needs external tokens/info first
-            if (window.ZenoEngine && typeof window.ZenoEngine.analyzePromptRequirements === 'function' && !currentImgBase64) {
-                const reqConfig = window.ZenoEngine.analyzePromptRequirements(text);
-                if (reqConfig) {
-                    window.ZenoEngine.promptUserForRequirements(reqConfig, text, (enrichedPrompt) => {
-                        executeRealApiKeyCall(enrichedPrompt, null, null);
-                    });
-                    return;
-                }
-            }
-
+            // Start building immediately with the Loading Indicator
             await executeRealApiKeyCall(text, currentImgBase64, currentImgMime);
         }
 
         async function executeRealApiKeyCall(promptText, imgBase64, imgMime) {
             const isEditing = window.KeepEditingEngine && typeof window.KeepEditingEngine.isEditingCurrentTabSite === 'function'
                 ? window.KeepEditingEngine.isEditingCurrentTabSite(promptText)
-                : Boolean(window.state.currentSiteHtml && !/\b(new website|new site|start fresh)\b/i.test(promptText));
+                : Boolean(window.state.currentSiteHtml && !/\b(new website|new site|start fresh|make a website|build a website)\b/i.test(promptText));
 
             currentAbortController = new AbortController();
             setGeneratingUIState(
                 true,
                 isEditing
-                    ? `⚡ AI is updating "${window.state.currentSiteName}" with your API Key...`
-                    : `⚡ AI is building your custom website with your API Key...`
+                    ? `⚡ AI is updating "${window.state.currentSiteName}"...`
+                    : `⚡ AI is building your website...`
             );
 
             try {
@@ -718,6 +716,9 @@
 
                 if (extractedHtml && extractedHtml.length > 50) {
                     let healedHtml = window.healWebsiteCode ? window.healWebsiteCode(extractedHtml, promptText) : extractedHtml;
+                    if (isEditing && window.KeepEditingEngine && typeof window.KeepEditingEngine.applyDirectVisualPatch === 'function') {
+                        healedHtml = window.KeepEditingEngine.applyDirectVisualPatch(healedHtml, promptText);
+                    }
                     const finalHtml = injectAdsAndPremium(healedHtml);
                     const siteSlug = isEditing && window.state.currentSiteName
                         ? window.state.currentSiteName
@@ -738,7 +739,7 @@
                     }
 
                     const cleanSummary = explanation ? explanation.slice(0, 350) : `Successfully built **${siteSlug}**!`;
-                    appendMessage('ai', `${cleanSummary}\n\n✅ **Your website is live! Click "Preview Website" below or at the top to view it.**`, null, true);
+                    appendMessage('ai', `${cleanSummary}\n\n✅ **Your website is ready! Click "Preview Website" below or at the top to view it.**`, null, true);
                     triggerWebsiteReadyNotification(siteSlug);
                 } else {
                     appendMessage('ai', explanation || aiResponseText);
@@ -747,11 +748,11 @@
                 setGeneratingUIState(false);
                 currentAbortController = null;
                 if (err && err.name === 'AbortError') return;
-                appendMessage('ai', `⚠️ **API Error:** ${err.message}\nPlease check your API Key in the top 3-dots menu or verify your internet connection.`);
+                appendMessage('ai', `⚠️ **API Notice:** ${err.message}\nPlease check your API Key in the top 3-dots menu or verify your internet connection.`);
             }
         }
 
-        // --- REAL API KEY ENGINE (Uses the user's actual API key to generate custom code) ---
+        // --- REAL API KEY ENGINE ---
         async function callUserApiKeyDirectly(userPrompt, imgBase64, imgMime, isEditing, abortSignal) {
             const key = sanitizeApiKey(window.state.apiKey);
             if (!key) {
@@ -770,15 +771,15 @@ Here is the current HTML code of the user's website ("${window.state.currentSite
 \`\`\`html
 ${window.state.currentSiteHtml.slice(0, 18000)}
 \`\`\`
-IMPORTANT: Apply the user's exact requested modification ("${userPrompt}") directly to the existing HTML above. Keep all existing content and features intact unless asked to change them, and return the FULL updated HTML5 document inside a \`\`\`html ... \`\`\` code block.`
-                : `\n\nIMPORTANT: Build the EXACT custom website, business, store, game, or feature requested by the user ("${userPrompt}"). Never refuse a benign website request and never output a generic placeholder—write real, complete, functional HTML, CSS, and JavaScript tailored specifically to their prompt.`;
+IMPORTANT: Apply the user's exact requested modification ("${userPrompt}") directly to the existing HTML above. Return the FULL updated HTML5 document inside a \`\`\`html ... \`\`\` code block.`
+                : `\n\nIMPORTANT: Build the EXACT custom website requested by the user ("${userPrompt}"). Write real, complete, functional HTML, CSS, and JavaScript tailored specifically to their prompt.`;
 
             const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack web developer.
 ${levelGuide}
 Rules:
 1. Write 1 short sentence explaining what you built or updated.
 2. Output the COMPLETE, self-contained, working HTML5 document inside a \`\`\`html ... \`\`\` code block using Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome.
-3. Always include a descriptive <title> 태그.${editContext}`;
+3. Always include a descriptive <title> tag.${editContext}`;
 
             const actualProvider = detectActualKeyType(key);
             let forcedModel = null;
@@ -796,18 +797,14 @@ Rules:
             }
         }
 
-        // 1. REAL GOOGLE GEMINI API (Auto-discovers valid models for the user's key via ListModels)
         async function callRealGeminiApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
-            const statusEl = document.getElementById('activeModelStatus');
             const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt}` }];
             if (imgBase64) {
                 parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
             }
 
-            // Discover models enabled on this specific Gemini key once per session
             if (!window.state.discoveredGeminiModels || window.state.discoveredGeminiModels.length === 0) {
                 try {
-                    if (statusEl) statusEl.innerText = `Checking available Gemini models for your key...`;
                     const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`, { signal: abortSignal });
                     if (listRes.ok) {
                         const listData = await listRes.json();
@@ -822,9 +819,8 @@ Rules:
                             )
                             .map(m => m.name.replace(/^models\//, ''));
 
-                        // Prioritize fast & smart flash/pro models
                         valid.sort((a, b) => {
-                            const score = (n) => (n.includes('2.5-flash') ? 50 : n.includes('2.0-flash') ? 45 : n.includes('2.5-pro') ? 40 : n.includes('1.5-flash') ? 35 : n.includes('pro') ? 25 : 10);
+                            const score = (n) => (n.includes('2.5-flash') ? 50 : n.includes('2.0-flash') ? 45 : n.includes('2.5-pro') ? 40 : n.includes('1.5-flash') ? 35 : 10);
                             return score(b) - score(a);
                         });
                         window.state.discoveredGeminiModels = valid;
@@ -846,7 +842,7 @@ Rules:
             let lastErr = 'Failed to connect to Gemini API.';
             for (const modelName of modelsToTry) {
                 try {
-                    if (statusEl) statusEl.innerText = `⚡ Generating live code with ${modelName}...`;
+                    if (window.ZenoLoading) window.ZenoLoading.updateStatus(`Model: ${modelName}`);
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(key)}`;
                     const res = await fetch(url, {
                         method: 'POST',
@@ -868,9 +864,7 @@ Rules:
                     }
 
                     lastErr = data.error?.message || `HTTP ${res.status}`;
-                    if (lastErr.toLowerCase().includes('api key not valid')) {
-                        throw new Error(lastErr);
-                    }
+                    if (lastErr.toLowerCase().includes('api key not valid')) throw new Error(lastErr);
                 } catch (err) {
                     if (err.name === 'AbortError') throw err;
                     lastErr = err.message;
@@ -880,7 +874,6 @@ Rules:
             throw new Error(lastErr);
         }
 
-        // 2. REAL OPENAI / GROQ / OPENROUTER API
         async function callRealOpenAiCompatibleApi(prov, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
             const endpoints = {
                 openai: 'https://api.openai.com/v1/chat/completions',
@@ -895,16 +888,13 @@ Rules:
             let lastErr = 'API error';
             for (const model of models) {
                 try {
+                    if (window.ZenoLoading) window.ZenoLoading.updateStatus(`Model: ${model}`);
                     const userContent = [{ type: 'text', text: userPrompt }];
-                    if (imgBase64) {
-                        userContent.push({ type: 'image_url', image_url: { url: `data:${imgMime};base64,${imgBase64}` } });
-                    }
+                    if (imgBase64) userContent.push({ type: 'image_url', image_url: { url: `data:${imgMime};base64,${imgBase64}` } });
+
                     const res = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${key}`
-                        },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                         body: JSON.stringify({
                             model,
                             messages: [
@@ -928,16 +918,14 @@ Rules:
             throw new Error(lastErr);
         }
 
-        // 3. REAL ANTHROPIC CLAUDE API
         async function callRealClaudeApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
             const models = forcedModel ? [forcedModel] : ['claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'];
             let lastErr = 'Claude API error';
             for (const model of models) {
                 try {
+                    if (window.ZenoLoading) window.ZenoLoading.updateStatus(`Model: ${model}`);
                     const content = [];
-                    if (imgBase64) {
-                        content.push({ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } });
-                    }
+                    if (imgBase64) content.push({ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } });
                     content.push({ type: 'text', text: userPrompt });
 
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -990,6 +978,10 @@ Rules:
         }
 
         function deriveSiteSlug(promptText, html) {
+            const nameMatch = promptText.match(/(?:named|names|called)\s+([a-zA-Z0-9_-]+)/i);
+            if (nameMatch && nameMatch[1]) {
+                return nameMatch[1].toLowerCase();
+            }
             const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
             if (titleMatch && titleMatch[1]) {
                 const clean = titleMatch[1].split('-')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -1251,7 +1243,8 @@ Rules:
         }
     </script>
 
-    <!-- MODULAR SCRIPTS -->
+    <!-- MODULAR SCRIPTS (INCLUDING NEW LOADING.JS) -->
+    <script src="loading.js"></script>
     <script src="self-healing.js"></script>
     <script src="templates.js"></script>
     <script src="keep-editing.js"></script>

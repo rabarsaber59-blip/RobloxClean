@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZoneWeb Pro - Modular AI Website Builder</title>
+    <title>ZoneWeb - Autonomous AI Website Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -33,10 +33,9 @@
         .accent-text { color: var(--accent); }
         .accent-border { border-color: var(--accent); }
         .card-bg { background-color: var(--bg-card); border: 1px solid var(--border-color); }
-        
         @keyframes pulseGlow {
             0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.06); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 1; }
         }
         .welcome-anim { animation: pulseGlow 2s infinite ease-in-out; }
         .drawer-backdrop { background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); }
@@ -60,14 +59,14 @@
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
                 Welcome to ZoneWeb
             </h1>
-            <p class="mt-3 text-gray-400 text-sm md:text-base">Autonomous Self-Healing AI Web Studio</p>
+            <p class="mt-3 text-gray-400 text-sm md:text-base">Next-Generation Real AI Website Builder</p>
         </div>
         <div class="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-8">
             <div id="splashProgress" class="h-full accent-bg transition-all duration-[4000ms] ease-linear w-0"></div>
         </div>
     </div>
 
-    <!-- SCREEN 2: UNIVERSAL API KEY SETUP -->
+    <!-- SCREEN 2: API KEY SETUP -->
     <div id="screen2" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4">
         <div class="card-bg w-full max-w-lg rounded-3xl p-6 md:p-8 shadow-2xl">
             <div class="flex items-center gap-3 mb-6">
@@ -76,7 +75,7 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold">Connect Your AI Engine</h2>
-                    <p class="text-xs text-gray-400">Accepts all versions of Gemini, OpenAI, Claude, OpenRouter & Groq</p>
+                    <p class="text-xs text-gray-400">Supports all versions of Gemini, OpenAI, Claude, Groq & OpenRouter</p>
                 </div>
             </div>
 
@@ -92,9 +91,9 @@
                 </button>
             </div>
 
-            <label class="block text-xs font-medium text-gray-400 mb-2">Enter Any API Key (All Versions Supported)</label>
+            <label class="block text-xs font-medium text-gray-400 mb-2">Enter Your API Key</label>
             <div class="flex gap-2 mb-4">
-                <input id="apiKeyInput" type="password" placeholder="Paste Gemini (AIza...), OpenAI (sk-...), Claude, or any key..." 
+                <input id="apiKeyInput" type="password" placeholder="Paste Gemini (AIza...), OpenAI (sk-...), Claude, or Groq key..." 
                     class="flex-1 px-4 py-3 rounded-xl bg-black/20 border border-gray-600 focus:outline-none focus:border-blue-500 text-sm">
                 <a id="getApiKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank" 
                     class="px-4 py-3 rounded-xl accent-bg text-white font-semibold text-xs flex items-center gap-1.5 whitespace-nowrap hover:opacity-90 transition shadow-lg">
@@ -104,17 +103,17 @@
 
             <div class="flex flex-wrap gap-2 mb-6 text-xs">
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" class="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400">
-                    <i class="fa-solid fa-bolt mr-1"></i>Fast Gemini Key
+                    <i class="fa-solid fa-bolt mr-1"></i>Get Gemini Key
                 </a>
                 <a href="https://platform.openai.com/api-keys" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400">
-                    <i class="fa-solid fa-bolt mr-1"></i>Fast OpenAI Key
+                    <i class="fa-solid fa-bolt mr-1"></i>Get OpenAI Key
                 </a>
                 <a href="https://console.anthropic.com/settings/keys" target="_blank" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400">
-                    <i class="fa-solid fa-bolt mr-1"></i>Fast Claude Key
+                    <i class="fa-solid fa-bolt mr-1"></i>Get Claude Key
                 </a>
             </div>
 
-            <button id="saveKeyBtn" onclick="saveApiKeyAndContinue()" class="w-full py-3.5 rounded-xl accent-bg text-white font-bold text-sm hover:opacity-95 transition shadow-lg">
+            <button onclick="saveApiKeyAndContinue()" class="w-full py-3.5 rounded-xl accent-bg text-white font-bold text-sm hover:opacity-95 transition shadow-lg">
                 Save & Launch ZoneWeb <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
             <p id="apiErrorMsg" class="text-red-400 text-xs mt-2 hidden"></p>
@@ -124,7 +123,7 @@
     <!-- SCREEN 3: MAIN WORKSPACE -->
     <div id="screen3" class="hidden flex-1 flex flex-col min-h-screen relative max-w-full overflow-x-hidden">
         
-        <!-- Top Sticky Header Container -->
+        <!-- Top Sticky Header -->
         <header class="card-bg sticky top-0 z-20 shadow-lg w-full">
             <div class="px-3 md:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
@@ -133,12 +132,17 @@
                     </button>
                     <div class="flex items-center gap-1.5">
                         <span class="font-extrabold text-base md:text-lg tracking-tight">ZoneWeb</span>
-                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold truncate max-w-[90px]">PRO AI</span>
+                        <span id="activeProviderBadge" class="text-[10px] uppercase px-2 py-0.5 rounded-full accent-bg text-white font-semibold truncate max-w-[110px]">REAL AI</span>
                     </div>
                 </div>
 
-                <!-- Top Action Bar: Templates Button (injected by templates.js) + Preview + AI Level -->
+                <!-- Top Right Controls: Templates + Preview + AI Level -->
                 <div class="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                    <button id="topTemplatesBtn" onclick="window.TemplatesStudio ? window.TemplatesStudio.openStudio() : alert('Please load templates.js next!')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md hover:opacity-95 transition shrink-0">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Templates</span>
+                    </button>
+
                     <button id="topPreviewBtn" onclick="openPreviewModal()" class="px-3 py-1.5 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90 transition shrink-0">
                         <i class="fa-solid fa-eye"></i>
                         <span>Preview</span>
@@ -152,7 +156,7 @@
                 </div>
             </div>
 
-            <!-- PUBLIC LINK BOX + COPY BUTTON + PREVIEW BUTTON -->
+            <!-- PUBLIC LINK BAR -->
             <div id="publicLinkBanner" class="hidden px-3 md:px-4 py-2 bg-emerald-500/10 border-t border-emerald-500/30 w-full">
                 <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
@@ -180,43 +184,25 @@
             </div>
         </header>
 
-        <!-- Main Center Content & Chat Messages -->
-        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-3 md:px-4 pt-6 pb-56 overflow-y-auto overflow-x-hidden">
-            
-            <!-- Center Hero Prompt -->
-            <div id="heroPrompt" class="my-auto text-center py-8">
+        <!-- Main Workspace & Chat Feed -->
+        <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-3 md:px-4 pt-6 pb-48 overflow-y-auto overflow-x-hidden">
+            <div id="heroPrompt" class="my-auto text-center py-12">
                 <div class="w-16 h-16 rounded-2xl accent-bg/20 border accent-border mx-auto mb-4 flex items-center justify-center">
                     <i class="fa-solid fa-wand-magic-sparkles text-2xl accent-text"></i>
                 </div>
                 <h2 class="text-2xl md:text-4xl font-extrabold mb-3">What business do you want to build today?</h2>
-                <p class="text-sm text-gray-400 max-w-md mx-auto mb-6">Use the <b>Templates</b> button at the top for ready-made screens & buttons, or describe any website below!</p>
-                
-                <div class="flex flex-wrap justify-center gap-2 max-w-xl mx-auto">
-                    <button onclick="quickStartCategory('Build a complete Online Shopping Store website with product categories, search bar, shopping cart, and checkout')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-bag-shopping text-rose-500"></i> 🛍️ Shopping Store
-                    </button>
-                    <button onclick="quickStartCategory('Build a Movie, Anime, and Drama streaming website like ZoneFlix with live search and video player')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-film text-purple-500"></i> 🎬 Movie & Anime Site
-                    </button>
-                    <button onclick="quickStartCategory('Build a TikTok and Phone contact website for username rabar2008r and phone 0751 616 5051 with black background and falling stars')" class="px-3.5 py-2 rounded-xl card-bg hover:border-blue-500 text-xs font-bold flex items-center gap-2 shadow">
-                        <i class="fa-brands fa-tiktok text-pink-500"></i> 📱 TikTok & Phone Hub
-                    </button>
-                    <button onclick="window.TemplatesStudio && window.TemplatesStudio.openModal()" class="px-3.5 py-2 rounded-xl bg-violet-600/20 border border-violet-500/40 text-violet-300 text-xs font-bold flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-layer-group"></i> 🎨 Open Templates Studio
-                    </button>
-                </div>
+                <p class="text-sm text-gray-400 max-w-md mx-auto">Ask the AI below to build any custom website or web app using your API key, or click <b>Templates</b> at the top for drag-and-drop visual building.</p>
             </div>
 
-            <!-- Conversation Feed -->
             <div id="chatFeed" class="space-y-4 w-full overflow-hidden"></div>
 
-            <!-- Live Status Bar + Stop Button -->
+            <!-- Live Generation Status Card -->
             <div id="bgStatusCard" class="hidden mt-4 p-4 rounded-2xl card-bg flex items-center justify-between border-l-4 accent-border shadow-lg">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-bolt fa-beat accent-text text-xl"></i>
+                    <i class="fa-solid fa-spinner fa-spin accent-text text-xl"></i>
                     <div>
-                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ Building & Auto-Healing Website...</p>
-                        <p id="activeModelStatus" class="text-xs text-gray-400">Constructing live components...</p>
+                        <p id="bgStatusTitle" class="text-sm font-bold">⚡ AI is building your website...</p>
+                        <p id="activeModelStatus" class="text-xs text-gray-400">Executing live request with your API key...</p>
                     </div>
                 </div>
                 <button onclick="stopAiGeneration()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 shadow shrink-0">
@@ -225,34 +211,23 @@
             </div>
         </main>
 
-        <!-- Bottom Fixed AI Chat Bar -->
-        <div class="fixed bottom-0 inset-x-0 p-2.5 md:p-4 z-20 pointer-events-none">
+        <!-- Bottom Fixed AI Chat Bar (Hidden automatically when Templates Studio is open) -->
+        <div id="bottomChatBarContainer" class="fixed bottom-0 inset-x-0 p-2.5 md:p-4 z-20 pointer-events-none">
             <div class="max-w-4xl mx-auto card-bg rounded-2xl p-2.5 shadow-2xl pointer-events-auto">
                 
-                <!-- LIVE AI INTENT RECOGNITION INDICATOR -->
-                <div id="intentRecognizerBar" class="hidden px-3 py-1 mb-2 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-between text-xs text-blue-400 font-semibold">
-                    <span id="intentDetectedText"><i class="fa-solid fa-brain mr-1"></i> AI Recognized: Custom Website</span>
-                    <span class="text-[10px] uppercase tracking-wider opacity-75">Self-Healing Active</span>
-                </div>
-
-                <!-- KEEP EDITING MODE BAR -->
-                <div id="keepEditingBanner" class="hidden px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-1.5 text-xs text-amber-400 font-semibold truncate">
-                        <i class="fa-solid fa-pen-ruler"></i>
-                        <span class="truncate">Keep Editing: <b id="editingSiteLabel">website</b></span>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="quickEditPrompt('Make the background black with animated falling stars')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-[11px] text-amber-300 font-medium">✨ Stars</button>
-                        <button onclick="window.TemplatesStudio && window.TemplatesStudio.openModal()" class="px-2 py-0.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-[11px] text-violet-300 font-medium">+ Template</button>
-                        <button onclick="startNewWebsiteProject()" class="px-2 py-0.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-[11px] text-red-300 font-bold">+ Reset</button>
-                    </div>
+                <!-- Keep Editing Indicator -->
+                <div id="keepEditingBanner" class="hidden px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2">
+                    <span class="text-xs text-amber-400 font-semibold truncate">
+                        <i class="fa-solid fa-pen-ruler mr-1"></i> Keep Editing Mode: <b id="editingSiteLabel">website</b>
+                    </span>
+                    <button onclick="startNewWebsiteProject()" class="px-2.5 py-0.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-[11px] text-red-300 font-bold">+ New Site</button>
                 </div>
 
                 <!-- Attached Image Preview -->
                 <div id="imagePreviewContainer" class="hidden px-3 pt-2 pb-2 flex items-center gap-3 border-b border-gray-500/20 mb-2">
                     <img id="attachedImageThumb" src="" class="w-14 h-14 object-cover rounded-xl border border-gray-500/30">
                     <div class="flex-1 text-xs">
-                        <p class="font-semibold text-blue-400">Image attached for AI Vision analysis</p>
+                        <p class="font-semibold text-blue-400">Image attached for AI Vision</p>
                         <p id="attachedImageName" class="text-gray-400 truncate"></p>
                     </div>
                     <button onclick="clearAttachedImage()" class="text-gray-400 hover:text-red-400 p-1">
@@ -266,7 +241,7 @@
                         <input id="imageInput" type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                     </label>
 
-                    <textarea id="chatInput" rows="1" oninput="handleLiveIntentRecognition(this.value)" onfocus="handleChatFocus()" onkeydown="handleChatKeydown(event)" placeholder="Describe your website or keep editing colors, buttons & features..."
+                    <textarea id="chatInput" rows="1" onkeydown="handleChatKeydown(event)" placeholder="Describe the exact website or feature you want the AI to build..."
                         class="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
 
                     <button id="stopBtn" onclick="stopAiGeneration()" class="hidden px-4 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs items-center justify-center gap-1.5 shrink-0 transition shadow-lg">
@@ -285,7 +260,6 @@
     <!-- 3-DOTS SIDEBAR DRAWER -->
     <div id="drawerOverlay" class="hidden fixed inset-0 z-50 drawer-backdrop flex">
         <div class="w-80 max-w-[88vw] bg-[#0b0c10] text-white h-full flex flex-col justify-between p-4 border-r border-white/10 overflow-y-auto">
-            
             <div>
                 <div class="flex items-center justify-between pb-4 mb-3 border-b border-white/10">
                     <span class="text-xl font-bold tracking-wide">ZoneWeb</span>
@@ -305,34 +279,34 @@
                     </div>
 
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (All Models)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">Change AI Brain (Model Selection)</label>
                         <select id="drawerAiBrain" onchange="handleBrainSelectionChange()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
-                            <option value="auto">⚡ Auto-Detect Best Brain (All Versions)</option>
-                            <optgroup label="Google Gemini Brains">
+                            <option value="auto">⚡ Auto-Discover Best Model for Key</option>
+                            <optgroup label="Google Gemini Models">
                                 <option value="gemini:gemini-2.5-flash">⚡ Gemini 2.5 Flash</option>
-                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro (Max IQ)</option>
+                                <option value="gemini:gemini-2.5-pro">🧠 Gemini 2.5 Pro</option>
                                 <option value="gemini:gemini-2.0-flash">🚀 Gemini 2.0 Flash</option>
+                                <option value="gemini:gemini-1.5-pro-latest">✨ Gemini 1.5 Pro</option>
                             </optgroup>
-                            <optgroup label="OpenAI ChatGPT Brains">
-                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini</option>
+                            <optgroup label="OpenAI Models">
                                 <option value="openai:gpt-4o">🧠 GPT-4o</option>
+                                <option value="openai:gpt-4o-mini">⚡ GPT-4o Mini</option>
                             </optgroup>
-                            <optgroup label="Anthropic Claude Brains">
-                                <option value="claude:claude-3-5-sonnet-latest">✨ Claude 3.5 Sonnet</option>
+                            <optgroup label="Anthropic Claude Models">
                                 <option value="claude:claude-3-7-sonnet-latest">🧠 Claude 3.7 Sonnet</option>
+                                <option value="claude:claude-3-5-sonnet-latest">✨ Claude 3.5 Sonnet</option>
                             </optgroup>
-                            <optgroup label="Groq & Smart Brains">
-                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B (Groq)</option>
-                                <option value="smart:intent-engine">🎯 ZoneWeb Instant Engine</option>
+                            <optgroup label="Groq Models">
+                                <option value="groq:llama-3.3-70b-versatile">🚀 Llama 3.3 70B</option>
                             </optgroup>
                         </select>
                     </div>
 
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Update API Key (All Providers & Versions)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">Update API Key</label>
                         <div class="flex gap-1.5">
                             <div class="relative flex-1">
-                                <input id="drawerApiKey" type="password" placeholder="Paste new API Key..." class="w-full bg-black/40 border border-white/15 rounded-lg pl-2.5 pr-7 py-2 text-xs text-white focus:outline-none">
+                                <input id="drawerApiKey" type="password" placeholder="Paste API Key..." class="w-full bg-black/40 border border-white/15 rounded-lg pl-2.5 pr-7 py-2 text-xs text-white focus:outline-none">
                                 <button type="button" onclick="toggleKeyVisibility()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs">
                                     <i id="keyEyeIcon" class="fa-regular fa-eye"></i>
                                 </button>
@@ -358,23 +332,19 @@
                     </div>
                 </div>
 
-                <!-- Navigation Menu Items -->
+                <!-- Navigation Menu -->
                 <nav class="space-y-1 text-sm">
                     <button onclick="startNewWebsiteProject()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-regular fa-pen-to-square w-5 text-center text-gray-300"></i>
-                        <span>New Website Chat (Start Fresh)</span>
+                        <span>New Website Chat</span>
                     </button>
-                    <button onclick="toggleDrawer(false); window.TemplatesStudio && window.TemplatesStudio.openModal();" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
+                    <button onclick="toggleDrawer(false); window.TemplatesStudio && window.TemplatesStudio.openStudio();" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-solid fa-layer-group w-5 text-center text-violet-400"></i>
-                        <span>Templates & Button Studio</span>
+                        <span>Open Templates Studio</span>
                     </button>
                     <button onclick="openPreviewModal(); toggleDrawer(false);" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-solid fa-eye w-5 text-center text-gray-300"></i>
                         <span>Preview Current Website</span>
-                    </button>
-                    <button onclick="document.getElementById('imageInput').click(); toggleDrawer(false);" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
-                        <i class="fa-regular fa-image w-5 text-center text-gray-300"></i>
-                        <span>Send Vision Image</span>
                     </button>
                     <button onclick="downloadGeneratedSite()" class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-left">
                         <i class="fa-solid fa-download w-5 text-center text-gray-300"></i>
@@ -382,61 +352,45 @@
                     </button>
                 </nav>
 
-                <!-- Saved Websites History -->
                 <div class="mt-4 pt-3 border-t border-white/10">
                     <p class="text-xs text-gray-400 px-2 mb-2 uppercase tracking-wider">Saved Projects</p>
                     <div id="savedProjectsList" class="space-y-1 max-h-32 overflow-y-auto text-xs"></div>
                 </div>
             </div>
 
-            <!-- BOTTOM OF 3-DOTS MENU: UNIVERSAL ADS & PREMIUM -->
+            <!-- BOTTOM 2 BUTTONS: ADS & PREMIUM -->
             <div class="pt-4 border-t border-white/10 space-y-3">
-                
-                <!-- BUTTON 1: UNIVERSAL ADS (Upgraded by design-pro.js to support all networks) -->
                 <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
                     <button onclick="toggleSection('adsPanel')" class="w-full py-2 px-3 rounded-xl accent-bg text-white font-bold text-xs flex items-center justify-between">
-                        <span><i class="fa-solid fa-rectangle-ad mr-1.5"></i> 1. Universal Ads Manager (All Networks)</span>
+                        <span><i class="fa-solid fa-rectangle-ad mr-1.5"></i> 1. Universal Ads Manager</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </button>
-                    <div id="adsPanel" class="mt-3 space-y-2.5"></div>
+                    <div id="adsPanel" class="mt-3 space-y-2.5">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="https://beta.publishers.adsterra.com/websites" target="_blank" class="py-2 px-2 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-300 text-xs font-semibold text-center">Adsterra Codes</a>
+                            <a href="https://cloud.unity.com/" target="_blank" class="py-2 px-2 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold text-center">Unity Ads</a>
+                        </div>
+                        <textarea id="adsCodeInput" rows="2" oninput="autoSaveConfig()" placeholder="Paste any Ad script or banner code here..." class="w-full bg-black/50 border border-white/15 rounded-xl p-2 text-xs text-gray-200 focus:outline-none"></textarea>
+                        <button onclick="applyAdsToWebsite()" class="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">Inject Ads into Website</button>
+                    </div>
                 </div>
 
-                <!-- BUTTON 2: PREMIUM MONETIZATION SETUP -->
                 <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
                     <button onclick="toggleSection('premiumPanel')" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-bold text-xs flex items-center justify-between">
                         <span><i class="fa-solid fa-crown mr-1.5"></i> 2. Setup Premium & Payment</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </button>
-
                     <div id="premiumPanel" class="hidden mt-3 space-y-2 text-xs">
-                        <input id="premMethod" type="text" oninput="autoSaveConfig()" placeholder="Payment Method (e.g. Keycard, Wallet, PayPal)" 
-                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="premApp" type="text" oninput="autoSaveConfig()" placeholder="On which App? (e.g. QiCard, FIB, FastPay, ZainCash)" 
-                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="premAccount" type="text" oninput="autoSaveConfig()" placeholder="Account Number / Wallet Link / Phone" 
-                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="premPrice" type="text" oninput="autoSaveConfig()" placeholder="Subscription Price (e.g. $9.99 or 10,000 IQD)" 
-                            class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="premMethod" type="text" oninput="autoSaveConfig()" placeholder="Payment Method (e.g. Card, Wallet, PayPal)" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="premApp" type="text" oninput="autoSaveConfig()" placeholder="App Name (e.g. QiCard, FIB, FastPay)" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="premAccount" type="text" oninput="autoSaveConfig()" placeholder="Account Number / Phone" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="premPrice" type="text" oninput="autoSaveConfig()" placeholder="Price (e.g. $9.99)" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-white">
                         <select id="premPlacement" onchange="autoSaveConfig()" class="w-full bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-gray-200">
-                            <option value="header">Place Premium Button in Top Header</option>
-                            <option value="modal">Place as Full VIP Paywall Popup</option>
-                            <option value="pricing">Place as Dedicated Pricing Section</option>
+                            <option value="header">Top Header Bar</option>
+                            <option value="modal">VIP Popup Modal</option>
                         </select>
-                        <button onclick="applyPremiumToWebsite()" class="w-full py-1.5 rounded-lg bg-amber-500 text-black font-bold">
-                            Add Premium Checkout to Website
-                        </button>
+                        <button onclick="applyPremiumToWebsite()" class="w-full py-1.5 rounded-lg bg-amber-500 text-black font-bold">Add Premium to Website</button>
                     </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-2 px-1">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-xs">ZW</div>
-                        <div>
-                            <p class="text-xs font-bold leading-none">ZoneWeb Studio</p>
-                            <span id="drawerModelLabel" class="text-[10px] text-emerald-400 font-semibold">🛡️ SELF-HEALING ACTIVE</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
                 </div>
             </div>
         </div>
@@ -458,7 +412,7 @@
                     <i class="fa-regular fa-copy mr-1"></i> Copy Link
                 </button>
                 <button onclick="downloadGeneratedSite()" class="px-3 py-1.5 rounded-lg accent-bg text-white text-xs font-semibold">
-                    <i class="fa-solid fa-download mr-1"></i> HTML
+                    <i class="fa-solid fa-download mr-1"></i> Download HTML
                 </button>
                 <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
@@ -470,7 +424,7 @@
         </div>
     </div>
 
-    <!-- CORE ENGINE SCRIPT -->
+    <!-- CORE REAL AI APPLICATION LOGIC -->
     <script>
         function sanitizeApiKey(raw) {
             if (!raw) return '';
@@ -479,12 +433,7 @@
 
         function escapeHtml(unsafe) {
             if (!unsafe) return '';
-            return String(unsafe)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         function safeSetStorage(key, val) {
@@ -504,7 +453,7 @@
             projects: JSON.parse(localStorage.getItem('zw_projects') || '[]'),
             currentSiteName: localStorage.getItem('zw_current_site_name') || '',
             currentSiteHtml: localStorage.getItem('zw_current_site_html') || '',
-            hasAskedInitialQuestions: false
+            discoveredGeminiModels: []
         };
 
         let attachedImageBase64 = null;
@@ -538,6 +487,10 @@
             if (checkPublicSiteRoute()) return;
             applySavedPreferences();
 
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+
             setTimeout(() => {
                 const bar = document.getElementById('splashProgress');
                 if (bar) bar.style.width = '100%';
@@ -565,6 +518,9 @@
             const brainSelect = document.getElementById('drawerAiBrain');
             if (brainSelect) brainSelect.value = window.state.aiBrain || 'auto';
 
+            const adsInp = document.getElementById('adsCodeInput');
+            if (adsInp) adsInp.value = window.state.adsCode;
+
             document.getElementById('premMethod').value = window.state.premium.method || '';
             document.getElementById('premApp').value = window.state.premium.app || '';
             document.getElementById('premAccount').value = window.state.premium.account || '';
@@ -590,30 +546,6 @@
             }
         }
 
-        function handleLiveIntentRecognition(val) {
-            const bar = document.getElementById('intentRecognizerBar');
-            const txt = document.getElementById('intentDetectedText');
-            if (!val || val.trim().length < 2 || typeof window.classifyUserIntent !== 'function') {
-                bar.classList.add('hidden');
-                return;
-            }
-            const intent = window.classifyUserIntent(val);
-            bar.classList.remove('hidden');
-            txt.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Recognized: <b>${intent.label}</b>`;
-        }
-
-        function quickStartCategory(promptText) {
-            const input = document.getElementById('chatInput');
-            input.value = promptText;
-            sendUserMessage();
-        }
-
-        function quickEditPrompt(text) {
-            const input = document.getElementById('chatInput');
-            input.value = text;
-            sendUserMessage();
-        }
-
         function handleChatKeydown(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -629,6 +561,11 @@
                 btn.classList.add('border-gray-700');
             });
             document.getElementById('prov-' + prov)?.classList.add('accent-bg', 'text-white', 'accent-border');
+
+            const getBtn = document.getElementById('getApiKeyBtn');
+            if (prov === 'gemini') getBtn.href = 'https://aistudio.google.com/app/apikey';
+            if (prov === 'openai') getBtn.href = 'https://platform.openai.com/api-keys';
+            if (prov === 'claude') getBtn.href = 'https://console.anthropic.com/settings/keys';
         }
 
         function detectActualKeyType(rawKey) {
@@ -638,14 +575,20 @@
             if (k.startsWith('sk-or-')) return 'openrouter';
             if (k.startsWith('gsk_')) return 'groq';
             if (k.startsWith('sk-')) return 'openai';
-            return 'gemini';
+            return window.state.provider || 'gemini';
         }
 
         function saveApiKeyAndContinue() {
             const key = sanitizeApiKey(document.getElementById('apiKeyInput').value);
-            if (key.length < 5) return;
+            if (key.length < 6) {
+                const err = document.getElementById('apiErrorMsg');
+                err.innerText = "Please enter a valid API key.";
+                err.classList.remove('hidden');
+                return;
+            }
             window.state.provider = detectActualKeyType(key);
             window.state.apiKey = key;
+            window.state.discoveredGeminiModels = [];
             safeSetStorage('zw_api_key', key);
             safeSetStorage('zw_provider', window.state.provider);
             document.getElementById('screen2').classList.add('hidden');
@@ -655,6 +598,7 @@
         function launchScreen3() {
             document.getElementById('screen3').classList.remove('hidden');
             document.getElementById('drawerApiKey').value = window.state.apiKey;
+            document.getElementById('activeProviderBadge').innerText = window.state.provider.toUpperCase();
             updateKeepEditingBar();
         }
 
@@ -675,15 +619,15 @@
             if (newKey) {
                 window.state.apiKey = newKey;
                 window.state.provider = detectActualKeyType(newKey);
+                window.state.discoveredGeminiModels = [];
                 safeSetStorage('zw_api_key', newKey);
                 safeSetStorage('zw_provider', window.state.provider);
+                document.getElementById('activeProviderBadge').innerText = window.state.provider.toUpperCase();
             }
             const badge = document.getElementById('saveConfirmBadge');
             badge.classList.remove('hidden');
             setTimeout(() => badge.classList.add('hidden'), 2000);
         }
-
-        function handleChatFocus() {}
 
         function handleImageUpload(e) {
             const file = e.target.files[0];
@@ -713,7 +657,7 @@
                 currentAbortController = null;
             }
             setGeneratingUIState(false);
-            appendMessage('ai', "⏹️ **Stopped.** Ready for your next command.");
+            appendMessage('ai', "⏹️ **Generation stopped.** Ready for your next instruction.");
         }
 
         function setGeneratingUIState(isGenerating, label = '') {
@@ -724,25 +668,347 @@
             if (label) document.getElementById('bgStatusTitle').innerText = label;
         }
 
-        // ---UNIVERSAL ADS INJECTION (Supports All Ad Networks & Script Tags)---
+        // --- SEND USER MESSAGE & EXECUTE REAL API KEY ---
+        async function sendUserMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text && !attachedImageBase64) return;
+
+            input.value = '';
+            const userImg = attachedImageBase64 ? `data:${attachedImageMime};base64,${attachedImageBase64}` : null;
+            const currentImgBase64 = attachedImageBase64;
+            const currentImgMime = attachedImageMime;
+            clearAttachedImage();
+
+            appendMessage('user', text || "Analyze this image and build a matching website.", userImg);
+
+            // Check if ZenoEngine needs external tokens/info first
+            if (window.ZenoEngine && typeof window.ZenoEngine.analyzePromptRequirements === 'function' && !currentImgBase64) {
+                const reqConfig = window.ZenoEngine.analyzePromptRequirements(text);
+                if (reqConfig) {
+                    window.ZenoEngine.promptUserForRequirements(reqConfig, text, (enrichedPrompt) => {
+                        executeRealApiKeyCall(enrichedPrompt, null, null);
+                    });
+                    return;
+                }
+            }
+
+            await executeRealApiKeyCall(text, currentImgBase64, currentImgMime);
+        }
+
+        async function executeRealApiKeyCall(promptText, imgBase64, imgMime) {
+            const isEditing = window.KeepEditingEngine && typeof window.KeepEditingEngine.isEditingCurrentTabSite === 'function'
+                ? window.KeepEditingEngine.isEditingCurrentTabSite(promptText)
+                : Boolean(window.state.currentSiteHtml && !/\b(new website|new site|start fresh)\b/i.test(promptText));
+
+            currentAbortController = new AbortController();
+            setGeneratingUIState(
+                true,
+                isEditing
+                    ? `⚡ AI is updating "${window.state.currentSiteName}" with your API Key...`
+                    : `⚡ AI is building your custom website with your API Key...`
+            );
+
+            try {
+                const aiResponseText = await callUserApiKeyDirectly(promptText, imgBase64, imgMime, isEditing, currentAbortController.signal);
+                setGeneratingUIState(false);
+                currentAbortController = null;
+
+                const { html: extractedHtml, explanation } = parseHtmlFromAiResponse(aiResponseText);
+
+                if (extractedHtml && extractedHtml.length > 50) {
+                    let healedHtml = window.healWebsiteCode ? window.healWebsiteCode(extractedHtml, promptText) : extractedHtml;
+                    const finalHtml = injectAdsAndPremium(healedHtml);
+                    const siteSlug = isEditing && window.state.currentSiteName
+                        ? window.state.currentSiteName
+                        : deriveSiteSlug(promptText, finalHtml);
+
+                    window.state.currentSiteName = siteSlug;
+                    window.state.currentSiteHtml = finalHtml;
+                    safeSetStorage('zw_current_site_name', siteSlug);
+                    safeSetStorage('zw_current_site_html', finalHtml);
+
+                    saveOrUpdateProjectInHistory(siteSlug, finalHtml, isEditing);
+                    updatePublicLinkUI(siteSlug, finalHtml);
+                    updateKeepEditingBar();
+
+                    const previewModal = document.getElementById('previewModal');
+                    if (!previewModal.classList.contains('hidden')) {
+                        document.getElementById('livePreviewIframe').srcdoc = finalHtml;
+                    }
+
+                    const cleanSummary = explanation ? explanation.slice(0, 350) : `Successfully built **${siteSlug}**!`;
+                    appendMessage('ai', `${cleanSummary}\n\n✅ **Your website is live! Click "Preview Website" below or at the top to view it.**`, null, true);
+                    triggerWebsiteReadyNotification(siteSlug);
+                } else {
+                    appendMessage('ai', explanation || aiResponseText);
+                }
+            } catch (err) {
+                setGeneratingUIState(false);
+                currentAbortController = null;
+                if (err && err.name === 'AbortError') return;
+                appendMessage('ai', `⚠️ **API Error:** ${err.message}\nPlease check your API Key in the top 3-dots menu or verify your internet connection.`);
+            }
+        }
+
+        // --- REAL API KEY ENGINE (Uses the user's actual API key to generate custom code) ---
+        async function callUserApiKeyDirectly(userPrompt, imgBase64, imgMime, isEditing, abortSignal) {
+            const key = sanitizeApiKey(window.state.apiKey);
+            if (!key) {
+                throw new Error("No API Key found. Please enter your API Key in the top 3-dots menu.");
+            }
+
+            const levelGuide = {
+                low: "Complexity Level: LOW. Build a clean, fast, modern responsive single-page website.",
+                medium: "Complexity Level: MEDIUM. Build a complete, rich, multi-section interactive website with Tailwind CSS, FontAwesome icons, and working JavaScript.",
+                high: "Complexity Level: HIGH. Build an advanced, production-grade full web application with interactive modals, working carts/forms/search/filters, animations, and ultra-polished Tailwind UI."
+            }[window.state.aiLevel] || "";
+
+            const editContext = (isEditing && window.state.currentSiteHtml)
+                ? `\n\nKEEP EDITING MODE ACTIVE:
+Here is the current HTML code of the user's website ("${window.state.currentSiteName}"):
+\`\`\`html
+${window.state.currentSiteHtml.slice(0, 18000)}
+\`\`\`
+IMPORTANT: Apply the user's exact requested modification ("${userPrompt}") directly to the existing HTML above. Keep all existing content and features intact unless asked to change them, and return the FULL updated HTML5 document inside a \`\`\`html ... \`\`\` code block.`
+                : `\n\nIMPORTANT: Build the EXACT custom website, business, store, game, or feature requested by the user ("${userPrompt}"). Never refuse a benign website request and never output a generic placeholder—write real, complete, functional HTML, CSS, and JavaScript tailored specifically to their prompt.`;
+
+            const systemPrompt = `You are ZoneWeb AI, an expert autonomous full-stack web developer.
+${levelGuide}
+Rules:
+1. Write 1 short sentence explaining what you built or updated.
+2. Output the COMPLETE, self-contained, working HTML5 document inside a \`\`\`html ... \`\`\` code block using Tailwind CSS (<script src="https://cdn.tailwindcss.com"><\/script>) and FontAwesome.
+3. Always include a descriptive <title> 태그.${editContext}`;
+
+            const actualProvider = detectActualKeyType(key);
+            let forcedModel = null;
+            if (window.state.aiBrain && window.state.aiBrain !== 'auto') {
+                const parts = window.state.aiBrain.split(':');
+                if (parts[0] === actualProvider) forcedModel = parts[1];
+            }
+
+            if (actualProvider === 'gemini') {
+                return await callRealGeminiApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
+            } else if (actualProvider === 'claude') {
+                return await callRealClaudeApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
+            } else {
+                return await callRealOpenAiCompatibleApi(actualProvider, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal);
+            }
+        }
+
+        // 1. REAL GOOGLE GEMINI API (Auto-discovers valid models for the user's key via ListModels)
+        async function callRealGeminiApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            const statusEl = document.getElementById('activeModelStatus');
+            const parts = [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt}` }];
+            if (imgBase64) {
+                parts.push({ inline_data: { mime_type: imgMime, data: imgBase64 } });
+            }
+
+            // Discover models enabled on this specific Gemini key once per session
+            if (!window.state.discoveredGeminiModels || window.state.discoveredGeminiModels.length === 0) {
+                try {
+                    if (statusEl) statusEl.innerText = `Checking available Gemini models for your key...`;
+                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`, { signal: abortSignal });
+                    if (listRes.ok) {
+                        const listData = await listRes.json();
+                        const valid = (listData.models || [])
+                            .filter(m =>
+                                Array.isArray(m.supportedGenerationMethods) &&
+                                m.supportedGenerationMethods.includes('generateContent') &&
+                                m.name.includes('gemini') &&
+                                !m.name.includes('embedding') &&
+                                !m.name.includes('imagen') &&
+                                !m.name.includes('tts')
+                            )
+                            .map(m => m.name.replace(/^models\//, ''));
+
+                        // Prioritize fast & smart flash/pro models
+                        valid.sort((a, b) => {
+                            const score = (n) => (n.includes('2.5-flash') ? 50 : n.includes('2.0-flash') ? 45 : n.includes('2.5-pro') ? 40 : n.includes('1.5-flash') ? 35 : n.includes('pro') ? 25 : 10);
+                            return score(b) - score(a);
+                        });
+                        window.state.discoveredGeminiModels = valid;
+                    }
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                }
+            }
+
+            const modelsToTry = [];
+            if (forcedModel) modelsToTry.push(forcedModel);
+            for (const m of (window.state.discoveredGeminiModels || [])) {
+                if (!modelsToTry.includes(m)) modelsToTry.push(m);
+            }
+            for (const fallback of ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-2.5-pro']) {
+                if (!modelsToTry.includes(fallback)) modelsToTry.push(fallback);
+            }
+
+            let lastErr = 'Failed to connect to Gemini API.';
+            for (const modelName of modelsToTry) {
+                try {
+                    if (statusEl) statusEl.innerText = `⚡ Generating live code with ${modelName}...`;
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(key)}`;
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts }],
+                            generationConfig: { temperature: 0.6, maxOutputTokens: 8192 }
+                        }),
+                        signal: abortSignal
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && data.candidates?.[0]?.content?.parts) {
+                        const outText = data.candidates[0].content.parts.map(p => p.text || '').join('\n').trim();
+                        if (outText) {
+                            document.getElementById('activeProviderBadge').innerText = modelName.toUpperCase();
+                            return outText;
+                        }
+                    }
+
+                    lastErr = data.error?.message || `HTTP ${res.status}`;
+                    if (lastErr.toLowerCase().includes('api key not valid')) {
+                        throw new Error(lastErr);
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError') throw err;
+                    lastErr = err.message;
+                    if (lastErr.toLowerCase().includes('api key not valid')) throw err;
+                }
+            }
+            throw new Error(lastErr);
+        }
+
+        // 2. REAL OPENAI / GROQ / OPENROUTER API
+        async function callRealOpenAiCompatibleApi(prov, key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            const endpoints = {
+                openai: 'https://api.openai.com/v1/chat/completions',
+                groq: 'https://api.groq.com/openai/v1/chat/completions',
+                openrouter: 'https://openrouter.ai/api/v1/chat/completions'
+            };
+            const url = endpoints[prov] || endpoints.openai;
+            const models = forcedModel
+                ? [forcedModel]
+                : (prov === 'groq' ? ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'] : ['gpt-4o-mini', 'gpt-4o']);
+
+            let lastErr = 'API error';
+            for (const model of models) {
+                try {
+                    const userContent = [{ type: 'text', text: userPrompt }];
+                    if (imgBase64) {
+                        userContent.push({ type: 'image_url', image_url: { url: `data:${imgMime};base64,${imgBase64}` } });
+                    }
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${key}`
+                        },
+                        body: JSON.stringify({
+                            model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: imgBase64 ? userContent : userPrompt }
+                            ]
+                        }),
+                        signal: abortSignal
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.choices?.[0]?.message?.content) {
+                        document.getElementById('activeProviderBadge').innerText = model.toUpperCase();
+                        return data.choices[0].message.content;
+                    }
+                    lastErr = data.error?.message || `HTTP ${res.status}`;
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                    lastErr = e.message;
+                }
+            }
+            throw new Error(lastErr);
+        }
+
+        // 3. REAL ANTHROPIC CLAUDE API
+        async function callRealClaudeApi(key, systemPrompt, userPrompt, imgBase64, imgMime, forcedModel, abortSignal) {
+            const models = forcedModel ? [forcedModel] : ['claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'];
+            let lastErr = 'Claude API error';
+            for (const model of models) {
+                try {
+                    const content = [];
+                    if (imgBase64) {
+                        content.push({ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } });
+                    }
+                    content.push({ type: 'text', text: userPrompt });
+
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': key,
+                            'anthropic-version': '2023-06-01',
+                            'anthropic-dangerous-direct-browser-access': 'true'
+                        },
+                        body: JSON.stringify({
+                            model,
+                            max_tokens: 8192,
+                            system: systemPrompt,
+                            messages: [{ role: 'user', content }]
+                        }),
+                        signal: abortSignal
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.content?.[0]?.text) {
+                        document.getElementById('activeProviderBadge').innerText = model.toUpperCase();
+                        return data.content[0].text;
+                    }
+                    lastErr = data.error?.message || `HTTP ${res.status}`;
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                    lastErr = e.message;
+                }
+            }
+            throw new Error(lastErr);
+        }
+
+        function parseHtmlFromAiResponse(raw) {
+            if (!raw) return { html: null, explanation: '' };
+            const match = raw.match(/```(?:html)?\s*(<!DOCTYPE html[\s\S]*?)```/i) || raw.match(/```html\s*([\s\S]*?)```/i);
+            if (match && match[1]) {
+                return { html: match[1].trim(), explanation: raw.replace(match[0], '').trim() };
+            }
+            const openFence = raw.search(/```html/i);
+            if (openFence !== -1) {
+                let code = raw.slice(openFence).replace(/```html/i, '').replace(/```$/g, '').trim();
+                if (!code.toLowerCase().includes('</html>')) code += '\n</body>\n</html>';
+                return { html: code, explanation: raw.slice(0, openFence).trim() };
+            }
+            const docIdx = raw.search(/<!DOCTYPE html|<html/i);
+            if (docIdx !== -1) {
+                return { html: raw.slice(docIdx).replace(/```$/g, '').trim(), explanation: raw.slice(0, docIdx).trim() };
+            }
+            return { html: null, explanation: raw };
+        }
+
+        function deriveSiteSlug(promptText, html) {
+            const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+            if (titleMatch && titleMatch[1]) {
+                const clean = titleMatch[1].split('-')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                if (clean.length > 2) return clean.slice(0, 24);
+            }
+            return (promptText.split(' ').slice(0, 3).join('-').toLowerCase().replace(/[^a-z0-9-]+/g, '') || 'custom-site').slice(0, 24);
+        }
+
         function injectAdsAndPremium(rawHtml) {
             let html = window.healWebsiteCode ? window.healWebsiteCode(rawHtml) : rawHtml;
             const adCode = window.state.adsCode || localStorage.getItem('zw_ads_code') || '';
             const adPos = localStorage.getItem('zw_ads_position') || 'top';
 
             if (adCode.trim() !== '') {
-                const topAdBar = `<div id="zw-universal-ad-top" style="width:100%;text-align:center;padding:8px;background:#090a0f;color:#fff;z-index:9999;border-bottom:1px solid rgba(255,255,255,0.1);">${adCode}</div>`;
-                const bottomAdBar = `<div id="zw-universal-ad-bottom" style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:8px;background:rgba(9,10,15,0.95);color:#fff;z-index:9999;border-top:1px solid rgba(255,255,255,0.1);">${adCode}</div>`;
-
-                if ((adPos === 'head' || adPos === 'both') && html.includes('</head>')) {
-                    html = html.replace('</head>', `${adCode}\n</head>`);
-                }
-                if ((adPos === 'top' || adPos === 'both') && html.includes('<body')) {
-                    html = html.replace(/(<body[^>]*>)/i, `$1\n${topAdBar}`);
-                }
-                if ((adPos === 'bottom' || adPos === 'both') && html.includes('</body>')) {
-                    html = html.replace('</body>', `${bottomAdBar}\n</body>`);
-                }
+                const topAdBar = `<div style="width:100%;text-align:center;padding:8px;background:#090a0f;color:#fff;z-index:9999;">${adCode}</div>`;
+                const bottomAdBar = `<div style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:8px;background:rgba(9,10,15,0.95);color:#fff;z-index:9999;">${adCode}</div>`;
+                if ((adPos === 'head' || adPos === 'both') && html.includes('</head>')) html = html.replace('</head>', `${adCode}\n</head>`);
+                if ((adPos === 'top' || adPos === 'both') && html.includes('<body')) html = html.replace(/(<body[^>]*>)/i, `$1\n${topAdBar}`);
+                if ((adPos === 'bottom' || adPos === 'both') && html.includes('</body>')) html = html.replace('</body>', `${bottomAdBar}\n</body>`);
             }
 
             if (window.state.premium && (window.state.premium.app || window.state.premium.account)) {
@@ -759,9 +1025,9 @@
                 window.state.currentSiteHtml = injectAdsAndPremium(window.state.currentSiteHtml);
                 safeSetStorage('zw_current_site_html', window.state.currentSiteHtml);
                 updatePublicLinkUI(window.state.currentSiteName || 'my-site', window.state.currentSiteHtml);
-                alert("✅ Universal Ads injected into your website!");
+                alert("✅ Ads injected into your website!");
             } else {
-                alert("✅ Ads saved! They will be automatically injected into your next website.");
+                alert("✅ Ads saved! They will be added when your website is generated.");
             }
         }
 
@@ -772,75 +1038,9 @@
                 safeSetStorage('zw_current_site_html', window.state.currentSiteHtml);
                 updatePublicLinkUI(window.state.currentSiteName || 'my-site', window.state.currentSiteHtml);
                 alert("✅ Premium checkout added to your website!");
+            } else {
+                alert("✅ Premium settings saved!");
             }
-        }
-
-        // --- MAIN SEND & SELF-HEALING GENERATION ---
-        async function sendUserMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if (!text && !attachedImageBase64) return;
-
-            input.value = '';
-            document.getElementById('intentRecognizerBar').classList.add('hidden');
-            clearAttachedImage();
-
-            const intent = typeof window.classifyUserIntent === 'function'
-                ? window.classifyUserIntent(text)
-                : { type: 'custom', label: 'Custom Website', isNewSite: !window.state.currentSiteHtml };
-
-            const isEditing = Boolean(window.state.currentSiteHtml && !intent.isNewSite);
-            appendMessage('user', text);
-
-            setGeneratingUIState(true, `⚡ ${intent.label}...`);
-
-            setTimeout(() => {
-                try {
-                    let finalHtml = '';
-                    if (isEditing && typeof window.applySmartInstantEdit === 'function') {
-                        finalHtml = window.applySmartInstantEdit(window.state.currentSiteHtml, text);
-                    } else {
-                        const rawBuilt = compileSmartWebsiteByIntent(text, intent);
-                        finalHtml = window.healWebsiteCode ? window.healWebsiteCode(rawBuilt, text) : rawBuilt;
-                    }
-
-                    finalHtml = injectAdsAndPremium(finalHtml);
-                    const siteSlug = isEditing && window.state.currentSiteName
-                        ? window.state.currentSiteName
-                        : (intent.type + '-pro');
-
-                    window.state.currentSiteName = siteSlug;
-                    window.state.currentSiteHtml = finalHtml;
-                    safeSetStorage('zw_current_site_name', siteSlug);
-                    safeSetStorage('zw_current_site_html', finalHtml);
-
-                    saveOrUpdateProjectInHistory(siteSlug, finalHtml, isEditing);
-                    updatePublicLinkUI(siteSlug, finalHtml);
-                    updateKeepEditingBar();
-                    setGeneratingUIState(false);
-
-                    appendMessage('ai', `🎯 **${intent.label}** is ready!\n✅ Click **Preview Website** below or use the **Templates** button at the top to add more custom buttons & screens!`, null, true);
-                } catch (err) {
-                    setGeneratingUIState(false);
-                }
-            }, 600);
-        }
-
-        function compileSmartWebsiteByIntent(promptText, intent) {
-            if (intent.type === 'streaming' && window.ZenoEngine?.buildRealMovieAnimeStreamingSite) {
-                return window.ZenoEngine.buildRealMovieAnimeStreamingSite('');
-            }
-            if (intent.type === 'shopping' && window.ZenoEngine?.buildRealShoppingWithOrderWebhook) {
-                return window.ZenoEngine.buildRealShoppingWithOrderWebhook('');
-            }
-
-            // Default rich shopping / custom fallback
-            const p = (promptText || '').toLowerCase();
-            if (intent.type === 'shopping') {
-                return `<!DOCTYPE html><html lang="en" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ZoneShop Store</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head><body class="bg-zinc-950 text-white min-h-screen"><header class="p-5 border-b border-white/10 flex justify-between items-center max-w-6xl mx-auto"><h1 class="text-2xl font-black text-rose-500">ZoneShop</h1><button onclick="alert('Cart Active')" class="px-4 py-2 rounded-xl bg-rose-600 font-bold text-xs">Cart (0)</button></header><main class="max-w-6xl mx-auto p-6 grid sm:grid-cols-2 md:grid-cols-4 gap-5">${['Wireless Headphones|$89', 'Luxury Watch|$149', 'Gaming Keyboard|$79', 'Sport Sneakers|$110'].map(x => { const [n, pr] = x.split('|'); return `<div class="p-4 rounded-2xl bg-zinc-900 border border-white/10"><div class="h-40 rounded-xl bg-rose-500/10 flex items-center justify-center text-4xl mb-3">🛍️</div><h3 class="font-bold text-sm">${n}</h3><p class="text-rose-400 font-extrabold mt-1">${pr}</p><button onclick="alert('Added ${n} to cart!')" class="mt-3 w-full py-2 rounded-xl bg-rose-600 font-bold text-xs">Add to Cart</button></div>`; }).join('')}</main></body></html>`;
-            }
-
-            return `<!DOCTYPE html><html lang="en" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ZoneWeb Custom Site</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head><body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-6 text-center"><h1 class="text-4xl md:text-6xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">${escapeHtml(promptText.slice(0, 40) || 'Welcome')}</h1><p class="text-zinc-400 max-w-md mb-6">Built with ZoneWeb Studio. Keep chatting below or open Templates to customize!</p><div class="flex gap-3"><a href="https://www.tiktok.com/@rabar2008r" target="_blank" class="px-6 py-3 rounded-2xl bg-rose-600 font-bold text-sm">TikTok Profile</a><a href="tel:07516165051" class="px-6 py-3 rounded-2xl bg-emerald-600 font-bold text-sm">Call Direct</a></div></body></html>`;
         }
 
         function updatePublicLinkUI(siteName, html) {
@@ -874,6 +1074,25 @@
             window.open(URL.createObjectURL(blob), '_blank');
         }
 
+        function triggerWebsiteReadyNotification(siteName) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.15;
+                osc.start();
+                setTimeout(() => osc.stop(), 350);
+            } catch (e) {}
+
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("ZoneWeb Builder", { body: "Your website is ready! (" + siteName + ")" });
+            }
+            document.title = "✅ Your website is ready! - ZoneWeb";
+        }
+
         function appendMessage(role, text, imageUrl = null, hasSiteAction = false) {
             document.getElementById('heroPrompt').classList.add('hidden');
             window.state.chatHistory.push({ role, text, imageUrl, hasSiteAction });
@@ -890,17 +1109,15 @@
                 return `
                 <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full">
                     <div class="max-w-[88%] rounded-2xl p-4 ${msg.role === 'user' ? 'accent-bg text-white' : 'card-bg'} shadow-lg overflow-hidden break-words">
+                        ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="max-h-48 rounded-xl mb-2 border border-white/20">` : ''}
                         <div class="text-sm whitespace-pre-wrap leading-relaxed break-words">${safeText}</div>
                         ${msg.hasSiteAction ? `
                             <div class="mt-3 pt-3 border-t border-gray-500/20 flex flex-wrap gap-2">
-                                <button onclick="openPreviewModal()" class="px-3.5 py-2 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                                <button onclick="openPreviewModal()" class="px-4 py-2 rounded-xl accent-bg text-white text-xs font-bold flex items-center gap-1.5 shadow">
                                     <i class="fa-solid fa-eye"></i> Preview Website
                                 </button>
-                                <button onclick="window.TemplatesStudio && window.TemplatesStudio.openModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold flex items-center gap-1.5 shadow">
-                                    <i class="fa-solid fa-layer-group"></i> Add Templates / Buttons
-                                </button>
-                                <button onclick="copyPublicLink()" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 shadow">
-                                    <i class="fa-regular fa-copy"></i> Copy Link
+                                <button onclick="copyPublicLink()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                                    <i class="fa-regular fa-copy"></i> Copy Public Link
                                 </button>
                             </div>
                         ` : ''}
@@ -987,6 +1204,7 @@
         }
 
         function startNewWebsiteProject() {
+            if (currentAbortController) stopAiGeneration();
             window.state.chatHistory = [];
             window.state.currentSiteName = '';
             window.state.currentSiteHtml = '';
@@ -1002,7 +1220,7 @@
 
         function openPreviewModal() {
             if (!window.state.currentSiteHtml) {
-                alert("Build a website or select a Template first!");
+                alert("Ask the AI to build a website or use Templates first!");
                 return;
             }
             document.getElementById('previewSiteTitle').innerText = (window.state.currentSiteName || 'Website').toUpperCase();
@@ -1033,7 +1251,7 @@
         }
     </script>
 
-    <!-- LOAD ALL 5 MODULAR SYSTEM FILES -->
+    <!-- MODULAR SCRIPTS -->
     <script src="self-healing.js"></script>
     <script src="templates.js"></script>
     <script src="keep-editing.js"></script>

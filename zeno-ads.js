@@ -1,6 +1,6 @@
 /**
  * ZENO-ADS.JS - Adsterra 320x50 Banner Ad Module
- * Renders the Adsterra banner directly underneath the Public Link bar.
+ * Includes no-referrer-when-downgrade meta tag and renders directly under the Public Link bar.
  */
 (function () {
     const ZenoAds = {
@@ -8,6 +8,8 @@
 
         init() {
             window.ZenoAds = this;
+            this.ensureMainReferrerMeta();
+
             const boot = () => {
                 this.mountAdSlotUnderPublicLink();
                 this.watchScreen3Visibility();
@@ -18,6 +20,18 @@
             } else {
                 boot();
             }
+        },
+
+        // Adds <meta name="referrer" content="no-referrer-when-downgrade" /> to the main page <head>
+        ensureMainReferrerMeta() {
+            if (!document.head) return;
+            let meta = document.querySelector('meta[name="referrer"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = 'referrer';
+                document.head.appendChild(meta);
+            }
+            meta.content = 'no-referrer-when-downgrade';
         },
 
         mountAdSlotUnderPublicLink() {
@@ -34,7 +48,6 @@
             publicBanner.insertAdjacentElement('afterend', adBar);
         },
 
-        // Loads the ad as soon as the main workspace becomes visible so impressions register properly
         watchScreen3Visibility() {
             const screen3 = document.getElementById('screen3');
             if (!screen3) return;
@@ -65,6 +78,7 @@
             iframe.height = '50';
             iframe.scrolling = 'no';
             iframe.frameBorder = '0';
+            iframe.referrerPolicy = 'no-referrer-when-downgrade';
             iframe.style.cssText = 'width:320px; height:50px; max-width:100%; border:0; overflow:hidden; display:block; background:transparent;';
 
             wrap.innerHTML = '';
@@ -74,6 +88,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer-when-downgrade" />
 <style>
   html, body {
     margin: 0;

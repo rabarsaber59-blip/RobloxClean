@@ -1,6 +1,6 @@
 /**
  * ZENO-ADS.JS - Adsterra 320x50 Banner Ad Module
- * Includes no-referrer-when-downgrade meta tag and renders directly under the Public Link bar.
+ * Includes referrer and Monetag verification meta tags.
  */
 (function () {
     const ZenoAds = {
@@ -8,7 +8,7 @@
 
         init() {
             window.ZenoAds = this;
-            this.ensureMainReferrerMeta();
+            this.injectRequiredMetaTags();
 
             const boot = () => {
                 this.mountAdSlotUnderPublicLink();
@@ -22,16 +22,24 @@
             }
         },
 
-        // Adds <meta name="referrer" content="no-referrer-when-downgrade" /> to the main page <head>
-        ensureMainReferrerMeta() {
+        // Adds both referrer and monetag meta tags to <head>
+        injectRequiredMetaTags() {
             if (!document.head) return;
-            let meta = document.querySelector('meta[name="referrer"]');
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.name = 'referrer';
-                document.head.appendChild(meta);
-            }
-            meta.content = 'no-referrer-when-downgrade';
+
+            const tags = [
+                { name: 'referrer', content: 'no-referrer-when-downgrade' },
+                { name: 'monetag', content: '41dc7553f45020928d845d4e715b78e8' }
+            ];
+
+            tags.forEach(t => {
+                let meta = document.querySelector(`meta[name="${t.name}"]`);
+                if (!meta) {
+                    meta = document.createElement('meta');
+                    meta.name = t.name;
+                    document.head.appendChild(meta);
+                }
+                meta.content = t.content;
+            });
         },
 
         mountAdSlotUnderPublicLink() {
@@ -89,6 +97,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="referrer" content="no-referrer-when-downgrade" />
+<meta name="monetag" content="41dc7553f45020928d845d4e715b78e8">
 <style>
   html, body {
     margin: 0;

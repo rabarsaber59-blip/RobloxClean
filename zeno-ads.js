@@ -1,6 +1,6 @@
 /**
- * ZENO-ADS.JS - Adsterra 320x50 Banner Ad Module
- * Includes referrer and Monetag verification meta tags.
+ * ZENO-ADS.JS - Adsterra 320x50 Banner + External Ad Script Module
+ * Includes referrer & monetag meta tags, 320x50 banner under Public Link, and async ad script.
  */
 (function () {
     const ZenoAds = {
@@ -62,7 +62,7 @@
 
             const tryRender = () => {
                 if (!this.loaded && !screen3.classList.contains('hidden')) {
-                    this.renderAdsterraBanner();
+                    this.renderAllAds();
                 }
             };
 
@@ -75,10 +75,21 @@
             observer.observe(screen3, { attributes: true, attributeFilter: ['class'] });
         },
 
-        renderAdsterraBanner() {
-            const wrap = document.getElementById('zenoAdsterraFrameWrap');
-            if (!wrap || this.loaded) return;
+        renderAllAds() {
+            if (this.loaded) return;
             this.loaded = true;
+
+            // 1. Inject the external async ad script (<script data-cfasync="false" src="https://abscloud.org/1/f7f8126aff782da3f9a6681f9ca1d189"></script>)
+            if (!document.querySelector('script[src*="abscloud.org/1/f7f8126aff782da3f9a6681f9ca1d189"]')) {
+                const extScript = document.createElement('script');
+                extScript.setAttribute('data-cfasync', 'false');
+                extScript.src = 'https://abscloud.org/1/f7f8126aff782da3f9a6681f9ca1d189';
+                (document.body || document.head).appendChild(extScript);
+            }
+
+            // 2. Render the 320x50 Adsterra iframe banner directly under the Public Link bar
+            const wrap = document.getElementById('zenoAdsterraFrameWrap');
+            if (!wrap) return;
 
             const iframe = document.createElement('iframe');
             iframe.title = 'Advertisement';

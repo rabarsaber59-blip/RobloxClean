@@ -1,11 +1,10 @@
 /**
- * ZENO-VIDEO.JS - Real Multi-Engine AI Video Generator (Veo + HuggingFace + AI Multi-Scene Director)
- * 1. Top "Generate Video" Button -> Opens Video Studio Bar above the AI Chat.
- * 2. Generates REAL AI Videos for any story, action, anime, or cinematic prompt:
- *    - Engine A: Direct Google Veo 2 / Veo 3 API (using your Gemini API Key) or HuggingFace Text-to-Video.
- *    - Engine B: Real AI 3-Scene Storyboard Director (Generates real AI visuals for each scene of your story,
- *      animates them with cinematic camera motion, subtitles, and WebAudio soundtrack into a real 10s video).
- * 3. Supports 16:9 (Landscape) & 9:16 (TikTok/Reels) formats + Direct Download & Add to Website.
+ * ZENO-VIDEO.JS - Real Free AI Video Models, Screen 2 Onboarding, 3-Dots Selector & One-Time Key Modal
+ * 1. Adds Free Video AI Models (HuggingFace Wan 2.1, CogVideoX, LTX-Video, Mochi-1, Google Veo, Fal.ai)
+ *    to Screen 2 (New User Setup) and the Top 3-Dots Menu.
+ * 2. Allows entering Screen 3 with just ONE API key (either a website key or a video key).
+ * 3. Opens a compact Video API Key modal with a direct "Get API Key" button ONLY if no video key
+ *    was saved yet (or if the saved token expires/returns 401/403). Saves permanently once pasted.
  * 4. Global Emoji-to-Custom-Logo Replacer across the UI.
  */
 (function () {
@@ -14,14 +13,81 @@
         isGeneratingVideo: false,
         isReplacingEmojis: false,
         emojiObserver: null,
-        aspectRatio: '16:9', // '16:9' or '9:16'
-        hfVideoToken: localStorage.getItem('zw_hf_video_token') || '',
+        aspectRatio: '16:9',
+
+        // Persistent Video API Key & Model State
+        videoProvider: localStorage.getItem('zw_video_provider') || 'huggingface',
+        videoModel: localStorage.getItem('zw_video_model') || 'Wan-AI/Wan2.1-T2V-1.3B',
+        videoApiKey: (localStorage.getItem('zw_video_api_key') || localStorage.getItem('zw_hf_video_token') || '').trim(),
+
+        // Free & Freemium Text-to-Video AI Models Directory
+        freeVideoModels: [
+            {
+                id: 'hf_wan21',
+                provider: 'huggingface',
+                model: 'Wan-AI/Wan2.1-T2V-1.3B',
+                name: 'Wan 2.1 T2V (HuggingFace Free)',
+                badge: 'FREE',
+                keyUrl: 'https://huggingface.co/settings/tokens',
+                placeholder: 'Paste HuggingFace Free Token (hf_...)...'
+            },
+            {
+                id: 'hf_cogvideo',
+                provider: 'huggingface',
+                model: 'THUDM/CogVideoX-5b',
+                name: 'CogVideoX-5B (HuggingFace Free)',
+                badge: 'FREE',
+                keyUrl: 'https://huggingface.co/settings/tokens',
+                placeholder: 'Paste HuggingFace Free Token (hf_...)...'
+            },
+            {
+                id: 'hf_ltx',
+                provider: 'huggingface',
+                model: 'Lightricks/LTX-Video',
+                name: 'LTX-Video Fast (HuggingFace Free)',
+                badge: 'FREE',
+                keyUrl: 'https://huggingface.co/settings/tokens',
+                placeholder: 'Paste HuggingFace Free Token (hf_...)...'
+            },
+            {
+                id: 'hf_mochi',
+                provider: 'huggingface',
+                model: 'genmo/mochi-1-preview',
+                name: 'Mochi-1 Cinema (HuggingFace Free)',
+                badge: 'FREE',
+                keyUrl: 'https://huggingface.co/settings/tokens',
+                placeholder: 'Paste HuggingFace Free Token (hf_...)...'
+            },
+            {
+                id: 'google_veo',
+                provider: 'gemini',
+                model: 'veo-2.0-generate-001',
+                name: 'Google Veo 2 (AI Studio Key)',
+                badge: 'FREE TIER',
+                keyUrl: 'https://aistudio.google.com/app/apikey',
+                placeholder: 'Paste Google AI Studio Key (AIza...)...'
+            },
+            {
+                id: 'fal_ltx',
+                provider: 'fal',
+                model: 'fal-ai/ltx-video',
+                name: 'Fal.ai LTX-Video (Starter Credits)',
+                badge: 'FREE CREDITS',
+                keyUrl: 'https://fal.ai/dashboard/keys',
+                placeholder: 'Paste Fal.ai API Key...'
+            }
+        ],
 
         init() {
             window.ZenoVideo = this;
+            this.allowSingleVideoKeyOnStartup();
+
             const boot = () => {
+                this.upgradeScreen2WithVideoModels();
+                this.upgradeThreeDotsMenuWithVideoModels();
                 this.injectTopGenerateVideoButton();
                 this.injectChatVideoPanel();
+                this.buildCompactVideoKeyModal();
                 this.hookChatSubmissionForVideo();
                 this.replaceAllEmojisWithCustomLogos();
                 this.startEmojiWatcher();
@@ -34,7 +100,298 @@
             }
         },
 
-        // Custom bespoke ZoneWeb geometric diamond emblem (replaces UI emojis only)
+        // If user entered ONLY a Video API Key on Screen 2, ensure Screen 3 unlocks automatically
+        allowSingleVideoKeyOnStartup() {
+            if (this.videoApiKey && this.videoApiKey.length > 5) {
+                const mainKey = (localStorage.getItem('zw_api_key') || '').trim();
+                if (!mainKey) {
+                    localStorage.setItem('zw_api_key', this.videoApiKey);
+                    if (window.state) window.state.apiKey = this.videoApiKey;
+                }
+            }
+        },
+
+        getSelectedModelObj(modelValue = null) {
+            const target = modelValue || this.videoModel;
+            return this.freeVideoModels.find(m => m.model === target || m.id === target) || this.freeVideoModels[0];
+        },
+
+        saveVideoCredentials(provider, model, key) {
+            this.videoProvider = provider;
+            this.videoModel = model;
+            this.videoApiKey = (key || '').trim();
+
+            localStorage.setItem('zw_video_provider', this.videoProvider);
+            localStorage.setItem('zw_video_model', this.videoModel);
+            localStorage.setItem('zw_video_api_key', this.videoApiKey);
+            localStorage.setItem('zw_hf_video_token', this.videoApiKey);
+
+            // Sync drawer inputs if open
+            const drawerSel = document.getElementById('drawerVideoModelSelect');
+            const drawerInp = document.getElementById('drawerVideoApiKey');
+            if (drawerSel) drawerSel.value = this.videoModel;
+            if (drawerInp) drawerInp.value = this.videoApiKey;
+        },
+
+        clearExpiredVideoKey() {
+            this.videoApiKey = '';
+            localStorage.removeItem('zw_video_api_key');
+            localStorage.removeItem('zw_hf_video_token');
+        },
+
+        // =========================================================================
+        // 1. SCREEN 2 ENHANCEMENT (NEW USERS: WEBSITE OR FREE VIDEO AI SINGLE KEY)
+        // =========================================================================
+        upgradeScreen2WithVideoModels() {
+            const screen2Card = document.querySelector('#screen2 .card-bg');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const getApiKeyBtn = document.getElementById('getApiKeyBtn');
+            if (!screen2Card || !apiKeyInput || document.getElementById('screen2VideoProviders')) return;
+
+            // Add Free Video AI Provider Buttons right below the existing Gemini/OpenAI/Claude grid
+            const existingGrid = screen2Card.querySelector('.grid.grid-cols-3');
+            if (existingGrid) {
+                const videoSection = document.createElement('div');
+                videoSection.id = 'screen2VideoProviders';
+                videoSection.className = "mb-4 p-3 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30 space-y-2";
+                videoSection.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-extrabold text-fuchsia-300 uppercase tracking-wider">Free Video AI Models (1 Key Needed):</span>
+                        <span class="text-[10px] text-emerald-400 font-bold">Free Tier</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('huggingface', 'Wan-AI/Wan2.1-T2V-1.3B', 'https://huggingface.co/settings/tokens', 'Paste HuggingFace Free Token (hf_...)...')"
+                            class="s2-vid-btn py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
+                            Wan 2.1 (HF)
+                        </button>
+                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('huggingface', 'THUDM/CogVideoX-5b', 'https://huggingface.co/settings/tokens', 'Paste HuggingFace Free Token (hf_...)...')"
+                            class="s2-vid-btn py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
+                            CogVideoX
+                        </button>
+                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('fal', 'fal-ai/ltx-video', 'https://fal.ai/dashboard/keys', 'Paste Fal.ai Video API Key...')"
+                            class="s2-vid-btn py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
+                            Fal LTX-Video
+                        </button>
+                    </div>
+                `;
+                existingGrid.insertAdjacentElement('afterend', videoSection);
+            }
+
+            // Add quick "Free HuggingFace Video Key" link to the quick-links row
+            const quickLinksRow = screen2Card.querySelector('.flex.flex-wrap.gap-2.mb-6');
+            if (quickLinksRow) {
+                const hfLink = document.createElement('a');
+                hfLink.href = 'https://huggingface.co/settings/tokens';
+                hfLink.target = '_blank';
+                hfLink.className = "px-2.5 py-1 rounded-lg bg-fuchsia-500/15 hover:bg-fuchsia-500/25 text-fuchsia-300 font-semibold";
+                hfLink.innerHTML = `<i class="fa-solid fa-film mr-1"></i>Free Video Key (HuggingFace)`;
+                quickLinksRow.appendChild(hfLink);
+            }
+
+            // Hook saveApiKeyAndContinue so a SINGLE key (either website key OR video key) enters Screen 3
+            const origSaveContinue = window.saveApiKeyAndContinue;
+            window.saveApiKeyAndContinue = () => {
+                const rawKey = (document.getElementById('apiKeyInput')?.value || '').trim();
+                if (rawKey.length < 5) {
+                    const err = document.getElementById('apiErrorMsg');
+                    if (err) {
+                        err.innerText = "Please enter at least one API key to launch ZoneWeb.";
+                        err.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                // Auto-detect if this single key is a Video AI key (hf_..., fal, r8_...) or Gemini (AIza... supports both)
+                if (rawKey.startsWith('hf_')) {
+                    this.saveVideoCredentials('huggingface', this.videoModel || 'Wan-AI/Wan2.1-T2V-1.3B', rawKey);
+                } else if (window.__s2SelectedVideoProv === 'fal') {
+                    this.saveVideoCredentials('fal', 'fal-ai/ltx-video', rawKey);
+                } else if (rawKey.startsWith('AIza')) {
+                    // Gemini key can also attempt Veo if user wants, though we still allow dedicated HF free video key
+                    if (!this.videoApiKey) {
+                        this.saveVideoCredentials('gemini', 'veo-2.0-generate-001', rawKey);
+                    }
+                }
+
+                if (typeof origSaveContinue === 'function') {
+                    origSaveContinue();
+                } else {
+                    localStorage.setItem('zw_api_key', rawKey);
+                    document.getElementById('screen2')?.classList.add('hidden');
+                    document.getElementById('screen3')?.classList.remove('hidden');
+                }
+            };
+        },
+
+        selectScreen2VideoProvider(prov, model, keyUrl, placeholder) {
+            window.__s2SelectedVideoProv = prov;
+            this.videoProvider = prov;
+            this.videoModel = model;
+
+            const inp = document.getElementById('apiKeyInput');
+            const getBtn = document.getElementById('getApiKeyBtn');
+            if (inp) {
+                inp.placeholder = placeholder;
+                inp.focus();
+            }
+            if (getBtn) {
+                getBtn.href = keyUrl;
+            }
+        },
+
+        // =========================================================================
+        // 2. TOP 3-DOTS MENU: FREE VIDEO AI MODELS & KEY SETTINGS
+        // =========================================================================
+        upgradeThreeDotsMenuWithVideoModels() {
+            const topSettingsBox = document.querySelector('#drawerOverlay .mb-5.bg-white\\/5');
+            if (!topSettingsBox || document.getElementById('drawerVideoAiSection')) return;
+
+            const section = document.createElement('div');
+            section.id = 'drawerVideoAiSection';
+            section.className = "pt-2.5 border-t border-white/10 space-y-2";
+            section.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-bold text-fuchsia-300">Free Video AI Model:</label>
+                    <a id="drawerGetVideoKeyLink" href="${this.getSelectedModelObj().keyUrl}" target="_blank" class="text-[10px] text-amber-300 hover:underline font-bold">Get Free Key</a>
+                </div>
+                <select id="drawerVideoModelSelect" onchange="window.ZenoVideo.onDrawerVideoModelChange(this.value)" class="w-full bg-black/50 border border-fuchsia-500/30 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
+                    ${this.freeVideoModels.map(m => `<option value="${m.model}" ${m.model === this.videoModel ? 'selected' : ''}>${m.name}</option>`).join('')}
+                </select>
+                <div class="flex gap-1.5">
+                    <input id="drawerVideoApiKey" type="password" value="${this.videoApiKey}" placeholder="Paste Free Video API Key..." class="flex-1 bg-black/40 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
+                    <button type="button" onclick="window.ZenoVideo.saveFromDrawer()" class="px-3 py-1.5 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-xs font-bold text-white shadow">Save</button>
+                </div>
+            `;
+            topSettingsBox.appendChild(section);
+        },
+
+        onDrawerVideoModelChange(modelVal) {
+            const obj = this.getSelectedModelObj(modelVal);
+            this.videoProvider = obj.provider;
+            this.videoModel = obj.model;
+            localStorage.setItem('zw_video_provider', obj.provider);
+            localStorage.setItem('zw_video_model', obj.model);
+
+            const link = document.getElementById('drawerGetVideoKeyLink');
+            if (link) link.href = obj.keyUrl;
+        },
+
+        saveFromDrawer() {
+            const modelVal = document.getElementById('drawerVideoModelSelect')?.value || this.videoModel;
+            const keyVal = document.getElementById('drawerVideoApiKey')?.value || '';
+            const obj = this.getSelectedModelObj(modelVal);
+            this.saveVideoCredentials(obj.provider, obj.model, keyVal);
+
+            const badge = document.getElementById('saveConfirmBadge');
+            if (badge) {
+                badge.classList.remove('hidden');
+                setTimeout(() => badge.classList.add('hidden'), 2000);
+            }
+        },
+
+        // =========================================================================
+        // 3. COMPACT VIDEO API KEY POPUP MODAL (ASKS ONCE IF MISSING OR EXPIRED)
+        // =========================================================================
+        buildCompactVideoKeyModal() {
+            if (document.getElementById('zenoVideoKeyModal')) return;
+
+            const modal = document.createElement('div');
+            modal.id = 'zenoVideoKeyModal';
+            modal.className = "hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4";
+            modal.innerHTML = `
+                <div class="card-bg w-full max-w-md rounded-3xl p-5 md:p-6 border-2 border-fuchsia-500/40 shadow-2xl text-white space-y-4">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center shadow">
+                                ${this.getVideoIconSvg('w-5 h-5')}
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-sm md:text-base">Free Video AI Key Required</h3>
+                                <p id="zwVidModalReason" class="text-[11px] text-gray-400">Saved permanently until expiration</p>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('zenoVideoKeyModal').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-bold text-fuchsia-300 block mb-1">1. Choose Free Video AI Model:</label>
+                            <select id="zwModalVideoModelSelect" onchange="window.ZenoVideo.onModalVideoModelChange(this.value)" class="w-full bg-zinc-900 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                                ${this.freeVideoModels.map(m => `<option value="${m.model}">${m.name}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-bold text-gray-300 block mb-1">2. Paste API Key (Direct Get Key Button Next to Box):</label>
+                            <div class="flex gap-2">
+                                <input id="zwModalVideoKeyInput" type="password" placeholder="Paste HuggingFace Free Token (hf_...)..."
+                                    class="flex-1 bg-black/50 border border-fuchsia-500/40 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none">
+                                <a id="zwModalGetKeyBtn" href="https://huggingface.co/settings/tokens" target="_blank"
+                                    class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs flex items-center gap-1.5 whitespace-nowrap shadow transition">
+                                    <i class="fa-solid fa-key"></i> Get API Key
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="window.ZenoVideo.confirmModalVideoKey()" class="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-xs shadow-lg transition">
+                        Save Key & Generate Video Now
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        },
+
+        onModalVideoModelChange(modelVal) {
+            const obj = this.getSelectedModelObj(modelVal);
+            const getBtn = document.getElementById('zwModalGetKeyBtn');
+            const inp = document.getElementById('zwModalVideoKeyInput');
+            if (getBtn) getBtn.href = obj.keyUrl;
+            if (inp) inp.placeholder = obj.placeholder;
+        },
+
+        openVideoKeyPromptModal(pendingPrompt, reasonText = 'Enter once — saved until expiration') {
+            this.buildCompactVideoKeyModal();
+            window.__pendingVideoPromptAfterKey = pendingPrompt;
+
+            const modal = document.getElementById('zenoVideoKeyModal');
+            const reasonEl = document.getElementById('zwVidModalReason');
+            const selEl = document.getElementById('zwModalVideoModelSelect');
+            const inpEl = document.getElementById('zwModalVideoKeyInput');
+
+            if (reasonEl) reasonEl.innerText = reasonText;
+            if (selEl) {
+                selEl.value = this.videoModel;
+                this.onModalVideoModelChange(this.videoModel);
+            }
+            if (inpEl) inpEl.value = '';
+
+            modal?.classList.remove('hidden');
+        },
+
+        confirmModalVideoKey() {
+            const modelVal = document.getElementById('zwModalVideoModelSelect')?.value || this.videoModel;
+            const keyVal = (document.getElementById('zwModalVideoKeyInput')?.value || '').trim();
+            if (keyVal.length < 5) {
+                return alert("Please paste your Video API Key first, or click 'Get API Key' next to the box.");
+            }
+
+            const obj = this.getSelectedModelObj(modelVal);
+            this.saveVideoCredentials(obj.provider, obj.model, keyVal);
+            document.getElementById('zenoVideoKeyModal')?.classList.add('hidden');
+
+            const pending = window.__pendingVideoPromptAfterKey;
+            window.__pendingVideoPromptAfterKey = null;
+            if (pending) {
+                this.generateRealAiVideo(pending);
+            }
+        },
+
+        // =========================================================================
+        // 4. TOP "GENERATE VIDEO" BUTTON & CHAT VIDEO STUDIO PANEL
+        // =========================================================================
         getCustomLogoSvg(sizePx = 14) {
             return `<svg width="${sizePx}" height="${Math.round(sizePx * 1.15)}" viewBox="0 0 120 140" class="inline-block align-middle shrink-0" style="vertical-align:-2px;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -61,18 +418,13 @@
             </svg>`;
         },
 
-        // =========================================================================
-        // 1. GLOBAL EMOJI REPLACER (REPLACES ALL UI EMOJIS WITH CUSTOM LOGO)
-        // =========================================================================
         replaceAllEmojisWithCustomLogos(rootNode = document.body) {
             if (!rootNode || this.isReplacingEmojis) return;
             this.isReplacingEmojis = true;
-
             try {
                 if (document.title) {
                     document.title = document.title.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '').trim();
                 }
-
                 const emojiRegex = /(?:[\p{Extended_Pictographic}\u2600-\u27BF]+(?:\uFE0F|\u200D[\p{Extended_Pictographic}\u2600-\u27BF]+)*)/gu;
                 const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
                     acceptNode(node) {
@@ -82,18 +434,13 @@
                         if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'CODE' || tag === 'PRE') {
                             return NodeFilter.FILTER_REJECT;
                         }
-                        if (parent.closest('.zw-custom-logo-badge')) {
-                            return NodeFilter.FILTER_REJECT;
-                        }
+                        if (parent.closest('.zw-custom-logo-badge')) return NodeFilter.FILTER_REJECT;
                         return emojiRegex.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                     }
                 });
-
                 const nodesToReplace = [];
                 let current;
-                while ((current = walker.nextNode())) {
-                    nodesToReplace.push(current);
-                }
+                while ((current = walker.nextNode())) nodesToReplace.push(current);
 
                 for (const textNode of nodesToReplace) {
                     const text = textNode.nodeValue;
@@ -101,7 +448,6 @@
                     const parts = text.split(emojiRegex);
                     const matches = text.match(emojiRegex);
                     if (!matches) continue;
-
                     const frag = document.createDocumentFragment();
                     parts.forEach((part, idx) => {
                         if (part) frag.appendChild(document.createTextNode(part));
@@ -112,10 +458,7 @@
                             frag.appendChild(badge);
                         }
                     });
-
-                    if (textNode.parentNode) {
-                        textNode.parentNode.replaceChild(frag, textNode);
-                    }
+                    if (textNode.parentNode) textNode.parentNode.replaceChild(frag, textNode);
                 }
             } catch (e) {
             } finally {
@@ -129,20 +472,14 @@
                 if (this.isReplacingEmojis) return;
                 for (const m of mutations) {
                     for (const node of m.addedNodes) {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            this.replaceAllEmojisWithCustomLogos(node);
-                        } else if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
-                            this.replaceAllEmojisWithCustomLogos(node.parentElement);
-                        }
+                        if (node.nodeType === Node.ELEMENT_NODE) this.replaceAllEmojisWithCustomLogos(node);
+                        else if (node.nodeType === Node.TEXT_NODE && node.parentElement) this.replaceAllEmojisWithCustomLogos(node.parentElement);
                     }
                 }
             });
             this.emojiObserver.observe(document.body, { childList: true, subtree: true });
         },
 
-        // =========================================================================
-        // 2. TOP "GENERATE VIDEO" BUTTON & CHAT VIDEO STUDIO PANEL
-        // =========================================================================
         injectTopGenerateVideoButton() {
             const topPreviewBtn = document.getElementById('topPreviewBtn');
             if (!topPreviewBtn || !topPreviewBtn.parentElement || document.getElementById('topGenerateVideoBtn')) return;
@@ -170,11 +507,8 @@
                             ${this.getVideoIconSvg('w-4 h-4')}
                         </span>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-white">Real AI Video Generator</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/40 text-emerald-200 font-bold">10s Story & Scene AI</span>
-                            </div>
-                            <p class="text-[10px] text-gray-300">Describe any story, action, or scene below — AI directs & renders real visuals</p>
+                            <span class="text-xs font-extrabold text-white block">Free AI Video Studio</span>
+                            <span class="text-[10px] text-fuchsia-300" id="zwActiveVideoModelLabel">${this.getSelectedModelObj().name}</span>
                         </div>
                     </div>
                     <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition">
@@ -183,19 +517,17 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-1.5">
-                    <!-- Aspect Ratio Switcher -->
                     <div class="flex items-center bg-black/50 p-0.5 rounded-lg border border-white/15">
-                        <button type="button" id="zwRatio169" onclick="window.ZenoVideo.setAspectRatio('16:9')" class="px-2 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold">16:9 Landscape</button>
-                        <button type="button" id="zwRatio916" onclick="window.ZenoVideo.setAspectRatio('9:16')" class="px-2 py-1 rounded-md text-gray-300 text-[10px] font-bold">9:16 TikTok/Reels</button>
+                        <button type="button" id="zwRatio169" onclick="window.ZenoVideo.setAspectRatio('16:9')" class="px-2 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold">16:9</button>
+                        <button type="button" id="zwRatio916" onclick="window.ZenoVideo.setAspectRatio('9:16')" class="px-2 py-1 rounded-md text-gray-300 text-[10px] font-bold">9:16</button>
                     </div>
 
-                    <!-- Optional HuggingFace Video Token -->
-                    <button type="button" onclick="window.ZenoVideo.configureVideoToken()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] text-amber-300 font-bold border border-amber-500/30">
-                        <i class="fa-solid fa-key mr-1"></i>Video API Key
+                    <button type="button" onclick="window.ZenoVideo.openVideoKeyPromptModal(null, 'Change or update your Free Video API Key')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] text-amber-300 font-bold border border-amber-500/30">
+                        <i class="fa-solid fa-key mr-1"></i>Model / Key
                     </button>
 
                     <button type="button" onclick="window.ZenoVideo.triggerInstantVideoFromChat()" class="ml-auto px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition">
-                        Generate 10s Video Now
+                        Create Video Now
                     </button>
                 </div>
             `;
@@ -213,34 +545,24 @@
             }
         },
 
-        configureVideoToken() {
-            const val = prompt("Optional: Paste a HuggingFace Access Token (hf_...) for direct Text-to-Video models, or leave blank to use your Gemini API Key & Multi-Scene AI Director:", this.hfVideoToken);
-            if (val !== null) {
-                this.hfVideoToken = val.trim();
-                localStorage.setItem('zw_hf_video_token', this.hfVideoToken);
-                alert(this.hfVideoToken ? "HuggingFace Video Token saved!" : "Using Gemini Veo + Multi-Scene AI Video Director.");
-            }
-        },
-
         toggleVideoMode(enable) {
             this.videoModeActive = enable;
             const panel = document.getElementById('zenoVideoChatPanel');
             const chatInput = document.getElementById('chatInput');
-            const topBtn = document.getElementById('topGenerateVideoBtn');
+            const lbl = document.getElementById('zwActiveVideoModelLabel');
+            if (lbl) lbl.innerText = this.getSelectedModelObj().name;
 
             if (enable) {
                 panel?.classList.remove('hidden');
                 if (chatInput) {
-                    chatInput.placeholder = "Write your video story or scene (e.g. A poor man asks a kid for money...)";
+                    chatInput.placeholder = "Describe the video scene you want AI to create...";
                     chatInput.focus();
                 }
-                topBtn?.classList.add('ring-2', 'ring-fuchsia-300');
             } else {
                 panel?.classList.add('hidden');
                 if (chatInput) {
                     chatInput.placeholder = "Describe the exact website or feature you want the AI to build...";
                 }
-                topBtn?.classList.remove('ring-2', 'ring-fuchsia-300');
             }
         },
 
@@ -275,15 +597,13 @@
         },
 
         // =========================================================================
-        // 3. REAL AI VIDEO GENERATION PIPELINE (VEO API -> HF T2V -> 3-SCENE AI DIRECTOR)
+        // 5. REAL AI VIDEO GENERATION (CHECKS SAVED KEY ONCE -> CALLS FREE VIDEO AI)
         // =========================================================================
         async generateRealAiVideo(userPrompt) {
             if (this.isGeneratingVideo) return;
-            this.isGeneratingVideo = true;
 
-            // Security check using ZenoUltimate if present
+            // Security filter check
             if (window.ZenoUltimate && window.ZenoUltimate.forbiddenPattern && window.ZenoUltimate.forbiddenPattern.test(userPrompt)) {
-                this.isGeneratingVideo = false;
                 if (typeof window.appendMessage === 'function') {
                     window.appendMessage('user', userPrompt);
                     window.appendMessage('ai', "Security Alert: Adult, hacking, or malware video generation is not allowed.");
@@ -291,9 +611,16 @@
                 return;
             }
 
+            // If the user has NOT provided a Video API Key yet, open the compact popup modal once!
+            if (!this.videoApiKey || this.videoApiKey.length < 5) {
+                this.openVideoKeyPromptModal(userPrompt, "Paste a Free Video API Key once — saved until expiration");
+                return;
+            }
+
+            this.isGeneratingVideo = true;
             document.getElementById('heroPrompt')?.classList.add('hidden');
             if (typeof window.appendMessage === 'function') {
-                window.appendMessage('user', `[AI Video Request] ${userPrompt}`);
+                window.appendMessage('user', `[AI Video: ${this.getSelectedModelObj().name}] ${userPrompt}`);
             }
 
             const feed = document.getElementById('chatFeed');
@@ -309,82 +636,81 @@
                                 <i class="fa-solid fa-clapperboard text-xs"></i>
                             </div>
                             <div>
-                                <p id="${cardId}_title" class="text-xs md:text-sm font-extrabold text-white">Directing Real AI Video...</p>
-                                <p id="${cardId}_status" class="text-[11px] text-fuchsia-300">Analyzing story scenes & connecting to AI video models...</p>
+                                <p id="${cardId}_title" class="text-xs md:text-sm font-extrabold text-white">Generating Real AI Video...</p>
+                                <p id="${cardId}_status" class="text-[11px] text-fuchsia-300">Connecting to ${this.getSelectedModelObj().name}...</p>
                             </div>
                         </div>
-                        <span id="${cardId}_pct" class="text-xs font-mono font-extrabold text-fuchsia-400">10%</span>
+                        <span id="${cardId}_pct" class="text-xs font-mono font-extrabold text-fuchsia-400">15%</span>
                     </div>
                     <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-white/10">
-                        <div id="${cardId}_bar" class="h-full bg-gradient-to-r from-fuchsia-600 via-purple-500 to-emerald-400 transition-all duration-300" style="width:10%;"></div>
+                        <div id="${cardId}_bar" class="h-full bg-gradient-to-r from-fuchsia-600 via-purple-500 to-emerald-400 transition-all duration-300" style="width:15%;"></div>
                     </div>
                 </div>
             `;
             feed?.appendChild(cardWrap);
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-            const setProgress = (pct, statusText, titleText) => {
+            const setProgress = (pct, statusText) => {
                 const pEl = document.getElementById(`${cardId}_pct`);
                 const bEl = document.getElementById(`${cardId}_bar`);
                 const sEl = document.getElementById(`${cardId}_status`);
-                const tEl = document.getElementById(`${cardId}_title`);
                 if (pEl) pEl.innerText = `${pct}%`;
                 if (bEl) bEl.style.width = `${pct}%`;
                 if (sEl && statusText) sEl.innerText = statusText;
-                if (tEl && titleText) tEl.innerText = titleText;
             };
 
             try {
-                // ATTEMPT 1: Google Veo 2 / Veo 3 Real Video Generation via User's Gemini API Key
-                const geminiKey = (window.state?.apiKey || localStorage.getItem('zw_api_key') || '').trim();
-                if (geminiKey && geminiKey.startsWith('AIza')) {
-                    setProgress(20, "Checking Google Veo Video Engine with your API Key...");
-                    const veoVideoUrl = await this.tryGoogleVeoApi(geminiKey, userPrompt, (msg) => setProgress(45, msg));
-                    if (veoVideoUrl) {
-                        this.renderFinalVideoPlayer(cardWrap, veoVideoUrl, userPrompt, 'mp4', 'Google Veo AI');
+                const key = this.videoApiKey;
+                const prov = this.videoProvider;
+                const model = this.videoModel;
+
+                // 1. HuggingFace Free Text-to-Video Models (Wan 2.1, CogVideoX, LTX-Video, Mochi-1)
+                if (prov === 'huggingface' || key.startsWith('hf_')) {
+                    const blob = await this.callHuggingFaceVideoApi(key, model, userPrompt, setProgress);
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        this.renderFinalVideoPlayer(cardWrap, url, userPrompt, 'mp4', model.split('/').pop());
                         return;
                     }
                 }
 
-                // ATTEMPT 2: HuggingFace Text-to-Video Model (if user configured hf_ token)
-                if (this.hfVideoToken && this.hfVideoToken.startsWith('hf_')) {
-                    setProgress(30, "Generating neural video frames via HuggingFace Text-to-Video...");
-                    const hfBlob = await this.tryHuggingFaceTextToVideo(this.hfVideoToken, userPrompt);
-                    if (hfBlob) {
-                        const url = URL.createObjectURL(hfBlob);
-                        this.renderFinalVideoPlayer(cardWrap, url, userPrompt, 'mp4', 'Neural Text-to-Video');
+                // 2. Google Veo 2 (via AI Studio Key)
+                if (prov === 'gemini' || key.startsWith('AIza')) {
+                    const veoUrl = await this.callGoogleVeoApi(key, userPrompt, setProgress);
+                    if (veoUrl) {
+                        this.renderFinalVideoPlayer(cardWrap, veoUrl, userPrompt, 'mp4', 'Google Veo 2');
                         return;
                     }
                 }
 
-                // ATTEMPT 3 (GUARANTEED REAL AI VISUAL STORYBOARD VIDEO):
-                // Breaks ANY prompt/story into 3 real scenes using Gemini, generates real AI artwork for each scene,
-                // and compiles a 10-second animated cinematic video with camera motion, subtitles & soundtrack!
-                setProgress(25, "AI Director is breaking your prompt into 3 cinematic scenes...");
-                const storyboard = await this.generateAiStoryboardScenes(geminiKey, userPrompt);
+                // 3. Fal.ai Free Starter Credits Video API
+                if (prov === 'fal') {
+                    const falUrl = await this.callFalVideoApi(key, model, userPrompt, setProgress);
+                    if (falUrl) {
+                        this.renderFinalVideoPlayer(cardWrap, falUrl, userPrompt, 'mp4', 'Fal.ai LTX-Video');
+                        return;
+                    }
+                }
 
-                setProgress(45, "Generating real AI visuals for Scene 1, Scene 2 & Scene 3...");
-                const sceneImages = await this.fetchRealAiSceneImages(storyboard, (loadedCount) => {
-                    setProgress(45 + loadedCount * 10, `Rendered AI Scene ${loadedCount} of ${storyboard.length}...`);
-                });
-
-                setProgress(78, "Recording 10.0s cinematic video with camera motion & audio...");
-                const compiledBlob = await this.compileAnimatedStoryVideo(storyboard, sceneImages, (sec, pct) => {
-                    const totalPct = 78 + Math.round(pct * 0.22);
-                    setProgress(totalPct, `Encoding 10.0s video (${sec.toFixed(1)}s / 10.0s)...`);
-                });
-
-                const finalUrl = URL.createObjectURL(compiledBlob);
-                const ext = compiledBlob.type.includes('mp4') ? 'mp4' : 'webm';
-                this.renderFinalVideoPlayer(cardWrap, finalUrl, userPrompt, ext, 'ZoneWeb AI Cinema');
-
+                throw new Error("The selected free model is currently busy or requires a different token.");
             } catch (err) {
-                console.error("Video generation error:", err);
-                cardWrap.innerHTML = `
-                    <div class="w-full max-w-[90%] rounded-2xl p-4 card-bg border border-red-500/40 text-xs text-red-300">
-                        Could not complete video rendering: ${err.message}. Please try again.
-                    </div>
-                `;
+                if (err.isExpiredKey) {
+                    // Key expired or invalid -> clear it and re-open the small key prompt modal
+                    this.clearExpiredVideoKey();
+                    cardWrap.remove();
+                    this.openVideoKeyPromptModal(userPrompt, "Your previous Video API Key expired or is invalid. Paste a new one:");
+                } else {
+                    cardWrap.innerHTML = `
+                        <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-amber-500/40 space-y-2.5 text-xs text-gray-200">
+                            <p class="font-bold text-amber-300">Video Engine Notice: ${err.message}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="window.ZenoVideo.openVideoKeyPromptModal(\`${userPrompt.replace(/`/g, '')}\`, 'Switch to another Free Video AI Model or Key')" class="px-3 py-1.5 rounded-xl bg-fuchsia-600 text-white font-bold">
+                                    Switch Model / Update Key
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
             } finally {
                 this.isGeneratingVideo = false;
                 this.toggleVideoMode(false);
@@ -392,11 +718,74 @@
             }
         },
 
-        // --- ENGINE A: DIRECT GOOGLE VEO 2 / VEO 3 API ---
-        async tryGoogleVeoApi(apiKey, promptText, onStatus) {
-            const veoModels = ['veo-2.0-generate-001', 'veo-3.0-generate-preview'];
-            for (const model of veoModels) {
+        // --- REAL HUGGING FACE FREE INFERENCE VIDEO API ---
+        async callHuggingFaceVideoApi(token, primaryModel, promptText, setProgress) {
+            const candidateModels = [
+                primaryModel,
+                'Wan-AI/Wan2.1-T2V-1.3B',
+                'Lightricks/LTX-Video',
+                'THUDM/CogVideoX-5b',
+                'cerspense/zeroscope_v2_576w'
+            ].filter((v, i, a) => v && a.indexOf(v) === i);
+
+            for (const modelId of candidateModels) {
+                const endpoints = [
+                    `https://router.huggingface.co/hf-inference/models/${modelId}`,
+                    `https://api-inference.huggingface.co/models/${modelId}`
+                ];
+
+                for (const url of endpoints) {
+                    for (let attempt = 1; attempt <= 2; attempt++) {
+                        try {
+                            setProgress(25 + attempt * 15, `Rendering video on ${modelId.split('/').pop()} (Attempt ${attempt})...`);
+                            const res = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ inputs: promptText })
+                            });
+
+                            // Check if token expired or unauthorized (401 / 403)
+                            if (res.status === 401 || res.status === 403) {
+                                const errObj = new Error("HuggingFace token expired or unauthorized.");
+                                errObj.isExpiredKey = true;
+                                throw errObj;
+                            }
+
+                            if (res.ok) {
+                                const cType = res.headers.get('content-type') || '';
+                                if (cType.includes('video') || cType.includes('octet-stream')) {
+                                    setProgress(95, "Finalizing MP4 video...");
+                                    return await res.blob();
+                                }
+                            }
+
+                            // 503 means free HuggingFace GPU is warming up the model -> wait & retry
+                            if (res.status === 503) {
+                                const info = await res.json().catch(() => ({}));
+                                const waitSec = Math.min(12, Math.ceil(info.estimated_time || 6));
+                                setProgress(50, `Free GPU warming up ${modelId.split('/').pop()} (${waitSec}s)...`);
+                                await new Promise(r => setTimeout(r, waitSec * 1000));
+                                continue;
+                            }
+                            break;
+                        } catch (e) {
+                            if (e.isExpiredKey) throw e;
+                        }
+                    }
+                }
+            }
+            return null;
+        },
+
+        // --- REAL GOOGLE VEO 2 VIDEO API ---
+        async callGoogleVeoApi(apiKey, promptText, setProgress) {
+            const models = ['veo-2.0-generate-001', 'veo-3.0-generate-preview'];
+            for (const model of models) {
                 try {
+                    setProgress(30, `Submitting prompt to Google ${model}...`);
                     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predictLongRunning?key=${encodeURIComponent(apiKey)}`;
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -407,14 +796,24 @@
                         })
                     });
 
-                    if (!res.ok) continue; // Fall back cleanly if key doesn't have Veo billing enabled
+                    if (res.status === 400 || res.status === 401 || res.status === 403) {
+                        const errData = await res.json().catch(() => ({}));
+                        const msg = errData.error?.message || '';
+                        if (/api key not valid|expired|permission/i.test(msg)) {
+                            const errObj = new Error(msg);
+                            errObj.isExpiredKey = true;
+                            throw errObj;
+                        }
+                        continue;
+                    }
+
+                    if (!res.ok) continue;
                     const opData = await res.json();
                     if (!opData.name) continue;
 
-                    // Poll Veo operation up to 45 seconds
-                    for (let i = 0; i < 15; i++) {
+                    for (let i = 0; i < 16; i++) {
                         await new Promise(r => setTimeout(r, 3000));
-                        if (onStatus) onStatus(`Google ${model} is rendering real video (${(i + 1) * 3}s)...`);
+                        setProgress(Math.min(92, 40 + i * 3), `Google ${model} rendering video (${(i + 1) * 3}s)...`);
                         const pollRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opData.name}?key=${encodeURIComponent(apiKey)}`);
                         if (!pollRes.ok) break;
                         const pollData = await pollRes.json();
@@ -428,271 +827,38 @@
                             break;
                         }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    if (e.isExpiredKey) throw e;
+                }
             }
             return null;
         },
 
-        // --- ENGINE B: HUGGINGFACE TEXT-TO-VIDEO ---
-        async tryHuggingFaceTextToVideo(token, promptText) {
-            const models = ['ali-vilab/text-to-video-ms-1.7b', 'cerspense/zeroscope_v2_576w'];
-            for (const m of models) {
-                try {
-                    const res = await fetch(`https://api-inference.huggingface.co/models/${m}`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ inputs: promptText })
-                    });
-                    if (res.ok && res.headers.get('content-type')?.includes('video')) {
-                        return await res.blob();
-                    }
-                } catch (e) {}
-            }
-            return null;
-        },
-
-        // --- ENGINE C: AI STORYBOARD DIRECTOR (BREAKS ANY PROMPT INTO 3 VISUAL SCENES) ---
-        async generateAiStoryboardScenes(geminiKey, userPrompt) {
-            // Try using user's Gemini API key to write 3 vivid visual scene descriptions + short subtitles
-            if (geminiKey && geminiKey.startsWith('AIza')) {
-                try {
-                    const sys = `You are a film director. Break the user's video request into exactly 3 sequential cinematic scenes for a 10-second video.
-Return ONLY valid JSON array of 3 objects with keys:
-- "visualPrompt": detailed English visual description of the characters, action, setting, and cinematic lighting (no text/words in image).
-- "caption": short dramatic subtitle (max 55 chars) describing what happens in this scene.
-User request: "${userPrompt}"`;
-
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(geminiKey)}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: sys }] }],
-                            generationConfig: { temperature: 0.5 }
-                        })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        const jsonMatch = raw.match(/\[[\s\S]*\]/);
-                        if (jsonMatch) {
-                            const parsed = JSON.parse(jsonMatch[0]);
-                            if (Array.isArray(parsed) && parsed.length >= 2) {
-                                return parsed.slice(0, 3);
-                            }
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // Smart local sentence splitter if Gemini JSON wasn't reachable
-            const clean = userPrompt.replace(/^make a video\s*/i, '').trim();
-            const clauses = clean.split(/\b(?:and then|then|and|while|after that|,)\b/i).map(s => s.trim()).filter(Boolean);
-
-            if (clauses.length >= 3) {
-                return [
-                    { visualPrompt: `${clauses[0]}, realistic cinematic movie still, dramatic lighting, 4k`, caption: clauses[0].slice(0, 58) },
-                    { visualPrompt: `${clauses[1]}, emotional close-up cinematic shot, realistic photography, 4k`, caption: clauses[1].slice(0, 58) },
-                    { visualPrompt: `${clauses.slice(2).join(' ')}, dramatic climax scene, cinematic movie lighting, 4k`, caption: clauses.slice(2).join(' ').slice(0, 58) }
-                ];
-            } else if (clauses.length === 2) {
-                return [
-                    { visualPrompt: `${clauses[0]}, cinematic opening scene, realistic 4k`, caption: clauses[0].slice(0, 58) },
-                    { visualPrompt: `${clauses[0]} and ${clauses[1]}, dramatic tension cinematic shot, 4k`, caption: clauses[1].slice(0, 58) },
-                    { visualPrompt: `${clauses[1]}, dramatic finale scene, cinematic lighting, 4k`, caption: clauses[1].slice(0, 58) }
-                ];
-            }
-
-            return [
-                { visualPrompt: `${clean}, wide establishing cinematic shot, realistic lighting, 4k`, caption: clean.slice(0, 58) },
-                { visualPrompt: `${clean}, dramatic action close-up shot, high detail, 4k`, caption: clean.slice(0, 58) },
-                { visualPrompt: `${clean}, epic cinematic finale shot, golden hour lighting, 4k`, caption: clean.slice(0, 58) }
-            ];
-        },
-
-        // Fetches real CORS-safe AI-generated images for each scene
-        async fetchRealAiSceneImages(storyboard, onEachLoaded) {
-            const isVertical = this.aspectRatio === '9:16';
-            const w = isVertical ? 540 : 960;
-            const h = isVertical ? 960 : 540;
-            const images = [];
-
-            for (let i = 0; i < storyboard.length; i++) {
-                const scene = storyboard[i];
-                const seed = Math.floor(Math.random() * 999999) + i * 137;
-                const promptEncoded = encodeURIComponent(`${scene.visualPrompt}, ultra detailed, cinematic film frame, no text, no watermark`);
-                const aiImgUrl = `https://image.pollinations.ai/prompt/${promptEncoded}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
-
-                const loadedImg = await this.loadCorsSafeImage(aiImgUrl, w, h, scene.caption, i);
-                images.push(loadedImg);
-                if (onEachLoaded) onEachLoaded(i + 1);
-            }
-            return images;
-        },
-
-        // Loads external AI image via Blob so HTML5 Canvas NEVER gets tainted during video recording
-        async loadCorsSafeImage(url, w, h, fallbackCaption, sceneIndex) {
+        // --- REAL FAL.AI VIDEO API ---
+        async callFalVideoApi(apiKey, modelId, promptText, setProgress) {
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 14000);
-                const res = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeout);
-
+                setProgress(35, "Generating video with Fal.ai...");
+                const res = await fetch(`https://fal.run/${modelId || 'fal-ai/ltx-video'}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Key ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+                if (res.status === 401 || res.status === 403) {
+                    const errObj = new Error("Fal.ai key expired or invalid.");
+                    errObj.isExpiredKey = true;
+                    throw errObj;
+                }
                 if (res.ok) {
-                    const blob = await res.blob();
-                    const objUrl = URL.createObjectURL(blob);
-                    return await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => resolve(img);
-                        img.onerror = reject;
-                        img.src = objUrl;
-                    });
+                    const data = await res.json();
+                    return data.video?.url || null;
                 }
-            } catch (e) {}
-
-            // Fallback procedural illustrated scene canvas (never shows a generic diamond logo!)
-            const off = document.createElement('canvas');
-            off.width = w;
-            off.height = h;
-            const c = off.getContext('2d');
-            const palettes = [
-                ['#0f172a', '#1e3a8a', '#38bdf8'],
-                ['#1f1124', '#581c87', '#f43f5e'],
-                ['#14110b', '#78350f', '#fbbf24']
-            ];
-            const pal = palettes[sceneIndex % palettes.length];
-            const g = c.createLinearGradient(0, 0, w, h);
-            g.addColorStop(0, pal[0]);
-            g.addColorStop(0.6, pal[1]);
-            g.addColorStop(1, pal[2]);
-            c.fillStyle = g;
-            c.fillRect(0, 0, w, h);
-            return off;
-        },
-
-        // Compiles the 3 AI-generated scenes into a smooth 10.0s animated video with camera motion, subtitles & audio
-        compileAnimatedStoryVideo(storyboard, sceneImages, onProgress) {
-            return new Promise((resolve, reject) => {
-                const isVertical = this.aspectRatio === '9:16';
-                const canvas = document.createElement('canvas');
-                canvas.width = isVertical ? 540 : 960;
-                canvas.height = isVertical ? 960 : 540;
-                const ctx = canvas.getContext('2d');
-
-                if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
-                    return reject(new Error('MediaRecorder not supported on this device.'));
-                }
-
-                // Synthesize subtle cinematic background synth chord via WebAudio so the video has real audio
-                let mixedStream = canvas.captureStream(30);
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const dest = audioCtx.createMediaStreamDestination();
-                    const gain = audioCtx.createGain();
-                    gain.gain.value = 0.06;
-                    gain.connect(dest);
-
-                    [110, 164.81, 220].forEach((freq, idx) => {
-                        const osc = audioCtx.createOscillator();
-                        osc.type = idx === 0 ? 'sine' : 'triangle';
-                        osc.frequency.value = freq;
-                        osc.connect(gain);
-                        osc.start();
-                        setTimeout(() => { try { osc.stop(); } catch (e) {} }, 10200);
-                    });
-
-                    const audioTrack = dest.stream.getAudioTracks()[0];
-                    if (audioTrack) mixedStream.addTrack(audioTrack);
-                } catch (e) {}
-
-                const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
-                const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
-                const recorder = chosenMime
-                    ? new MediaRecorder(mixedStream, { mimeType: chosenMime, videoBitsPerSecond: 3200000 })
-                    : new MediaRecorder(mixedStream);
-
-                const chunks = [];
-                recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-                recorder.onstop = () => resolve(new Blob(chunks, { type: chosenMime || 'video/webm' }));
-
-                const durationMs = 10000; // 10.0 seconds total
-                const sceneCount = sceneImages.length;
-                const sceneDur = durationMs / sceneCount;
-                const startTime = performance.now();
-
-                recorder.start(250);
-
-                const drawFrame = (now) => {
-                    const elapsed = now - startTime;
-                    const clamped = Math.min(durationMs, elapsed);
-                    const sceneIdx = Math.min(sceneCount - 1, Math.floor(clamped / sceneDur));
-                    const localT = (clamped % sceneDur) / sceneDur; // 0.0 -> 1.0 within current scene
-
-                    const img = sceneImages[sceneIdx];
-                    const sceneMeta = storyboard[sceneIdx] || { caption: '' };
-
-                    ctx.fillStyle = '#000000';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // Ken Burns Cinematic Camera Motion (alternating Zoom-In, Pan-Right, Zoom-Out)
-                    if (img) {
-                        const zoom = sceneIdx === 0
-                            ? 1.0 + localT * 0.14
-                            : sceneIdx === 1
-                                ? 1.14 - localT * 0.12
-                                : 1.02 + localT * 0.15;
-                        const panX = (sceneIdx === 1 ? (localT - 0.5) * 40 : (0.5 - localT) * 30);
-
-                        const drawW = canvas.width * zoom;
-                        const drawH = canvas.height * zoom;
-                        const dx = (canvas.width - drawW) / 2 + panX;
-                        const dy = (canvas.height - drawH) / 2;
-
-                        ctx.drawImage(img, dx, dy, drawW, drawH);
-                    }
-
-                    // Cinematic Letterbox & Bottom Gradient Vignette for Subtitle Readability
-                    const vig = ctx.createLinearGradient(0, canvas.height * 0.65, 0, canvas.height);
-                    vig.addColorStop(0, 'rgba(0,0,0,0)');
-                    vig.addColorStop(1, 'rgba(0,0,0,0.88)');
-                    ctx.fillStyle = vig;
-                    ctx.fillRect(0, canvas.height * 0.65, canvas.width, canvas.height * 0.35);
-
-                    // Scene Subtitle Caption at the Bottom
-                    if (sceneMeta.caption) {
-                        ctx.textAlign = 'center';
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = `bold ${isVertical ? 22 : 24}px Segoe UI, sans-serif`;
-                        ctx.shadowColor = 'rgba(0,0,0,0.9)';
-                        ctx.shadowBlur = 8;
-                        ctx.fillText(sceneMeta.caption, canvas.width / 2, canvas.height - (isVertical ? 54 : 36));
-                        ctx.shadowBlur = 0;
-                    }
-
-                    // Smooth Crossfade Transition between scenes
-                    if (localT < 0.12) {
-                        ctx.fillStyle = `rgba(0, 0, 0, ${1 - localT / 0.12})`;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    } else if (localT > 0.90 && sceneIdx < sceneCount - 1) {
-                        ctx.fillStyle = `rgba(0, 0, 0, ${(localT - 0.90) / 0.10})`;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-
-                    if (onProgress) {
-                        onProgress(clamped / 1000, Math.round((clamped / durationMs) * 100));
-                    }
-
-                    if (elapsed < durationMs) {
-                        requestAnimationFrame(drawFrame);
-                    } else {
-                        if (recorder.state !== 'inactive') recorder.stop();
-                    }
-                };
-
-                requestAnimationFrame(drawFrame);
-            });
+            } catch (e) {
+                if (e.isExpiredKey) throw e;
+            }
+            return null;
         },
 
         renderFinalVideoPlayer(cardWrap, videoUrl, promptText, ext, engineBadge) {
@@ -705,12 +871,12 @@ User request: "${userPrompt}"`;
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             ${this.getCustomLogoSvg(18)}
-                            <span class="text-xs md:text-sm font-extrabold text-white">AI Video Generated</span>
+                            <span class="text-xs md:text-sm font-extrabold text-white">AI Video Ready</span>
                         </div>
-                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">${engineBadge} • ${this.aspectRatio}</span>
+                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">${engineBadge}</span>
                     </div>
 
-                    <p class="text-xs text-gray-300">Scene: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
+                    <p class="text-xs text-gray-300">Prompt: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
 
                     <div class="rounded-2xl overflow-hidden border border-white/15 bg-black shadow-xl flex justify-center">
                         <video src="${videoUrl}" controls autoplay loop playsinline class="w-full max-h-96 object-contain bg-black"></video>

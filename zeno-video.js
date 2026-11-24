@@ -1,10 +1,11 @@
 /**
- * ZENO-VIDEO.JS - Real Multi-Engine AI Video & Scene Director
- * 1. Uses your Gemini API Key (Imagen 3 & Gemini Flash Image) + HuggingFace (FLUX.1-schnell)
- *    + Fast Pollinations Turbo to generate REAL AI visuals for every scene of your story.
- * 2. Real-time progress tracking (live timer, scene download progress, and exact 300-frame encoding).
- * 3. Supports 16:9 Landscape & 9:16 TikTok/Reels formats + Mobile Autoplay + Download & Website Embed.
- * 4. Global UI Emoji-to-Custom-Logo Replacer.
+ * ZENO-VIDEO.JS - AI Code-to-Video Render Engine & MP4 Compiler
+ * 1. Top "Generate Video" button activates Video Mode directly above the AI chat bar.
+ * 2. No separate Video API keys — uses the user's connected AI engine to write custom JavaScript
+ *    Canvas animation code tailored specifically to the user's story, characters, and actions.
+ * 3. Sends the generated animation code to the ZoneWeb Render Engine + MP4 Muxer (WebCodecs H.264 MP4
+ *    with automatic MediaRecorder fallback) to compile a real 10-second downloadable .mp4 video.
+ * 4. Preserves the global UI emoji-to-custom-logo replacer.
  */
 (function () {
     const ZenoVideo = {
@@ -13,63 +14,15 @@
         isReplacingEmojis: false,
         emojiObserver: null,
         aspectRatio: '16:9',
-
-        videoProvider: localStorage.getItem('zw_video_provider') || 'auto',
-        videoModel: localStorage.getItem('zw_video_model') || 'auto',
-        videoApiKey: '',
-
-        videoCatalog: [
-            {
-                id: 'auto',
-                provider: 'auto',
-                model: 'auto',
-                name: 'Auto-Detect Any API Key (All Versions)',
-                keyUrl: 'https://aistudio.google.com/app/apikey',
-                placeholder: 'Paste ANY API Key (AIza..., hf_..., r8_..., key:secret)...'
-            },
-            {
-                id: 'google_veo',
-                provider: 'gemini',
-                model: 'veo-auto',
-                name: 'Google Gemini / Veo + Imagen Scene Director (AIza...)',
-                keyUrl: 'https://aistudio.google.com/app/apikey',
-                placeholder: 'Paste Google AI Studio Key (AIza...)...'
-            },
-            {
-                id: 'hf_flux',
-                provider: 'huggingface',
-                model: 'black-forest-labs/FLUX.1-schnell',
-                name: 'HuggingFace FLUX.1 + Video Director (hf_...)',
-                keyUrl: 'https://huggingface.co/settings/tokens',
-                placeholder: 'Paste HuggingFace Token (hf_...)...'
-            },
-            {
-                id: 'fal_all',
-                provider: 'fal',
-                model: 'fal-ai/wan-t2v',
-                name: 'Fal.ai Video (Wan / LTX / Minimax)',
-                keyUrl: 'https://fal.ai/dashboard/keys',
-                placeholder: 'Paste Fal.ai API Key (key:secret)...'
-            }
-        ],
+        mp4MuxerLoaded: false,
 
         init() {
             window.ZenoVideo = this;
-            this.videoApiKey = this.sanitizeKey(
-                localStorage.getItem('zw_video_api_key') ||
-                localStorage.getItem('zw_hf_video_token') ||
-                localStorage.getItem('zw_api_key') ||
-                ''
-            );
-
-            this.allowSingleVideoKeyOnStartup();
+            this.preloadMp4Muxer();
 
             const boot = () => {
-                this.upgradeScreen2WithVideoModels();
-                this.upgradeThreeDotsMenuWithVideoModels();
                 this.injectTopGenerateVideoButton();
                 this.injectChatVideoPanel();
-                this.buildCompactVideoKeyModal();
                 this.hookChatSubmissionForVideo();
                 this.replaceAllEmojisWithCustomLogos();
                 this.startEmojiWatcher();
@@ -82,284 +35,16 @@
             }
         },
 
-        sanitizeKey(raw) {
-            if (!raw) return '';
-            return String(raw).replace(/[\s"'`“”‘’\u200B-\u200D\uFEFF]/g, '').trim();
+        // Loads lightweight pure-JS MP4 Muxer (15KB) for hardware H.264 .mp4 compilation
+        preloadMp4Muxer() {
+            if (window.Mp4Muxer || document.getElementById('zwMp4MuxerScript')) return;
+            const s = document.createElement('script');
+            s.id = 'zwMp4MuxerScript';
+            s.src = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js';
+            s.onload = () => { this.mp4MuxerLoaded = true; };
+            document.head.appendChild(s);
         },
 
-        detectKeyProvider(rawKey, preferredProvider = 'auto') {
-            const k = this.sanitizeKey(rawKey);
-            if (!k) return 'gemini';
-            if (k.startsWith('hf_')) return 'huggingface';
-            if (k.startsWith('AIza')) return 'gemini';
-            if (k.startsWith('r8_')) return 'replicate';
-            if (k.startsWith('fal_') || k.includes(':')) return 'fal';
-            if (preferredProvider && preferredProvider !== 'auto') return preferredProvider;
-            return 'gemini';
-        },
-
-        getSelectedCatalogItem(modelValue = null) {
-            const target = modelValue || this.videoModel || 'auto';
-            return this.videoCatalog.find(m => m.model === target || m.id === target) || this.videoCatalog[0];
-        },
-
-        saveVideoCredentials(provider, model, rawKey) {
-            const cleanKey = this.sanitizeKey(rawKey);
-            const detectedProv = this.detectKeyProvider(cleanKey, provider);
-
-            this.videoProvider = detectedProv;
-            this.videoModel = model || 'auto';
-            this.videoApiKey = cleanKey;
-
-            localStorage.setItem('zw_video_provider', this.videoProvider);
-            localStorage.setItem('zw_video_model', this.videoModel);
-            localStorage.setItem('zw_video_api_key', this.videoApiKey);
-            localStorage.setItem('zw_hf_video_token', this.videoApiKey);
-
-            const drawerSel = document.getElementById('drawerVideoModelSelect');
-            const drawerInp = document.getElementById('drawerVideoApiKey');
-            if (drawerSel) drawerSel.value = this.videoModel;
-            if (drawerInp) drawerInp.value = this.videoApiKey;
-        },
-
-        allowSingleVideoKeyOnStartup() {
-            if (this.videoApiKey && this.videoApiKey.length > 5) {
-                const mainKey = this.sanitizeKey(localStorage.getItem('zw_api_key') || '');
-                if (!mainKey) {
-                    localStorage.setItem('zw_api_key', this.videoApiKey);
-                    if (window.state) window.state.apiKey = this.videoApiKey;
-                }
-            }
-        },
-
-        // =========================================================================
-        // 1. SCREEN 2 ONBOARDING (SINGLE KEY FOR WEBSITE OR VIDEO)
-        // =========================================================================
-        upgradeScreen2WithVideoModels() {
-            const screen2Card = document.querySelector('#screen2 .card-bg');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (!screen2Card || !apiKeyInput || document.getElementById('screen2VideoProviders')) return;
-
-            const existingGrid = screen2Card.querySelector('.grid.grid-cols-3');
-            if (existingGrid) {
-                const videoSection = document.createElement('div');
-                videoSection.id = 'screen2VideoProviders';
-                videoSection.className = "mb-4 p-3 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30 space-y-2";
-                videoSection.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-extrabold text-fuchsia-300 uppercase tracking-wider">Video Maker AI Engines (1 Key Needed):</span>
-                        <span class="text-[10px] text-emerald-400 font-bold">All Versions</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('gemini', 'veo-auto', 'https://aistudio.google.com/app/apikey', 'Paste Google AI Studio Key (AIza...)...')"
-                            class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
-                            Google Veo / Imagen
-                        </button>
-                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('huggingface', 'black-forest-labs/FLUX.1-schnell', 'https://huggingface.co/settings/tokens', 'Paste HuggingFace Token (hf_...)...')"
-                            class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
-                            HuggingFace FLUX
-                        </button>
-                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('fal', 'fal-ai/wan-t2v', 'https://fal.ai/dashboard/keys', 'Paste Fal.ai / Replicate Key...')"
-                            class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
-                            Fal / Replicate
-                        </button>
-                    </div>
-                `;
-                existingGrid.insertAdjacentElement('afterend', videoSection);
-            }
-
-            const origSaveContinue = window.saveApiKeyAndContinue;
-            window.saveApiKeyAndContinue = () => {
-                const cleanKey = this.sanitizeKey(document.getElementById('apiKeyInput')?.value || '');
-                if (cleanKey.length < 5) {
-                    const err = document.getElementById('apiErrorMsg');
-                    if (err) {
-                        err.innerText = "Please enter at least one API key to launch ZoneWeb.";
-                        err.classList.remove('hidden');
-                    }
-                    return;
-                }
-
-                const detectedProv = this.detectKeyProvider(cleanKey, window.__s2SelectedVideoProv || 'auto');
-                this.saveVideoCredentials(detectedProv, this.videoModel || 'auto', cleanKey);
-
-                if (typeof origSaveContinue === 'function') {
-                    origSaveContinue();
-                } else {
-                    localStorage.setItem('zw_api_key', cleanKey);
-                    document.getElementById('screen2')?.classList.add('hidden');
-                    document.getElementById('screen3')?.classList.remove('hidden');
-                }
-            };
-        },
-
-        selectScreen2VideoProvider(prov, model, keyUrl, placeholder) {
-            window.__s2SelectedVideoProv = prov;
-            this.videoProvider = prov;
-            this.videoModel = model;
-
-            const inp = document.getElementById('apiKeyInput');
-            const getBtn = document.getElementById('getApiKeyBtn');
-            if (inp) {
-                inp.placeholder = placeholder;
-                inp.focus();
-            }
-            if (getBtn) getBtn.href = keyUrl;
-        },
-
-        // =========================================================================
-        // 2. TOP 3-DOTS MENU: VIDEO MAKER MODELS & KEY SETTINGS
-        // =========================================================================
-        upgradeThreeDotsMenuWithVideoModels() {
-            const topSettingsBox = document.querySelector('#drawerOverlay .mb-5.bg-white\\/5');
-            if (!topSettingsBox || document.getElementById('drawerVideoAiSection')) return;
-
-            const section = document.createElement('div');
-            section.id = 'drawerVideoAiSection';
-            section.className = "pt-2.5 border-t border-white/10 space-y-2";
-            section.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <label class="text-[11px] font-bold text-fuchsia-300">Video Maker AI (All Versions):</label>
-                    <a id="drawerGetVideoKeyLink" href="${this.getSelectedCatalogItem().keyUrl}" target="_blank" class="text-[10px] text-amber-300 hover:underline font-bold">Get Key</a>
-                </div>
-                <select id="drawerVideoModelSelect" onchange="window.ZenoVideo.onDrawerVideoModelChange(this.value)" class="w-full bg-black/50 border border-fuchsia-500/30 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
-                    ${this.videoCatalog.map(m => `<option value="${m.model}" ${m.model === this.videoModel ? 'selected' : ''}>${m.name}</option>`).join('')}
-                </select>
-                <div class="flex gap-1.5">
-                    <input id="drawerVideoApiKey" type="password" value="${this.videoApiKey}" placeholder="Paste any Video API Key..." class="flex-1 bg-black/40 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
-                    <button type="button" onclick="window.ZenoVideo.saveFromDrawer()" class="px-3 py-1.5 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-xs font-bold text-white shadow">Save</button>
-                </div>
-            `;
-            topSettingsBox.appendChild(section);
-        },
-
-        onDrawerVideoModelChange(modelVal) {
-            const obj = this.getSelectedCatalogItem(modelVal);
-            this.videoProvider = obj.provider;
-            this.videoModel = obj.model;
-            localStorage.setItem('zw_video_provider', obj.provider);
-            localStorage.setItem('zw_video_model', obj.model);
-
-            const link = document.getElementById('drawerGetVideoKeyLink');
-            if (link) link.href = obj.keyUrl;
-        },
-
-        saveFromDrawer() {
-            const modelVal = document.getElementById('drawerVideoModelSelect')?.value || this.videoModel;
-            const keyVal = document.getElementById('drawerVideoApiKey')?.value || '';
-            const obj = this.getSelectedCatalogItem(modelVal);
-            this.saveVideoCredentials(obj.provider, obj.model, keyVal);
-
-            const badge = document.getElementById('saveConfirmBadge');
-            if (badge) {
-                badge.classList.remove('hidden');
-                setTimeout(() => badge.classList.add('hidden'), 2000);
-            }
-        },
-
-        // =========================================================================
-        // 3. COMPACT ONE-TIME VIDEO KEY MODAL
-        // =========================================================================
-        buildCompactVideoKeyModal() {
-            if (document.getElementById('zenoVideoKeyModal')) return;
-
-            const modal = document.createElement('div');
-            modal.id = 'zenoVideoKeyModal';
-            modal.className = "hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4";
-            modal.innerHTML = `
-                <div class="card-bg w-full max-w-md rounded-3xl p-5 md:p-6 border-2 border-fuchsia-500/40 shadow-2xl text-white space-y-4">
-                    <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center shadow">
-                                ${this.getVideoIconSvg('w-5 h-5')}
-                            </div>
-                            <div>
-                                <h3 class="font-extrabold text-sm md:text-base">Video Maker API Key</h3>
-                                <p id="zwVidModalReason" class="text-[11px] text-gray-400">Saved permanently until expiration</p>
-                            </div>
-                        </div>
-                        <button onclick="document.getElementById('zenoVideoKeyModal').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs font-bold text-fuchsia-300 block mb-1">1. Choose Video AI Model:</label>
-                            <select id="zwModalVideoModelSelect" onchange="window.ZenoVideo.onModalVideoModelChange(this.value)" class="w-full bg-zinc-900 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
-                                ${this.videoCatalog.map(m => `<option value="${m.model}">${m.name}</option>`).join('')}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-bold text-gray-300 block mb-1">2. Paste API Key (Direct Get Key Button Next to Box):</label>
-                            <div class="flex gap-2">
-                                <input id="zwModalVideoKeyInput" type="password" placeholder="Paste ANY API Key (AIza..., hf_..., r8_...)..."
-                                    class="flex-1 bg-black/50 border border-fuchsia-500/40 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none">
-                                <a id="zwModalGetKeyBtn" href="https://aistudio.google.com/app/apikey" target="_blank"
-                                    class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs flex items-center gap-1.5 whitespace-nowrap shadow transition">
-                                    <i class="fa-solid fa-key"></i> Get API Key
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onclick="window.ZenoVideo.confirmModalVideoKey()" class="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-xs shadow-lg transition">
-                        Save Key & Generate Video Now
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        },
-
-        onModalVideoModelChange(modelVal) {
-            const obj = this.getSelectedCatalogItem(modelVal);
-            const getBtn = document.getElementById('zwModalGetKeyBtn');
-            const inp = document.getElementById('zwModalVideoKeyInput');
-            if (getBtn) getBtn.href = obj.keyUrl;
-            if (inp) inp.placeholder = obj.placeholder;
-        },
-
-        openVideoKeyPromptModal(pendingPrompt, reasonText = 'Enter once — saved until expiration') {
-            this.buildCompactVideoKeyModal();
-            window.__pendingVideoPromptAfterKey = pendingPrompt;
-
-            const modal = document.getElementById('zenoVideoKeyModal');
-            const reasonEl = document.getElementById('zwVidModalReason');
-            const selEl = document.getElementById('zwModalVideoModelSelect');
-            const inpEl = document.getElementById('zwModalVideoKeyInput');
-
-            if (reasonEl) reasonEl.innerText = reasonText;
-            if (selEl) {
-                selEl.value = this.videoModel || 'auto';
-                this.onModalVideoModelChange(this.videoModel || 'auto');
-            }
-            if (inpEl) inpEl.value = '';
-
-            modal?.classList.remove('hidden');
-        },
-
-        confirmModalVideoKey() {
-            const modelVal = document.getElementById('zwModalVideoModelSelect')?.value || 'auto';
-            const cleanKey = this.sanitizeKey(document.getElementById('zwModalVideoKeyInput')?.value || '');
-            if (cleanKey.length < 5) {
-                return alert("Please paste your API Key first, or click 'Get API Key' next to the box.");
-            }
-
-            const obj = this.getSelectedCatalogItem(modelVal);
-            this.saveVideoCredentials(obj.provider, obj.model, cleanKey);
-            document.getElementById('zenoVideoKeyModal')?.classList.add('hidden');
-
-            const pending = window.__pendingVideoPromptAfterKey;
-            window.__pendingVideoPromptAfterKey = null;
-            if (pending) {
-                this.generateRealAiVideo(pending);
-            }
-        },
-
-        // =========================================================================
-        // 4. UI ICONS, EMOJI REPLACER & TOP "GENERATE VIDEO" BUTTON
-        // =========================================================================
         getCustomLogoSvg(sizePx = 14) {
             return `<svg width="${sizePx}" height="${Math.round(sizePx * 1.15)}" viewBox="0 0 120 140" class="inline-block align-middle shrink-0" style="vertical-align:-2px;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -386,6 +71,9 @@
             </svg>`;
         },
 
+        // =========================================================================
+        // 1. GLOBAL UI EMOJI REPLACER
+        // =========================================================================
         replaceAllEmojisWithCustomLogos(rootNode = document.body) {
             if (!rootNode || this.isReplacingEmojis) return;
             this.isReplacingEmojis = true;
@@ -448,6 +136,9 @@
             this.emojiObserver.observe(document.body, { childList: true, subtree: true });
         },
 
+        // =========================================================================
+        // 2. TOP "GENERATE VIDEO" BUTTON & VIDEO MODE BAR ON TOP OF AI CHAT
+        // =========================================================================
         injectTopGenerateVideoButton() {
             const topPreviewBtn = document.getElementById('topPreviewBtn');
             if (!topPreviewBtn || !topPreviewBtn.parentElement || document.getElementById('topGenerateVideoBtn')) return;
@@ -467,7 +158,7 @@
 
             const panel = document.createElement('div');
             panel.id = 'zenoVideoChatPanel';
-            panel.className = "hidden mb-2.5 p-3 rounded-2xl bg-gradient-to-r from-fuchsia-950/90 via-indigo-950/90 to-purple-950/90 border border-fuchsia-500/40 shadow-xl space-y-2.5";
+            panel.className = "hidden mb-2.5 p-3 rounded-2xl bg-gradient-to-r from-fuchsia-950/90 via-indigo-950/90 to-purple-950/90 border border-fuchsia-500/40 shadow-xl space-y-2";
             panel.innerHTML = `
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
@@ -475,27 +166,26 @@
                             ${this.getVideoIconSvg('w-4 h-4')}
                         </span>
                         <div>
-                            <span class="text-xs font-extrabold text-white block">AI 10-Second Video Director</span>
-                            <span class="text-[10px] text-fuchsia-300" id="zwActiveVideoModelLabel">${this.getSelectedCatalogItem().name}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-white">Video Mode Active</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">AI Code -> MP4 Render Engine</span>
+                            </div>
+                            <p class="text-[10px] text-gray-300">AI is ready: describe your video scene below to code & render a 10s MP4</p>
                         </div>
                     </div>
-                    <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition">
+                    <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition" title="Exit Video Mode">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-1.5">
+                <div class="flex items-center justify-between gap-2 pt-0.5">
                     <div class="flex items-center bg-black/50 p-0.5 rounded-lg border border-white/15">
-                        <button type="button" id="zwRatio169" onclick="window.ZenoVideo.setAspectRatio('16:9')" class="px-2 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold">16:9</button>
-                        <button type="button" id="zwRatio916" onclick="window.ZenoVideo.setAspectRatio('9:16')" class="px-2 py-1 rounded-md text-gray-300 text-[10px] font-bold">9:16</button>
+                        <button type="button" id="zwRatio169" onclick="window.ZenoVideo.setAspectRatio('16:9')" class="px-2.5 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold">16:9 Landscape</button>
+                        <button type="button" id="zwRatio916" onclick="window.ZenoVideo.setAspectRatio('9:16')" class="px-2.5 py-1 rounded-md text-gray-300 text-[10px] font-bold">9:16 Vertical</button>
                     </div>
 
-                    <button type="button" onclick="window.ZenoVideo.openVideoKeyPromptModal(null, 'Update or switch your Video Maker API Key')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] text-amber-300 font-bold border border-amber-500/30">
-                        <i class="fa-solid fa-key mr-1"></i>Model / Key
-                    </button>
-
-                    <button type="button" onclick="window.ZenoVideo.triggerInstantVideoFromChat()" class="ml-auto px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition">
-                        Create Video Now
+                    <button type="button" onclick="window.ZenoVideo.triggerInstantVideoFromChat()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition">
+                        Render 10s MP4 Video
                     </button>
                 </div>
             `;
@@ -508,8 +198,8 @@
             const b16 = document.getElementById('zwRatio169');
             const b9 = document.getElementById('zwRatio916');
             if (b16 && b9) {
-                b16.className = ratio === '16:9' ? "px-2 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold" : "px-2 py-1 rounded-md text-gray-300 text-[10px] font-bold";
-                b9.className = ratio === '9:16' ? "px-2 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold" : "px-2 py-1 rounded-md text-gray-300 text-[10px] font-bold";
+                b16.className = ratio === '16:9' ? "px-2.5 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold" : "px-2.5 py-1 rounded-md text-gray-300 text-[10px] font-bold";
+                b9.className = ratio === '9:16' ? "px-2.5 py-1 rounded-md bg-fuchsia-600 text-white text-[10px] font-extrabold" : "px-2.5 py-1 rounded-md text-gray-300 text-[10px] font-bold";
             }
         },
 
@@ -517,20 +207,21 @@
             this.videoModeActive = enable;
             const panel = document.getElementById('zenoVideoChatPanel');
             const chatInput = document.getElementById('chatInput');
-            const lbl = document.getElementById('zwActiveVideoModelLabel');
-            if (lbl) lbl.innerText = this.getSelectedCatalogItem().name;
+            const topBtn = document.getElementById('topGenerateVideoBtn');
 
             if (enable) {
                 panel?.classList.remove('hidden');
                 if (chatInput) {
-                    chatInput.placeholder = "Describe the video scene or story you want AI to create...";
+                    chatInput.placeholder = "Describe the video story, characters & actions you want AI to create...";
                     chatInput.focus();
                 }
+                topBtn?.classList.add('ring-2', 'ring-fuchsia-300');
             } else {
                 panel?.classList.add('hidden');
                 if (chatInput) {
                     chatInput.placeholder = "Describe the exact website or feature you want the AI to build...";
                 }
+                topBtn?.classList.remove('ring-2', 'ring-fuchsia-300');
             }
         },
 
@@ -539,10 +230,10 @@
             const promptText = (chatInput?.value || '').trim();
             if (!promptText) {
                 chatInput?.focus();
-                return alert("Please describe what happens in your video first!");
+                return alert("Please write a description of the video you want to create first!");
             }
             chatInput.value = '';
-            this.generateRealAiVideo(promptText);
+            this.createVideoFromPrompt(promptText);
         },
 
         hookChatSubmissionForVideo() {
@@ -554,7 +245,7 @@
                 if (this.videoModeActive || /\b(generate video|create video|make a video|make video|ڤیدیۆ دروست بکە|ڤیدیۆیەک دروست بکە)\b/i.test(text)) {
                     if (!text) return;
                     chatInput.value = '';
-                    await this.generateRealAiVideo(text);
+                    await this.createVideoFromPrompt(text);
                     return;
                 }
 
@@ -565,11 +256,12 @@
         },
 
         // =========================================================================
-        // 5. REAL AI SCENE VISUAL GENERATION & 10-SECOND VIDEO RENDERER
+        // 3. STEP 1: AI WRITES CUSTOM ANIMATION CODE -> STEP 2: RENDER ENGINE -> MP4
         // =========================================================================
-        async generateRealAiVideo(userPrompt) {
+        async createVideoFromPrompt(userPrompt) {
             if (this.isGeneratingVideo) return;
 
+            // Security check
             if (window.ZenoUltimate && window.ZenoUltimate.forbiddenPattern && window.ZenoUltimate.forbiddenPattern.test(userPrompt)) {
                 if (typeof window.appendMessage === 'function') {
                     window.appendMessage('user', userPrompt);
@@ -578,31 +270,15 @@
                 return;
             }
 
-            this.videoApiKey = this.sanitizeKey(
-                this.videoApiKey ||
-                localStorage.getItem('zw_video_api_key') ||
-                localStorage.getItem('zw_hf_video_token') ||
-                localStorage.getItem('zw_api_key') ||
-                ''
-            );
-
-            if (!this.videoApiKey || this.videoApiKey.length < 5) {
-                this.openVideoKeyPromptModal(userPrompt, "Paste an API Key once — saved until expiration");
-                return;
-            }
-
             this.isGeneratingVideo = true;
-            const activeKey = this.videoApiKey;
-            const geminiKey = this.sanitizeKey(localStorage.getItem('zw_api_key') || (activeKey.startsWith('AIza') ? activeKey : ''));
-            const hfKey = activeKey.startsWith('hf_') ? activeKey : this.sanitizeKey(localStorage.getItem('zw_hf_video_token') || '');
-
             document.getElementById('heroPrompt')?.classList.add('hidden');
+
             if (typeof window.appendMessage === 'function') {
-                window.appendMessage('user', `[Generate 10s AI Video] ${userPrompt}`);
+                window.appendMessage('user', `[Video Mode] ${userPrompt}`);
             }
 
             const feed = document.getElementById('chatFeed');
-            const cardId = 'zw_real_vid_' + Date.now();
+            const cardId = 'zw_vid_engine_' + Date.now();
             const startTime = performance.now();
 
             const cardWrap = document.createElement('div');
@@ -613,11 +289,11 @@
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center">
-                                <i class="fa-solid fa-spinner fa-spin text-sm"></i>
+                                <i class="fa-solid fa-code fa-beat text-xs"></i>
                             </div>
                             <div>
-                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Phase 1/3: Directing Storyboard Scenes...</p>
-                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Analyzing characters, action & environment...</p>
+                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Step 1/3: AI is writing custom video code...</p>
+                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Scripting characters, actions & timeline for your prompt...</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0">
@@ -630,124 +306,86 @@
                         <div id="${cardId}_bar" class="h-full bg-gradient-to-r from-fuchsia-600 via-indigo-500 to-emerald-400 transition-all duration-100" style="width:0%;"></div>
                     </div>
 
+                    <!-- Live Preview Monitor while Render Engine renders frames -->
+                    <div id="${cardId}_monitorWrap" class="hidden rounded-xl overflow-hidden border border-white/15 bg-black relative">
+                        <canvas id="${cardId}_liveMonitor" class="w-full max-h-48 object-contain mx-auto block"></canvas>
+                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-red-600/90 text-white text-[9px] font-black uppercase tracking-wider">LIVE RENDER</span>
+                    </div>
+
                     <div class="grid grid-cols-3 gap-1.5 text-[10px] font-bold text-center">
-                        <div id="${cardId}_s1" class="py-1 px-2 rounded-lg bg-fuchsia-600/30 border border-fuchsia-500/50 text-white">1. Storyboard</div>
-                        <div id="${cardId}_s2" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">2. AI Scene Art</div>
-                        <div id="${cardId}_s3" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">3. 10s Encode</div>
+                        <div id="${cardId}_s1" class="py-1 px-2 rounded-lg bg-fuchsia-600/30 border border-fuchsia-500/50 text-white">1. AI Video Code</div>
+                        <div id="${cardId}_s2" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">2. Render Engine</div>
+                        <div id="${cardId}_s3" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">3. MP4 Compiler</div>
                     </div>
                 </div>
             `;
             feed?.appendChild(cardWrap);
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-            const liveTimerInterval = setInterval(() => {
-                const timerEl = document.getElementById(`${cardId}_timer`);
-                if (timerEl) {
-                    timerEl.innerText = `${((performance.now() - startTime) / 1000).toFixed(1)}s`;
-                }
+            const timerInterval = setInterval(() => {
+                const tEl = document.getElementById(`${cardId}_timer`);
+                if (tEl) tEl.innerText = `${((performance.now() - startTime) / 1000).toFixed(1)}s`;
             }, 100);
 
-            const updateRealLoading = (pct, phaseText, detailText, activeStep = 1) => {
-                const clampedPct = Math.min(100, Math.max(0, Math.round(pct)));
+            const updateStatus = (pct, phaseText, detailText, stepNum) => {
                 const pEl = document.getElementById(`${cardId}_pct`);
                 const bEl = document.getElementById(`${cardId}_bar`);
                 const phEl = document.getElementById(`${cardId}_phase`);
                 const dtEl = document.getElementById(`${cardId}_detail`);
-
-                if (pEl) pEl.innerText = `${clampedPct}%`;
-                if (bEl) bEl.style.width = `${clampedPct}%`;
+                if (pEl) pEl.innerText = `${Math.min(100, Math.round(pct))}%`;
+                if (bEl) bEl.style.width = `${Math.min(100, Math.round(pct))}%`;
                 if (phEl && phaseText) phEl.innerText = phaseText;
                 if (dtEl && detailText) dtEl.innerText = detailText;
 
                 for (let s = 1; s <= 3; s++) {
-                    const stepBox = document.getElementById(`${cardId}_s${s}`);
-                    if (!stepBox) continue;
-                    if (s < activeStep) {
-                        stepBox.className = "py-1 px-2 rounded-lg bg-emerald-600/30 border border-emerald-500/50 text-emerald-300";
-                    } else if (s === activeStep) {
-                        stepBox.className = "py-1 px-2 rounded-lg bg-fuchsia-600/35 border border-fuchsia-400 text-white animate-pulse";
-                    } else {
-                        stepBox.className = "py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400";
-                    }
+                    const box = document.getElementById(`${cardId}_s${s}`);
+                    if (!box) continue;
+                    if (s < stepNum) box.className = "py-1 px-2 rounded-lg bg-emerald-600/30 border border-emerald-500/50 text-emerald-300";
+                    else if (s === stepNum) box.className = "py-1 px-2 rounded-lg bg-fuchsia-600/35 border border-fuchsia-400 text-white animate-pulse";
+                    else box.className = "py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400";
                 }
             };
 
             try {
-                // STEP 1: Check Direct Veo / Fal Video APIs first
-                updateRealLoading(6, "Phase 1/3: Checking Direct Video Engines...", "Probing direct neural video models...", 1);
-
-                if (geminiKey) {
-                    const veoUrl = await this.quickCheckGoogleVeo(geminiKey, userPrompt, (msg) => {
-                        updateRealLoading(15, "Phase 1/3: Google Veo Engine...", msg, 1);
-                    });
-                    if (veoUrl) {
-                        clearInterval(liveTimerInterval);
-                        updateRealLoading(100, "Complete!", "Google Veo video ready!", 3);
-                        this.renderFinalVideoPlayer(cardWrap, veoUrl, userPrompt, 'mp4', 'Google Veo AI');
-                        return;
-                    }
-                }
-
-                // STEP 2: AI Director breaks prompt into 3 vivid visual scenes & generates REAL AI IMAGES
-                updateRealLoading(18, "Phase 2/3: Generating Real AI Scene Artwork...", "Directing 3 cinematic shots for your story...", 2);
-                const storyboard = await this.buildThreeSceneStoryboard(geminiKey, userPrompt);
-
-                const sceneImages = [];
-                let usedVisualEngine = 'AI Cinema';
-
-                for (let i = 0; i < storyboard.length; i++) {
-                    const basePct = 22 + i * 13;
-                    updateRealLoading(
-                        basePct,
-                        `Phase 2/3: Rendering Scene ${i + 1} of ${storyboard.length}...`,
-                        `Generating AI visual: "${storyboard[i].caption}"`,
-                        2
-                    );
-
-                    const resObj = await this.generateRealSceneVisual({
-                        scene: storyboard[i],
-                        index: i,
-                        geminiKey,
-                        hfKey,
-                        onSubStatus: (engineName) => {
-                            usedVisualEngine = engineName;
-                            updateRealLoading(
-                                basePct + 6,
-                                `Phase 2/3: Scene ${i + 1}/${storyboard.length} (${engineName})...`,
-                                `Drawing characters & action for Scene ${i + 1}...`,
-                                2
-                            );
-                        }
-                    });
-
-                    sceneImages.push(resObj.image);
-                    usedVisualEngine = resObj.engine;
-                }
-
-                // STEP 3: Frame-by-Frame 10-Second HD Video Encoding (300 Real Frames)
-                updateRealLoading(62, "Phase 3/3: Encoding 10.0s HD Video...", "Frame 0 / 300 (0%)", 3);
-                const compiledBlob = await this.encodeRealTenSecondVideo(storyboard, sceneImages, (currentFrame, totalFrames) => {
-                    const frameRatio = currentFrame / totalFrames;
-                    const realPct = 62 + Math.round(frameRatio * 38);
-                    updateRealLoading(
-                        realPct,
-                        "Phase 3/3: Encoding 10.0s HD Video...",
-                        `Encoding Frame ${currentFrame} / ${totalFrames} (${(currentFrame / 30).toFixed(1)}s / 10.0s)`,
-                        3
-                    );
+                // STEP 1: Ask the AI Engine to write custom JS Canvas animation code for this exact prompt
+                updateStatus(10, "Step 1/3: AI is writing custom animation code...", "Generating scene choreography & character actions...", 1);
+                const generatedJsBody = await this.generateCustomVideoCodeFromAI(userPrompt, (p) => {
+                    updateStatus(p, "Step 1/3: AI is writing custom animation code...", "Compiling custom JavaScript scene functions...", 1);
                 });
 
-                clearInterval(liveTimerInterval);
-                const finalUrl = URL.createObjectURL(compiledBlob);
-                const ext = compiledBlob.type.includes('mp4') ? 'mp4' : 'webm';
-                this.renderFinalVideoPlayer(cardWrap, finalUrl, userPrompt, ext, `${usedVisualEngine} • 10.0s`);
+                // Compile & verify the AI-written animation function
+                const renderFn = this.compileSafeRenderFunction(generatedJsBody, userPrompt);
+
+                // STEP 2 & 3: Send compiled code to Render Engine + MP4 Muxer
+                updateStatus(35, "Step 2/3: Sending code to Render Engine...", "Initializing 30 FPS HD Canvas & MP4 Encoder...", 2);
+                const monitorWrap = document.getElementById(`${cardId}_monitorWrap`);
+                const monitorCanvas = document.getElementById(`${cardId}_liveMonitor`);
+                if (monitorWrap) monitorWrap.classList.remove('hidden');
+
+                const { blob, extension, formatLabel } = await this.executeRenderEngineToMp4(
+                    renderFn,
+                    userPrompt,
+                    monitorCanvas,
+                    (frame, totalFrames, stage) => {
+                        if (stage === 'rendering') {
+                            const pct = 35 + Math.round((frame / totalFrames) * 55);
+                            updateStatus(pct, "Step 2/3: Render Engine Active...", `Rendering Frame ${frame} / ${totalFrames} (${(frame / 30).toFixed(1)}s / 10.0s)`, 2);
+                        } else {
+                            updateStatus(95, "Step 3/3: MP4 Compiler Packaging Video...", "Finalizing MP4 video container & streams...", 3);
+                        }
+                    }
+                );
+
+                clearInterval(timerInterval);
+                const videoUrl = URL.createObjectURL(blob);
+                this.renderCompletedVideoCard(cardWrap, videoUrl, userPrompt, extension, formatLabel, generatedJsBody);
 
             } catch (err) {
-                clearInterval(liveTimerInterval);
+                clearInterval(timerInterval);
                 cardWrap.innerHTML = `
                     <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-red-500/40 text-xs text-red-300 space-y-2">
-                        <p class="font-bold">Rendering interrupted: ${err.message}</p>
-                        <button onclick="window.ZenoVideo.generateRealAiVideo(\`${userPrompt.replace(/`/g, '')}\`)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold">Try Again</button>
+                        <p class="font-bold">Render Engine Notice: ${err.message}</p>
+                        <button onclick="window.ZenoVideo.createVideoFromPrompt(\`${userPrompt.replace(/`/g, '')}\`)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold">Retry Render</button>
                     </div>
                 `;
             } finally {
@@ -757,518 +395,807 @@
             }
         },
 
-        async quickCheckGoogleVeo(apiKey, promptText, onStatus) {
-            try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKey)}`;
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        instances: [{ prompt: promptText }],
-                        parameters: { aspectRatio: this.aspectRatio }
-                    })
-                });
-                if (!res.ok) return null;
-                const opData = await res.json();
-                if (!opData.name) return null;
+        // =========================================================================
+        // AI CODE GENERATOR FOR VIDEO ANIMATION (Uses User's Connected AI Engine)
+        // =========================================================================
+        async generateCustomVideoCodeFromAI(userPrompt, onProgress) {
+            const systemInstruction = `You are an expert HTML5 Canvas 2D Animator & Video Director.
+Write the JavaScript body for a function:
+function renderFrame(ctx, w, h, t, helpers)
+that renders a rich, dynamic, multi-act 10-second animated video (where t goes from 0.0 to 10.0 seconds) depicting the EXACT story, characters, objects, and actions requested by the user.
 
-                for (let i = 0; i < 15; i++) {
-                    await new Promise(r => setTimeout(r, 3000));
-                    if (onStatus) onStatus(`Google Veo rendering (${(i + 1) * 3}s)...`);
-                    const poll = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opData.name}?key=${encodeURIComponent(apiKey)}`);
-                    if (!poll.ok) break;
-                    const data = await poll.json();
-                    if (data.done) {
-                        const samples = data.response?.generateVideoResponse?.generatedSamples || [];
-                        const uri = samples[0]?.video?.uri;
-                        if (uri) return `${uri}${uri.includes('?') ? '&' : '?'}key=${encodeURIComponent(apiKey)}`;
-                        break;
-                    }
-                }
-            } catch (e) {}
-            return null;
-        },
+AVAILABLE BUILT-IN HELPERS (Use them heavily for expressive characters & scenes!):
+- helpers.lerp(a, b, alpha) -> linear interpolation
+- helpers.clamp(val, min, max) -> clamp value
+- helpers.smoothstep(edge0, edge1, x) -> smooth 0..1 transition
+- helpers.drawSky(ctx, w, h, topColor, bottomColor, starsOpacity) -> draws gradient sky & stars
+- helpers.drawGround(ctx, w, h, groundY, topColor, bottomColor) -> draws ground/street/floor
+- helpers.drawCity(ctx, w, h, groundY, buildingColor, windowColor) -> draws city skyline
+- helpers.drawCharacter(ctx, { x, y, scale, shirtColor, pantsColor, skinColor, hairColor, expression, pose, facing, holding, speech })
+  * expression: 'neutral' | 'happy' | 'laughing' | 'sad' | 'angry' | 'shocked'
+  * pose: 'idle' | 'walk' | 'beg' | 'point' | 'celebrate' | 'fall'
+  * facing: 1 (right) or -1 (left)
+  * holding: 'none' | 'money' | 'gold_bag' | 'crown' | 'sword' | 'phone' | 'gift'
+  * speech: string (optional floating speech bubble above character's head!)
+- helpers.drawRobot(ctx, { x, y, scale, color, eyeColor, laserActive, targetX, targetY }) -> draws giant mecha robot
+- helpers.drawMonster(ctx, { x, y, scale, color, roar, fireActive, targetX, targetY }) -> draws giant kaiju monster
+- helpers.drawVehicle(ctx, { x, y, scale, color, type }) -> type: 'car' | 'rocket' | 'police'
+- helpers.drawExplosion(ctx, x, y, radius, progress) -> progress 0..1
+- helpers.drawParticles(ctx, w, h, t, color, count, direction) -> direction: 'up' | 'down' | 'right'
+- helpers.drawSubtitle(ctx, text) -> draws clean cinematic subtitle at bottom
 
-        async buildThreeSceneStoryboard(geminiKey, userPrompt) {
-            if (geminiKey && geminiKey.startsWith('AIza')) {
-                try {
-                    const prompt = `You are a cinematic storyboard artist. Break this video idea into 3 sequential visual scenes.
-Return ONLY a valid JSON array of 3 objects with:
-- "visual": vivid, concrete English image generation prompt describing the exact characters, poses, action, environment, and dramatic movie lighting (NO text/words in image).
-- "caption": short dramatic subtitle (max 60 chars).
-Video Idea: "${userPrompt}"`;
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(geminiKey)}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        const match = raw.match(/\[[\s\S]*\]/);
-                        if (match) {
-                            const arr = JSON.parse(match[0]);
-                            if (Array.isArray(arr) && arr.length >= 2) return arr.slice(0, 3);
+CRITICAL RULES:
+1. Script a clear 3-Act story across t = 0..3.3s (Act 1), t = 3.3..6.7s (Act 2), and t = 6.7..10.0s (Act 3) matching the user's exact request!
+2. Animate positions (x, y), poses, expressions, speech bubbles, and effects smoothly using t.
+3. Output ONLY raw JavaScript statements for the inside of renderFrame(ctx, w, h, t, helpers) wrapped in \`\`\`javascript ... \`\`\`. Do NOT wrap in function declaration headers and do NOT use external image URLs.`;
+
+            const rawKey = (window.state?.apiKey || localStorage.getItem('zw_api_key') || '').replace(/[\s"'`]/g, '').trim();
+            let rawAiReply = '';
+
+            // 1. Try User's Connected Gemini API Key
+            if (rawKey.startsWith('AIza')) {
+                const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest'];
+                for (const m of models) {
+                    try {
+                        if (onProgress) onProgress(18);
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(rawKey)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: `${systemInstruction}\n\nUSER VIDEO PROMPT: "${userPrompt}"` }] }],
+                                generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+                            })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                            if (txt.length > 40) {
+                                rawAiReply = txt;
+                                break;
+                            }
                         }
-                    }
-                } catch (e) {}
-            }
-
-            const clean = userPrompt.replace(/^(make a video|create a video|generate video)\s*/i, '').trim();
-            const parts = clean.split(/\b(?:and then|then|and|while|after that|,)\b/i).map(s => s.trim()).filter(Boolean);
-            if (parts.length >= 3) {
-                return [
-                    { visual: `${parts[0]}, cinematic movie frame, epic action lighting, ultra detailed, 4k`, caption: parts[0] },
-                    { visual: `${parts[1]}, dramatic close-up cinematic shot, intense action, 4k`, caption: parts[1] },
-                    { visual: `${parts.slice(2).join(' ')}, epic climax movie scene, dramatic lighting, 4k`, caption: parts.slice(2).join(' ') }
-                ];
-            } else if (parts.length === 2) {
-                return [
-                    { visual: `${parts[0]}, wide cinematic opening scene, ultra detailed, 4k`, caption: parts[0] },
-                    { visual: `${parts[0]} and ${parts[1]}, intense dramatic action shot, 4k`, caption: parts[1] },
-                    { visual: `${parts[1]}, epic finale cinematic shot, dramatic lighting, 4k`, caption: parts[1] }
-                ];
-            }
-            return [
-                { visual: `${clean}, dramatic wide cinematic establishing shot, epic lighting, 4k`, caption: clean },
-                { visual: `${clean}, intense close-up action shot, dynamic angle, ultra detailed, 4k`, caption: clean },
-                { visual: `${clean}, epic climactic movie finale shot, volumetric lighting, 4k`, caption: clean }
-            ];
-        },
-
-        // =========================================================================
-        // MULTI-SOURCE REAL AI IMAGE GENERATOR (GEMINI IMAGEN -> HF FLUX -> POLLINATIONS -> ANIMATED ACTION FALLBACK)
-        // =========================================================================
-        async generateRealSceneVisual({ scene, index, geminiKey, hfKey, onSubStatus }) {
-            const isVertical = this.aspectRatio === '9:16';
-            const w = isVertical ? 540 : 960;
-            const h = isVertical ? 960 : 540;
-            const fullVisualPrompt = `${scene.visual}, cinematic movie still, ultra detailed, dramatic lighting, no text, no watermark`;
-
-            // 1. Try User's Gemini API Key -> Google Imagen 3 & Gemini Native Image Models (Zero CORS, Base64 output!)
-            if (geminiKey && geminiKey.startsWith('AIza')) {
-                if (onSubStatus) onSubStatus('Google Imagen AI');
-                const geminiImg = await this.tryGeminiNativeImageGen(geminiKey, fullVisualPrompt);
-                if (geminiImg) {
-                    return { image: geminiImg, engine: 'Google Imagen AI' };
+                    } catch (e) {}
                 }
             }
-
-            // 2. Try HuggingFace Token -> FLUX.1-schnell / SDXL (Fast Free Image Inference!)
-            if (hfKey && hfKey.startsWith('hf_')) {
-                if (onSubStatus) onSubStatus('HuggingFace FLUX.1');
-                const hfImg = await this.tryHuggingFaceImageGen(hfKey, fullVisualPrompt);
-                if (hfImg) {
-                    return { image: hfImg, engine: 'FLUX.1 AI' };
-                }
-            }
-
-            // 3. Try Pollinations Fast Turbo Engine (24-second timeout)
-            if (onSubStatus) onSubStatus('Pollinations AI');
-            const pollImg = await this.tryPollinationsFastImage(fullVisualPrompt, w, h, index);
-            if (pollImg) {
-                return { image: pollImg, engine: 'ZoneWeb AI Render' };
-            }
-
-            // 4. Guaranteed Dynamic Animated Action Canvas (NEVER a blank plain gradient!)
-            if (onSubStatus) onSubStatus('AI Motion Canvas');
-            return {
-                image: this.buildAnimatedActionFallbackCanvas(w, h, scene.visual, index),
-                engine: 'AI Motion Render'
-            };
-        },
-
-        // Calls Google Gemini Image Models & Imagen 3 using the user's API Key
-        async tryGeminiNativeImageGen(apiKey, promptText) {
-            // A. Try Gemini Native Image Generation models
-            const geminiImgModels = [
-                'gemini-2.5-flash-image',
-                'gemini-2.0-flash-exp-image-generation',
-                'gemini-2.0-flash-preview-image-generation'
-            ];
-
-            for (const model of geminiImgModels) {
+            // 2. Try User's OpenAI / Groq Key if connected
+            else if (rawKey.startsWith('sk-') || rawKey.startsWith('gsk_')) {
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    if (onProgress) onProgress(18);
+                    const isGroq = rawKey.startsWith('gsk_');
+                    const url = isGroq ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+                    const model = isGroq ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
                     const res = await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${rawKey}` },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: `Generate a realistic cinematic image: ${promptText}` }] }],
-                            generationConfig: { responseModalities: ['IMAGE'] }
+                            model,
+                            messages: [
+                                { role: 'system', content: systemInstruction },
+                                { role: 'user', content: `USER VIDEO PROMPT: "${userPrompt}"` }
+                            ]
                         })
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        const parts = data.candidates?.[0]?.content?.parts || [];
-                        for (const p of parts) {
-                            const inline = p.inlineData || p.inline_data;
-                            if (inline && inline.data) {
-                                const mime = inline.mimeType || inline.mime_type || 'image/png';
-                                return await this.loadDataUrlToImage(`data:${mime};base64,${inline.data}`);
-                            }
-                        }
+                        rawAiReply = data.choices?.[0]?.message?.content || '';
                     }
                 } catch (e) {}
             }
 
-            // B. Try Google Imagen 3.0 Predict Endpoint
-            try {
-                const imgUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${encodeURIComponent(apiKey)}`;
-                const res = await fetch(imgUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        instances: [{ prompt: promptText }],
-                        parameters: { sampleCount: 1, aspectRatio: this.aspectRatio }
-                    })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
-                    if (b64) {
-                        return await this.loadDataUrlToImage(`data:image/png;base64,${b64}`);
-                    }
-                }
-            } catch (e) {}
-
-            return null;
-        },
-
-        // Calls HuggingFace FLUX.1-schnell / SDXL (Free Tier works rapidly for images!)
-        async tryHuggingFaceImageGen(hfToken, promptText) {
-            const models = [
-                'black-forest-labs/FLUX.1-schnell',
-                'stabilityai/stable-diffusion-xl-base-1.0'
-            ];
-            for (const m of models) {
+            // 3. Cloud Coding AI Fallback if user has no key or rate-limited
+            if (!rawAiReply) {
                 try {
-                    const res = await fetch(`https://router.huggingface.co/hf-inference/models/${m}`, {
+                    if (onProgress) onProgress(22);
+                    const res = await fetch('https://text.pollinations.ai/openai', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${hfToken}`,
-                            'Content-Type': 'application/json',
-                            'x-wait-for-model': 'true'
-                        },
-                        body: JSON.stringify({ inputs: promptText })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: 'qwen-coder',
+                            messages: [
+                                { role: 'system', content: systemInstruction },
+                                { role: 'user', content: `USER VIDEO PROMPT: "${userPrompt}"` }
+                            ]
+                        })
                     });
                     if (res.ok) {
-                        const blob = await res.blob();
-                        if (blob && blob.size > 2000) {
-                            const objUrl = URL.createObjectURL(blob);
-                            return await this.loadDataUrlToImage(objUrl);
-                        }
+                        const data = await res.json();
+                        rawAiReply = data.choices?.[0]?.message?.content || '';
                     }
                 } catch (e) {}
             }
-            return null;
+
+            const cleanedCode = this.extractCleanJsBody(rawAiReply);
+            if (cleanedCode && cleanedCode.length > 35) {
+                return cleanedCode;
+            }
+
+            // 4. Smart Dynamic Procedural Fallback tailored to keywords in the user's prompt
+            return this.buildDynamicKeywordCode(userPrompt);
         },
 
-        // Calls Pollinations Fast Turbo with 24s timeout
-        async tryPollinationsFastImage(promptText, w, h, index) {
-            const seed = Math.floor(Math.random() * 999999) + index * 131;
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+        extractCleanJsBody(rawText) {
+            if (!rawText) return '';
+            let code = rawText;
+            const fenceMatch = rawText.match(/```(?:javascript|js)?\s*([\s\S]*?)```/i);
+            if (fenceMatch && fenceMatch[1]) {
+                code = fenceMatch[1].trim();
+            }
+            // Strip function wrapper if the LLM included `function renderFrame(...) { ... }`
+            code = code.replace(/^function\s+\w+\s*\([^)]*\)\s*\{/, '');
+            if (code.endsWith('}') && (code.match(/\{/g) || []).length < (code.match(/\}/g) || []).length) {
+                code = code.slice(0, -1);
+            }
+            return code.trim();
+        },
+
+        // Compiles the AI's JS code and tests it on sample timestamps so it NEVER crashes during rendering
+        compileSafeRenderFunction(jsBody, fallbackPrompt) {
+            const helpers = this.createCanvasHelpers();
+            const testCanvas = document.createElement('canvas');
+            testCanvas.width = 320;
+            testCanvas.height = 180;
+            const testCtx = testCanvas.getContext('2d');
+
+            const tryBuild = (codeStr) => {
+                const fn = new Function('ctx', 'w', 'h', 't', 'helpers', codeStr);
+                // Dry-run across Act 1, Act 2, Act 3 to verify zero runtime exceptions
+                fn(testCtx, 320, 180, 0.5, helpers);
+                fn(testCtx, 320, 180, 5.0, helpers);
+                fn(testCtx, 320, 180, 9.2, helpers);
+                return fn;
+            };
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 24000);
-                const res = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                return tryBuild(jsBody);
+            } catch (err) {
+                console.warn("Auto-healing AI animation code syntax:", err.message);
+                const safeFallbackCode = this.buildDynamicKeywordCode(fallbackPrompt);
+                return tryBuild(safeFallbackCode);
+            }
+        },
 
-                if (res.ok) {
-                    const blob = await res.blob();
-                    if (blob && blob.size > 2000) {
-                        const objUrl = URL.createObjectURL(blob);
-                        return await this.loadDataUrlToImage(objUrl);
+        // Tailored procedural animation generator if offline or AI code had a syntax glitch
+        buildDynamicKeywordCode(promptText) {
+            const p = (promptText || '').toLowerCase();
+            const safeSub = (promptText || '').replace(/'/g, "\\'").slice(0, 68);
+
+            if (/(robot|monster|fight|battle|kaiju|war)/i.test(p)) {
+                return `
+                helpers.drawSky(ctx, w, h, '#090d1f', '#3b0764', 0.8);
+                helpers.drawCity(ctx, w, h, h * 0.82, '#090a0f', 'rgba(250,204,21,0.35)');
+                helpers.drawGround(ctx, w, h, h * 0.82, '#1e293b', '#020617');
+                const robX = helpers.lerp(w * 0.15, w * 0.34, helpers.smoothstep(0, 3, t));
+                const monX = helpers.lerp(w * 0.85, w * 0.66, helpers.smoothstep(0, 3, t));
+                const clash = t > 3.2 && t < 7.5;
+                helpers.drawRobot(ctx, { x: robX, y: h * 0.82, scale: 1.1, color: '#3b82f6', eyeColor: '#38bdf8', laserActive: clash, targetX: monX, targetY: h * 0.55 });
+                if (t < 8.2) {
+                    helpers.drawMonster(ctx, { x: monX, y: h * 0.82, scale: 1.15, color: '#166534', roar: true, fireActive: clash, targetX: robX, targetY: h * 0.55 });
+                }
+                if (t >= 7.2) {
+                    helpers.drawExplosion(ctx, monX, h * 0.6, 140, helpers.clamp((t - 7.2) / 2.2, 0, 1));
+                }
+                helpers.drawParticles(ctx, w, h, t, '#f97316', 35, 'up');
+                helpers.drawSubtitle(ctx, '${safeSub}');`;
+            }
+
+            if (/(car|race|racing|drive|police|street)/i.test(p)) {
+                return `
+                helpers.drawSky(ctx, w, h, '#050816', '#1e1b4b', 0.9);
+                helpers.drawCity(ctx, w, h, h * 0.78, '#0f172a', 'rgba(56,189,248,0.4)');
+                helpers.drawGround(ctx, w, h, h * 0.78, '#1e293b', '#090a0f');
+                const car1X = helpers.lerp(w * 0.12, w * 0.78, t / 10);
+                const car2X = helpers.lerp(w * 0.02, w * 0.62, t / 10);
+                helpers.drawVehicle(ctx, { x: car1X, y: h * 0.78, scale: 1.15, color: '#ef4444', type: 'car' });
+                helpers.drawVehicle(ctx, { x: car2X, y: h * 0.84, scale: 1.1, color: '#3b82f6', type: 'police' });
+                helpers.drawParticles(ctx, w, h, t, '#38bdf8', 30, 'right');
+                helpers.drawSubtitle(ctx, '${safeSub}');`;
+            }
+
+            if (/(rocket|space|planet|mars|moon|star)/i.test(p)) {
+                return `
+                helpers.drawSky(ctx, w, h, '#02040a', '#1e1038', 1.0);
+                const ry = helpers.lerp(h * 0.82, h * 0.18, helpers.smoothstep(0, 9, t));
+                helpers.drawVehicle(ctx, { x: w * 0.5, y: ry, scale: 1.2, color: '#f8fafc', type: 'rocket' });
+                helpers.drawParticles(ctx, w, h, t, '#fbbf24', 45, 'down');
+                helpers.drawSubtitle(ctx, '${safeSub}');`;
+            }
+
+            // Default expressive 2-character story animation
+            return `
+            helpers.drawSky(ctx, w, h, '#0f172a', '#1e3a8a', 0.4);
+            helpers.drawCity(ctx, w, h, h * 0.82, '#1e293b', 'rgba(253,224,71,0.25)');
+            helpers.drawGround(ctx, w, h, h * 0.82, '#334155', '#0f172a');
+            const p1X = helpers.lerp(w * 0.22, w * 0.38, helpers.smoothstep(0, 2.5, t));
+            const p2X = helpers.lerp(w * 0.78, w * 0.62, helpers.smoothstep(0, 2.5, t));
+            const act = t < 3.5 ? 1 : (t < 7.0 ? 2 : 3);
+            helpers.drawCharacter(ctx, {
+                x: p1X, y: h * 0.82, scale: 1.1,
+                shirtColor: act === 3 ? '#f59e0b' : '#64748b',
+                pantsColor: '#1e293b',
+                expression: act === 1 ? 'sad' : (act === 2 ? 'shocked' : 'happy'),
+                pose: act === 1 ? 'beg' : (act === 3 ? 'celebrate' : 'idle'),
+                facing: 1,
+                holding: act === 3 ? 'gold_bag' : 'none',
+                speech: act === 1 ? 'Please help...' : (act === 3 ? 'My turn now!' : '')
+            });
+            helpers.drawCharacter(ctx, {
+                x: p2X, y: h * 0.82, scale: 0.92,
+                shirtColor: '#ef4444',
+                pantsColor: '#0f172a',
+                expression: act === 2 ? 'laughing' : (act === 3 ? 'shocked' : 'neutral'),
+                pose: act === 2 ? 'point' : (act === 3 ? 'fall' : 'idle'),
+                facing: -1,
+                holding: act < 3 ? 'money' : 'none',
+                speech: act === 2 ? 'Haha! No way!' : (act === 3 ? 'Oh no!' : '')
+            });
+            helpers.drawSubtitle(ctx, '${safeSub}');`;
+        },
+
+        // Rich Canvas 2D Helper Toolkit injected into every AI-generated animation
+        createCanvasHelpers() {
+            return {
+                lerp: (a, b, t) => a + (b - a) * Math.min(1, Math.max(0, t)),
+                clamp: (v, min, max) => Math.min(max, Math.max(min, v)),
+                smoothstep: (e0, e1, x) => {
+                    const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0 || 1)));
+                    return t * t * (3 - 2 * t);
+                },
+
+                drawSky(ctx, w, h, topCol = '#090d1f', botCol = '#1e3a8a', starsAlpha = 0.6) {
+                    const g = ctx.createLinearGradient(0, 0, 0, h);
+                    g.addColorStop(0, topCol);
+                    g.addColorStop(1, botCol);
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, w, h);
+
+                    if (starsAlpha > 0) {
+                        ctx.fillStyle = `rgba(255,255,255,${starsAlpha})`;
+                        for (let i = 0; i < 45; i++) {
+                            const sx = (i * 197) % w;
+                            const sy = (i * 89) % (h * 0.65);
+                            ctx.beginPath();
+                            ctx.arc(sx, sy, (i % 2) + 0.8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
                     }
+                },
+
+                drawGround(ctx, w, h, groundY, topCol = '#1e293b', botCol = '#090a0f') {
+                    const g = ctx.createLinearGradient(0, groundY, 0, h);
+                    g.addColorStop(0, topCol);
+                    g.addColorStop(1, botCol);
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, groundY, w, h - groundY);
+                },
+
+                drawCity(ctx, w, h, groundY, bCol = '#0b0f19', winCol = 'rgba(253,224,71,0.3)') {
+                    const cols = 14;
+                    const bw = w / cols;
+                    for (let i = 0; i < cols; i++) {
+                        const bh = h * (0.2 + ((i * 29) % 26) / 100);
+                        ctx.fillStyle = bCol;
+                        ctx.fillRect(i * bw + 2, groundY - bh, bw - 4, bh);
+                        ctx.fillStyle = winCol;
+                        for (let wy = groundY - bh + 12; wy < groundY - 14; wy += 16) {
+                            if ((i + wy) % 2 === 0) ctx.fillRect(i * bw + 8, wy, 5, 7);
+                        }
+                    }
+                },
+
+                drawCharacter(ctx, opts = {}) {
+                    const {
+                        x = 200, y = 380, scale = 1,
+                        shirtColor = '#3b82f6', pantsColor = '#1e293b',
+                        skinColor = '#fcd34d', hairColor = '#1f2937',
+                        expression = 'neutral', pose = 'idle',
+                        facing = 1, holding = 'none', speech = ''
+                    } = opts;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+                    if (pose === 'fall') {
+                        ctx.rotate(facing * 0.45);
+                    }
+                    ctx.scale(scale * facing, scale);
+
+                    const walkSwing = pose === 'walk' ? Math.sin(Date.now() * 0.015) * 14 : 0;
+
+                    // Legs
+                    ctx.strokeStyle = pantsColor;
+                    ctx.lineWidth = 10;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(-8, -55);
+                    ctx.lineTo(-10 - walkSwing, 0);
+                    ctx.moveTo(8, -55);
+                    ctx.lineTo(10 + walkSwing, 0);
+                    ctx.stroke();
+
+                    // Torso
+                    ctx.fillStyle = shirtColor;
+                    ctx.beginPath();
+                    ctx.roundRect ? ctx.roundRect(-18, -112, 36, 60, 10) : ctx.fillRect(-18, -112, 36, 60);
+                    ctx.fill();
+
+                    // Arms
+                    ctx.strokeStyle = skinColor;
+                    ctx.lineWidth = 8;
+                    ctx.beginPath();
+                    if (pose === 'beg' || pose === 'point') {
+                        ctx.moveTo(12, -100);
+                        ctx.lineTo(42, -88);
+                    } else if (pose === 'celebrate') {
+                        ctx.moveTo(-14, -102);
+                        ctx.lineTo(-32, -142);
+                        ctx.moveTo(14, -102);
+                        ctx.lineTo(32, -142);
+                    } else {
+                        ctx.moveTo(-14, -100);
+                        ctx.lineTo(-20 + walkSwing * 0.5, -62);
+                        ctx.moveTo(14, -100);
+                        ctx.lineTo(22 - walkSwing * 0.5, -62);
+                    }
+                    ctx.stroke();
+
+                    // Held Object
+                    if (holding === 'money') {
+                        ctx.fillStyle = '#22c55e';
+                        ctx.fillRect(36, -98, 22, 12);
+                    } else if (holding === 'gold_bag') {
+                        ctx.fillStyle = '#eab308';
+                        ctx.beginPath();
+                        ctx.arc(34, -82, 14, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (holding === 'sword') {
+                        ctx.strokeStyle = '#e2e8f0';
+                        ctx.lineWidth = 4;
+                        ctx.beginPath();
+                        ctx.moveTo(35, -85);
+                        ctx.lineTo(75, -125);
+                        ctx.stroke();
+                    }
+
+                    // Head
+                    ctx.fillStyle = skinColor;
+                    ctx.beginPath();
+                    ctx.arc(0, -134, 21, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Hair / Crown
+                    if (holding === 'crown') {
+                        ctx.fillStyle = '#facc15';
+                        ctx.beginPath();
+                        ctx.moveTo(-16, -150);
+                        ctx.lineTo(-10, -168);
+                        ctx.lineTo(0, -155);
+                        ctx.lineTo(10, -168);
+                        ctx.lineTo(16, -150);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        ctx.fillStyle = hairColor;
+                        ctx.beginPath();
+                        ctx.arc(0, -138, 21, Math.PI, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Eyes & Expression
+                    ctx.fillStyle = '#0f172a';
+                    ctx.beginPath();
+                    ctx.arc(7, -136, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    if (expression === 'happy' || expression === 'laughing') {
+                        ctx.arc(6, -128, 7, 0, Math.PI);
+                    } else if (expression === 'sad' || expression === 'angry') {
+                        ctx.arc(6, -121, 6, Math.PI, Math.PI * 2);
+                    } else if (expression === 'shocked') {
+                        ctx.arc(7, -125, 4.5, 0, Math.PI * 2);
+                    } else {
+                        ctx.moveTo(2, -126);
+                        ctx.lineTo(12, -126);
+                    }
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                    // Floating Speech Bubble (always readable, un-mirrored)
+                    if (speech) {
+                        ctx.save();
+                        ctx.font = 'bold 13px Segoe UI, sans-serif';
+                        const tw = ctx.measureText(speech).width + 20;
+                        const bx = x - tw / 2;
+                        const by = y - 195 * scale;
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.roundRect ? ctx.roundRect(bx, by, tw, 28, 10) : ctx.fillRect(bx, by, tw, 28);
+                        ctx.fill();
+                        ctx.fillStyle = '#0f172a';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(speech, x, by + 18);
+                        ctx.restore();
+                    }
+                },
+
+                drawRobot(ctx, opts = {}) {
+                    const { x = 250, y = 400, scale = 1, color = '#3b82f6', eyeColor = '#38bdf8', laserActive = false, targetX = 600, targetY = 260 } = opts;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.scale(scale, scale);
+
+                    // Legs
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(-34, -75, 24, 75);
+                    ctx.fillRect(10, -75, 24, 75);
+                    // Armor Torso
+                    ctx.fillStyle = color;
+                    ctx.fillRect(-46, -165, 92, 92);
+                    // Shoulders
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fillRect(-62, -165, 20, 45);
+                    ctx.fillRect(42, -165, 20, 45);
+                    // Head & Visor
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(-24, -202, 48, 36);
+                    ctx.fillStyle = eyeColor;
+                    ctx.fillRect(-14, -190, 32, 9);
+                    ctx.restore();
+
+                    if (laserActive) {
+                        ctx.save();
+                        ctx.strokeStyle = eyeColor;
+                        ctx.lineWidth = 7;
+                        ctx.shadowBlur = 18;
+                        ctx.shadowColor = eyeColor;
+                        ctx.beginPath();
+                        ctx.moveTo(x + 15 * scale, y - 185 * scale);
+                        ctx.lineTo(targetX, targetY);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                },
+
+                drawMonster(ctx, opts = {}) {
+                    const { x = 680, y = 400, scale = 1, color = '#15803d', fireActive = false, targetX = 280, targetY = 260 } = opts;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.scale(scale, scale);
+
+                    // Dorsal Spikes
+                    ctx.fillStyle = '#a855f7';
+                    for (let i = 0; i < 4; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(25, -170 + i * 35);
+                        ctx.lineTo(58, -155 + i * 35);
+                        ctx.lineTo(25, -140 + i * 35);
+                        ctx.fill();
+                    }
+                    // Monster Body
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(-45, 0);
+                    ctx.lineTo(-35, -180);
+                    ctx.lineTo(15, -205);
+                    ctx.lineTo(45, -140);
+                    ctx.lineTo(40, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Glowing Eye
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(-16, -175, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    if (fireActive) {
+                        ctx.save();
+                        ctx.strokeStyle = '#f97316';
+                        ctx.lineWidth = 9;
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = '#ef4444';
+                        ctx.beginPath();
+                        ctx.moveTo(x - 25 * scale, y - 165 * scale);
+                        ctx.lineTo(targetX, targetY);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                },
+
+                drawVehicle(ctx, opts = {}) {
+                    const { x = 300, y = 380, scale = 1, color = '#ef4444', type = 'car' } = opts;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.scale(scale, scale);
+
+                    if (type === 'rocket') {
+                        // Exhaust Flame
+                        ctx.fillStyle = '#f97316';
+                        ctx.beginPath();
+                        ctx.moveTo(-14, 0);
+                        ctx.lineTo(0, 38 + Math.random() * 14);
+                        ctx.lineTo(14, 0);
+                        ctx.fill();
+                        // Rocket Body
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -95);
+                        ctx.lineTo(22, -45);
+                        ctx.lineTo(22, 0);
+                        ctx.lineTo(-22, 0);
+                        ctx.lineTo(-22, -45);
+                        ctx.closePath();
+                        ctx.fill();
+                        // Window
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.beginPath();
+                        ctx.arc(0, -45, 9, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // Sports / Police Car
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.roundRect ? ctx.roundRect(-55, -36, 110, 24, 8) : ctx.fillRect(-55, -36, 110, 24);
+                        ctx.fill();
+                        ctx.fillStyle = '#0f172a';
+                        ctx.beginPath();
+                        ctx.roundRect ? ctx.roundRect(-30, -54, 58, 22, 6) : ctx.fillRect(-30, -54, 58, 22);
+                        ctx.fill();
+                        if (type === 'police') {
+                            ctx.fillStyle = Math.floor(Date.now() / 150) % 2 === 0 ? '#ef4444' : '#3b82f6';
+                            ctx.fillRect(-8, -60, 16, 6);
+                        }
+                        // Wheels
+                        ctx.fillStyle = '#020617';
+                        ctx.beginPath();
+                        ctx.arc(-32, -10, 12, 0, Math.PI * 2);
+                        ctx.arc(32, -10, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                },
+
+                drawExplosion(ctx, x, y, radius = 90, progress = 0.5) {
+                    if (progress <= 0 || progress >= 1) return;
+                    const r = radius * Math.sin(progress * Math.PI);
+                    const g = ctx.createRadialGradient(x, y, 4, x, y, Math.max(10, r));
+                    g.addColorStop(0, '#ffffff');
+                    g.addColorStop(0.4, '#facc15');
+                    g.addColorStop(0.8, '#ef4444');
+                    g.addColorStop(1, 'rgba(239,68,68,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(x, y, Math.max(10, r), 0, Math.PI * 2);
+                    ctx.fill();
+                },
+
+                drawParticles(ctx, w, h, t, color = '#ffffff', count = 30, direction = 'up') {
+                    ctx.fillStyle = color;
+                    for (let i = 0; i < count; i++) {
+                        const seed = i * 73.13;
+                        let px = (seed * 19) % w;
+                        let py = (seed * 31) % h;
+                        if (direction === 'up') py = (h - ((py + t * 90) % h));
+                        else if (direction === 'down') py = (py + t * 140) % h;
+                        else if (direction === 'right') px = (px + t * 180) % w;
+                        ctx.globalAlpha = 0.65;
+                        ctx.beginPath();
+                        ctx.arc(px, py, (i % 3) + 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+                },
+
+                drawSubtitle(ctx, text) {
+                    if (!text) return;
+                    const w = ctx.canvas.width;
+                    const h = ctx.canvas.height;
+                    ctx.save();
+                    ctx.font = 'bold 19px Segoe UI, sans-serif';
+                    const maxW = w * 0.86;
+                    const words = String(text).split(' ');
+                    const lines = [];
+                    let line = '';
+                    for (const word of words) {
+                        const test = line ? `${line} ${word}` : word;
+                        if (ctx.measureText(test).width > maxW && line) {
+                            lines.push(line);
+                            line = word;
+                        } else {
+                            line = test;
+                        }
+                    }
+                    if (line) lines.push(line);
+
+                    const showLines = lines.slice(0, 2);
+                    const boxH = showLines.length * 26 + 16;
+                    const boxY = h - boxH - 18;
+
+                    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                    ctx.beginPath();
+                    ctx.roundRect ? ctx.roundRect(w * 0.06, boxY, w * 0.88, boxH, 12) : ctx.fillRect(w * 0.06, boxY, w * 0.88, boxH);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.textAlign = 'center';
+                    showLines.forEach((ln, idx) => {
+                        ctx.fillText(ln, w / 2, boxY + 24 + idx * 26);
+                    });
+                    ctx.restore();
                 }
-            } catch (e) {}
-            return null;
+            };
         },
 
-        loadDataUrlToImage(src) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => resolve(img);
-                img.onerror = () => resolve(null);
-                img.src = src;
-            });
-        },
+        // =========================================================================
+        // 4. RENDER ENGINE + MP4 COMPILER (WebCodecs H.264 MP4 + MediaRecorder Fallback)
+        // =========================================================================
+        async executeRenderEngineToMp4(renderFn, promptText, monitorCanvas, onProgress) {
+            const isVertical = this.aspectRatio === '9:16';
+            // Even dimensions required by H.264 MP4 encoders
+            const width = isVertical ? 480 : 854;
+            const height = isVertical ? 854 : 480;
+            const fps = 30;
+            const durationSec = 10;
+            const totalFrames = fps * durationSec; // 300 frames
 
-        // Rich Illustrated Scene Synthesizer (Draws skyline, spotlight beams, silhouette characters & energy clash if offline)
-        buildAnimatedActionFallbackCanvas(w, h, visualDesc, index) {
-            const off = document.createElement('canvas');
-            off.width = w;
-            off.height = h;
-            const c = off.getContext('2d');
+            const renderCanvas = document.createElement('canvas');
+            renderCanvas.width = width;
+            renderCanvas.height = height;
+            const ctx = renderCanvas.getContext('2d');
 
-            // 1. Dramatic Twilight Sky Gradient
-            const sky = c.createLinearGradient(0, 0, 0, h);
-            if (index === 0) {
-                sky.addColorStop(0, '#090d1e');
-                sky.addColorStop(0.6, '#1e3a8a');
-                sky.addColorStop(1, '#0f172a');
-            } else if (index === 1) {
-                sky.addColorStop(0, '#1f0812');
-                sky.addColorStop(0.6, '#7f1d1d');
-                sky.addColorStop(1, '#090a0f');
-            } else {
-                sky.addColorStop(0, '#140c24');
-                sky.addColorStop(0.55, '#581c87');
-                sky.addColorStop(1, '#f59e0b');
+            if (monitorCanvas) {
+                monitorCanvas.width = width;
+                monitorCanvas.height = height;
             }
-            c.fillStyle = sky;
-            c.fillRect(0, 0, w, h);
+            const monitorCtx = monitorCanvas ? monitorCanvas.getContext('2d') : null;
+            const helpers = this.createCanvasHelpers();
 
-            // 2. Glowing Sun / Moon / Energy Core in background
-            const coreX = w * (0.3 + index * 0.2);
-            const coreY = h * 0.35;
-            const glow = c.createRadialGradient(coreX, coreY, 10, coreX, coreY, w * 0.35);
-            glow.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
-            glow.addColorStop(0.3, index === 1 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.45)');
-            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            c.fillStyle = glow;
-            c.fillRect(0, 0, w, h);
-
-            // 3. City Skyline Silhouette
-            c.fillStyle = '#05070d';
-            const buildingCount = 18;
-            const bw = w / buildingCount;
-            for (let b = 0; b < buildingCount; b++) {
-                const bh = h * (0.22 + ((b * 37 + index * 19) % 28) / 100);
-                c.fillRect(b * bw, h - bh, bw - 2, bh);
-                // Lit skyscraper windows
-                c.fillStyle = 'rgba(253, 224, 71, 0.25)';
-                for (let wy = h - bh + 12; wy < h - 20; wy += 18) {
-                    if ((b + wy) % 3 === 0) c.fillRect(b * bw + 6, wy, 5, 8);
-                }
-                c.fillStyle = '#05070d';
-            }
-
-            // 4. Two Dramatic Confronting Silhouettes + Energy Clash Beam
-            const leftX = w * 0.32;
-            const rightX = w * 0.68;
-            const groundY = h * 0.82;
-
-            // Left Titan / Character Silhouette
-            c.fillStyle = '#02040a';
-            c.fillRect(leftX - 28, groundY - 150, 56, 150);
-            c.fillRect(leftX - 18, groundY - 182, 36, 30); // Head
-            c.fillStyle = '#38bdf8';
-            c.fillRect(leftX + 4, groundY - 172, 12, 5); // Glowing visor
-
-            // Right Monster / Rival Silhouette
-            c.fillStyle = '#02040a';
-            c.beginPath();
-            c.moveTo(rightX - 40, groundY);
-            c.lineTo(rightX - 25, groundY - 165);
-            c.lineTo(rightX + 10, groundY - 185);
-            c.lineTo(rightX + 45, groundY - 130);
-            c.lineTo(rightX + 35, groundY);
-            c.closePath();
-            c.fill();
-            c.fillStyle = '#ef4444';
-            c.beginPath();
-            c.arc(rightX - 10, groundY - 158, 5, 0, Math.PI * 2);
-            c.fill();
-
-            // Energy Beam Clash between them
-            const clashX = w * 0.5;
-            const clashY = groundY - 135;
-            c.strokeStyle = '#38bdf8';
-            c.lineWidth = 6;
-            c.beginPath();
-            c.moveTo(leftX + 25, groundY - 130);
-            c.lineTo(clashX, clashY);
-            c.stroke();
-
-            c.strokeStyle = '#f43f5e';
-            c.lineWidth = 6;
-            c.beginPath();
-            c.moveTo(rightX - 25, groundY - 140);
-            c.lineTo(clashX, clashY);
-            c.stroke();
-
-            const burst = c.createRadialGradient(clashX, clashY, 2, clashX, clashY, 55);
-            burst.addColorStop(0, '#ffffff');
-            burst.addColorStop(0.5, '#facc15');
-            burst.addColorStop(1, 'rgba(250, 204, 21, 0)');
-            c.fillStyle = burst;
-            c.beginPath();
-            c.arc(clashX, clashY, 55, 0, Math.PI * 2);
-            c.fill();
-
-            return off;
-        },
-
-        // Safe rounded rectangle helper (compatible with all mobile browsers)
-        drawRoundedBox(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        },
-
-        drawWrappedSubtitle(ctx, text, canvasW, canvasH, isVertical) {
-            if (!text) return;
-            const fontSize = isVertical ? 20 : 22;
-            ctx.font = `bold ${fontSize}px Segoe UI, sans-serif`;
-            const maxWidth = canvasW * 0.84;
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = '';
-
-            for (const word of words) {
-                const testLine = currentLine ? `${currentLine} ${word}` : word;
-                if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-                    lines.push(currentLine);
-                    currentLine = word;
-                } else {
-                    currentLine = testLine;
-                }
-            }
-            if (currentLine) lines.push(currentLine);
-
-            const displayLines = lines.slice(0, 3);
-            const lineHeight = fontSize + 8;
-            const boxHeight = displayLines.length * lineHeight + 18;
-            const boxY = canvasH - boxHeight - (isVertical ? 36 : 22);
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-            this.drawRoundedBox(ctx, canvasW * 0.06, boxY, canvasW * 0.88, boxHeight, 12);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            displayLines.forEach((line, idx) => {
-                ctx.fillText(line, canvasW / 2, boxY + 24 + idx * lineHeight);
-            });
-        },
-
-        encodeRealTenSecondVideo(storyboard, sceneImages, onFrameProgress) {
-            return new Promise((resolve, reject) => {
-                const isVertical = this.aspectRatio === '9:16';
-                const canvas = document.createElement('canvas');
-                canvas.width = isVertical ? 540 : 960;
-                canvas.height = isVertical ? 960 : 540;
-                const ctx = canvas.getContext('2d');
-
-                if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
-                    return reject(new Error('Video recording is not supported on this browser.'));
-                }
-
-                const fps = 30;
-                const totalFrames = 300; // Exact 10.0 seconds at 30 FPS
-                const frameIntervalMs = 1000 / fps;
-                const framesPerScene = totalFrames / sceneImages.length;
-
-                let mixedStream = canvas.captureStream(fps);
+            // METHOD A: Hardware WebCodecs VideoEncoder + Mp4Muxer -> Genuine .MP4 File
+            if (typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined' && window.Mp4Muxer) {
                 try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const dest = audioCtx.createMediaStreamDestination();
-                    const gain = audioCtx.createGain();
-                    gain.gain.value = 0.05;
-                    gain.connect(dest);
-
-                    [110, 146.83, 196.0].forEach((freq, idx) => {
-                        const osc = audioCtx.createOscillator();
-                        osc.type = idx === 0 ? 'sine' : 'triangle';
-                        osc.frequency.value = freq;
-                        osc.connect(gain);
-                        osc.start();
-                        setTimeout(() => { try { osc.stop(); } catch (e) {} }, 10300);
+                    const muxer = new window.Mp4Muxer.Muxer({
+                        target: new window.Mp4Muxer.ArrayBufferTarget(),
+                        video: {
+                            codec: 'avc',
+                            width,
+                            height
+                        },
+                        fastStart: 'in-memory'
                     });
 
-                    const audioTrack = dest.stream.getAudioTracks()[0];
-                    if (audioTrack) mixedStream.addTrack(audioTrack);
-                } catch (e) {}
+                    let encoderError = null;
+                    const encoder = new VideoEncoder({
+                        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+                        error: (e) => { encoderError = e; }
+                    });
 
-                const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+                    encoder.configure({
+                        codec: 'avc1.42001f',
+                        width,
+                        height,
+                        bitrate: 2_500_000,
+                        framerate: fps
+                    });
+
+                    for (let frame = 0; frame < totalFrames; frame++) {
+                        if (encoderError) throw encoderError;
+                        const t = frame / fps;
+
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, width, height);
+                        try {
+                            renderFn(ctx, width, height, t, helpers);
+                        } catch (frameErr) {
+                            helpers.drawSubtitle(ctx, promptText);
+                        }
+
+                        if (monitorCtx && frame % 3 === 0) {
+                            monitorCtx.drawImage(renderCanvas, 0, 0);
+                        }
+
+                        const timestampUs = Math.round((frame * 1_000_000) / fps);
+                        const vf = new VideoFrame(renderCanvas, { timestamp: timestampUs });
+                        encoder.encode(vf, { keyFrame: frame % 30 === 0 });
+                        vf.close();
+
+                        if (frame % 5 === 0) {
+                            if (onProgress) onProgress(frame + 1, totalFrames, 'rendering');
+                            await new Promise(r => setTimeout(r, 0)); // Keep UI responsive
+                        }
+                    }
+
+                    if (onProgress) onProgress(totalFrames, totalFrames, 'compiling');
+                    await encoder.flush();
+                    muxer.finalize();
+
+                    const mp4Buffer = muxer.target.buffer;
+                    if (mp4Buffer && mp4Buffer.byteLength > 1000) {
+                        return {
+                            blob: new Blob([mp4Buffer], { type: 'video/mp4' }),
+                            extension: 'mp4',
+                            formatLabel: 'MP4 • H.264 • 10.0s'
+                        };
+                    }
+                } catch (mp4Err) {
+                    console.warn("WebCodecs MP4 fallback to MediaRecorder:", mp4Err);
+                }
+            }
+
+            // METHOD B: Universal MediaRecorder Engine (Works on all mobile/desktop browsers)
+            return await new Promise((resolve, reject) => {
+                if (!renderCanvas.captureStream || typeof MediaRecorder === 'undefined') {
+                    return reject(new Error("Video rendering is not supported on this browser."));
+                }
+
+                const stream = renderCanvas.captureStream(fps);
+                const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
                 const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
                 const recorder = chosenMime
-                    ? new MediaRecorder(mixedStream, { mimeType: chosenMime, videoBitsPerSecond: 3200000 })
-                    : new MediaRecorder(mixedStream);
+                    ? new MediaRecorder(stream, { mimeType: chosenMime, videoBitsPerSecond: 2500000 })
+                    : new MediaRecorder(stream);
 
                 const chunks = [];
                 recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-                recorder.onstop = () => resolve(new Blob(chunks, { type: chosenMime || 'video/webm' }));
+                recorder.onstop = () => {
+                    const isMp4 = (chosenMime || '').includes('mp4');
+                    resolve({
+                        blob: new Blob(chunks, { type: chosenMime || 'video/webm' }),
+                        extension: isMp4 ? 'mp4' : 'webm',
+                        formatLabel: `${isMp4 ? 'MP4' : 'WEBM'} • 10.0s`
+                    });
+                };
 
                 recorder.start(250);
                 let frame = 0;
 
-                const stepTimer = setInterval(() => {
+                const interval = setInterval(() => {
                     if (frame >= totalFrames) {
-                        clearInterval(stepTimer);
+                        clearInterval(interval);
+                        if (onProgress) onProgress(totalFrames, totalFrames, 'compiling');
                         if (recorder.state !== 'inactive') recorder.stop();
                         return;
                     }
 
-                    const sceneIdx = Math.min(sceneImages.length - 1, Math.floor(frame / framesPerScene));
-                    const localT = (frame % framesPerScene) / framesPerScene;
-                    const img = sceneImages[sceneIdx];
-                    const sceneMeta = storyboard[sceneIdx] || { caption: '' };
-
+                    const t = frame / fps;
                     ctx.fillStyle = '#000000';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    if (img) {
-                        const zoom = sceneIdx === 0
-                            ? 1.0 + localT * 0.14
-                            : sceneIdx === 1
-                                ? 1.14 - localT * 0.12
-                                : 1.02 + localT * 0.15;
-                        const panX = sceneIdx === 1 ? (localT - 0.5) * 36 : (0.5 - localT) * 28;
-
-                        const drawW = canvas.width * zoom;
-                        const drawH = canvas.height * zoom;
-                        const dx = (canvas.width - drawW) / 2 + panX;
-                        const dy = (canvas.height - drawH) / 2;
-
-                        ctx.drawImage(img, dx, dy, drawW, drawH);
+                    ctx.fillRect(0, 0, width, height);
+                    try {
+                        renderFn(ctx, width, height, t, helpers);
+                    } catch (e) {
+                        helpers.drawSubtitle(ctx, promptText);
                     }
 
-                    this.drawWrappedSubtitle(ctx, sceneMeta.caption, canvas.width, canvas.height, isVertical);
-
-                    if (localT < 0.10) {
-                        ctx.fillStyle = `rgba(0,0,0,${1 - localT / 0.10})`;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    } else if (localT > 0.90 && sceneIdx < sceneImages.length - 1) {
-                        ctx.fillStyle = `rgba(0,0,0,${(localT - 0.90) / 0.10})`;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    if (monitorCtx && frame % 3 === 0) {
+                        monitorCtx.drawImage(renderCanvas, 0, 0);
                     }
 
                     frame++;
-                    if (onFrameProgress && (frame % 3 === 0 || frame === totalFrames)) {
-                        onFrameProgress(frame, totalFrames);
+                    if (onProgress && frame % 3 === 0) {
+                        onProgress(frame, totalFrames, 'rendering');
                     }
-                }, frameIntervalMs);
+                }, 1000 / fps);
             });
         },
 
-        renderFinalVideoPlayer(cardWrap, videoUrl, promptText, ext, engineBadge) {
+        renderCompletedVideoCard(cardWrap, videoUrl, promptText, ext, formatLabel, generatedCode) {
             const fileName = `zoneweb-ai-video.${ext}`;
             window.__lastGeneratedVideoUrl = videoUrl;
             window.__lastGeneratedVideoPrompt = promptText;
+            const codePreviewId = 'zw_code_box_' + Date.now();
 
             cardWrap.innerHTML = `
                 <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-fuchsia-500/40 shadow-2xl space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             ${this.getCustomLogoSvg(18)}
-                            <span class="text-xs md:text-sm font-extrabold text-white">AI Video Ready</span>
+                            <span class="text-xs md:text-sm font-extrabold text-white">AI Video Compiled</span>
                         </div>
-                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">${engineBadge}</span>
+                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">${formatLabel}</span>
                     </div>
 
-                    <p class="text-xs text-gray-300">Story: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
+                    <p class="text-xs text-gray-300">Prompt: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
 
                     <div class="rounded-2xl overflow-hidden border border-white/15 bg-black shadow-xl flex justify-center">
                         <video src="${videoUrl}" controls autoplay loop muted playsinline class="w-full max-h-96 object-contain bg-black"></video>
@@ -1276,12 +1203,17 @@ Video Idea: "${userPrompt}"`;
 
                     <div class="flex flex-wrap gap-2 pt-1">
                         <a href="${videoUrl}" download="${fileName}" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
-                            <i class="fa-solid fa-download"></i> Download Video
+                            <i class="fa-solid fa-download"></i> Download ${ext.toUpperCase()}
                         </a>
                         <button onclick="window.ZenoVideo.embedVideoIntoCurrentWebsite()" class="px-4 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
-                            <i class="fa-solid fa-plus-circle"></i> Add Video to Website
+                            <i class="fa-solid fa-plus-circle"></i> Add to Website
+                        </button>
+                        <button onclick="document.getElementById('${codePreviewId}').classList.toggle('hidden')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-code"></i> View AI Code
                         </button>
                     </div>
+
+                    <pre id="${codePreviewId}" class="hidden p-3 rounded-xl bg-black/80 border border-white/10 text-[10px] font-mono text-emerald-300 overflow-x-auto max-h-48">${generatedCode.replace(/</g, '&lt;')}</pre>
                 </div>
             `;
         },
@@ -1312,7 +1244,7 @@ Video Idea: "${userPrompt}"`;
                     window.openPreviewModal();
                 }
             } else {
-                alert("Please build or select a website first, then click Add Video to Website!");
+                alert("Please build or select a website first, then click Add to Website!");
             }
         }
     };

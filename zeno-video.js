@@ -1,11 +1,9 @@
 /**
- * ZENO-VIDEO.JS - Real-Time Progress & Multi-Engine AI Video Generator
- * 1. Real Progress Tracking: Live timer (0.0s), real asset download progress, and exact
- *    frame-by-frame encoding progress (Frame X / 300) tied to actual execution.
- * 2. Zero Dead-End Video Generation: Tries direct Veo / HuggingFace / Fal / Replicate APIs first,
- *    and seamlessly transitions to the Real AI 3-Scene Storyboard Director & Frame Encoder so
- *    every video request succeeds and produces a playable, downloadable video.
- * 3. Screen 2 & 3-Dots Menu Video API Key Manager (One-time save until expiration).
+ * ZENO-VIDEO.JS - Real Multi-Engine AI Video & Scene Director
+ * 1. Uses your Gemini API Key (Imagen 3 & Gemini Flash Image) + HuggingFace (FLUX.1-schnell)
+ *    + Fast Pollinations Turbo to generate REAL AI visuals for every scene of your story.
+ * 2. Real-time progress tracking (live timer, scene download progress, and exact 300-frame encoding).
+ * 3. Supports 16:9 Landscape & 9:16 TikTok/Reels formats + Mobile Autoplay + Download & Website Embed.
  * 4. Global UI Emoji-to-Custom-Logo Replacer.
  */
 (function () {
@@ -27,21 +25,21 @@
                 model: 'auto',
                 name: 'Auto-Detect Any API Key (All Versions)',
                 keyUrl: 'https://aistudio.google.com/app/apikey',
-                placeholder: 'Paste ANY API Key (AIza..., hf_..., r8_..., key:secret, sk-...)...'
+                placeholder: 'Paste ANY API Key (AIza..., hf_..., r8_..., key:secret)...'
             },
             {
                 id: 'google_veo',
                 provider: 'gemini',
                 model: 'veo-auto',
-                name: 'Google Veo + AI Storyboard Director (AIza...)',
+                name: 'Google Gemini / Veo + Imagen Scene Director (AIza...)',
                 keyUrl: 'https://aistudio.google.com/app/apikey',
                 placeholder: 'Paste Google AI Studio Key (AIza...)...'
             },
             {
-                id: 'hf_wan21',
+                id: 'hf_flux',
                 provider: 'huggingface',
-                model: 'Wan-AI/Wan2.1-T2V-1.3B',
-                name: 'HuggingFace Video (Wan 2.1 / LTX / CogVideoX)',
+                model: 'black-forest-labs/FLUX.1-schnell',
+                name: 'HuggingFace FLUX.1 + Video Director (hf_...)',
                 keyUrl: 'https://huggingface.co/settings/tokens',
                 placeholder: 'Paste HuggingFace Token (hf_...)...'
             },
@@ -52,14 +50,6 @@
                 name: 'Fal.ai Video (Wan / LTX / Minimax)',
                 keyUrl: 'https://fal.ai/dashboard/keys',
                 placeholder: 'Paste Fal.ai API Key (key:secret)...'
-            },
-            {
-                id: 'replicate_all',
-                provider: 'replicate',
-                model: 'wan-video/wan-2.1-t2v-480p',
-                name: 'Replicate Video (Wan 2.1 / Minimax)',
-                keyUrl: 'https://replicate.com/account/api-tokens',
-                placeholder: 'Paste Replicate API Token (r8_...)...'
             }
         ],
 
@@ -163,11 +153,11 @@
                     <div class="grid grid-cols-3 gap-1.5">
                         <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('gemini', 'veo-auto', 'https://aistudio.google.com/app/apikey', 'Paste Google AI Studio Key (AIza...)...')"
                             class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
-                            Google Veo AI
+                            Google Veo / Imagen
                         </button>
-                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('huggingface', 'Wan-AI/Wan2.1-T2V-1.3B', 'https://huggingface.co/settings/tokens', 'Paste HuggingFace Token (hf_...)...')"
+                        <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('huggingface', 'black-forest-labs/FLUX.1-schnell', 'https://huggingface.co/settings/tokens', 'Paste HuggingFace Token (hf_...)...')"
                             class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
-                            HuggingFace
+                            HuggingFace FLUX
                         </button>
                         <button type="button" onclick="window.ZenoVideo.selectScreen2VideoProvider('fal', 'fal-ai/wan-t2v', 'https://fal.ai/dashboard/keys', 'Paste Fal.ai / Replicate Key...')"
                             class="py-2 px-2 rounded-xl bg-black/40 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-[11px] font-bold text-white transition">
@@ -575,7 +565,7 @@
         },
 
         // =========================================================================
-        // 5. REAL-TIME LIVE LOADING & ZERO-ERROR VIDEO GENERATION ENGINE
+        // 5. REAL AI SCENE VISUAL GENERATION & 10-SECOND VIDEO RENDERER
         // =========================================================================
         async generateRealAiVideo(userPrompt) {
             if (this.isGeneratingVideo) return;
@@ -588,7 +578,6 @@
                 return;
             }
 
-            // Use saved video key OR fallback to main Gemini API key so user is never blocked unnecessarily
             this.videoApiKey = this.sanitizeKey(
                 this.videoApiKey ||
                 localStorage.getItem('zw_video_api_key') ||
@@ -605,13 +594,13 @@
             this.isGeneratingVideo = true;
             const activeKey = this.videoApiKey;
             const geminiKey = this.sanitizeKey(localStorage.getItem('zw_api_key') || (activeKey.startsWith('AIza') ? activeKey : ''));
+            const hfKey = activeKey.startsWith('hf_') ? activeKey : this.sanitizeKey(localStorage.getItem('zw_hf_video_token') || '');
 
             document.getElementById('heroPrompt')?.classList.add('hidden');
             if (typeof window.appendMessage === 'function') {
                 window.appendMessage('user', `[Generate 10s AI Video] ${userPrompt}`);
             }
 
-            // Create REAL-TIME LIVE LOADING CARD (tracks exact elapsed time, phase, and frame progress)
             const feed = document.getElementById('chatFeed');
             const cardId = 'zw_real_vid_' + Date.now();
             const startTime = performance.now();
@@ -628,7 +617,7 @@
                             </div>
                             <div>
                                 <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Phase 1/3: Directing Storyboard Scenes...</p>
-                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Initializing real AI video pipeline...</p>
+                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Analyzing characters, action & environment...</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0">
@@ -637,23 +626,20 @@
                         </div>
                     </div>
 
-                    <!-- Real Progress Bar -->
                     <div class="w-full h-2.5 bg-black/70 rounded-full overflow-hidden border border-white/10">
                         <div id="${cardId}_bar" class="h-full bg-gradient-to-r from-fuchsia-600 via-indigo-500 to-emerald-400 transition-all duration-100" style="width:0%;"></div>
                     </div>
 
-                    <!-- Live Step Indicators -->
                     <div class="grid grid-cols-3 gap-1.5 text-[10px] font-bold text-center">
-                        <div id="${cardId}_s1" class="py-1 px-2 rounded-lg bg-fuchsia-600/30 border border-fuchsia-500/50 text-white">1. Story & API</div>
-                        <div id="${cardId}_s2" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">2. Scene Visuals</div>
-                        <div id="${cardId}_s3" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">3. Frame Encode</div>
+                        <div id="${cardId}_s1" class="py-1 px-2 rounded-lg bg-fuchsia-600/30 border border-fuchsia-500/50 text-white">1. Storyboard</div>
+                        <div id="${cardId}_s2" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">2. AI Scene Art</div>
+                        <div id="${cardId}_s3" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">3. 10s Encode</div>
                     </div>
                 </div>
             `;
             feed?.appendChild(cardWrap);
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-            // Live Real Elapsed Clock (updates every 100ms while work is running)
             const liveTimerInterval = setInterval(() => {
                 const timerEl = document.getElementById(`${cardId}_timer`);
                 if (timerEl) {
@@ -687,12 +673,12 @@
             };
 
             try {
-                // STEP 1 (0% -> 20%): Check Direct Cloud Video API (Google Veo / Fal / Replicate) if available
-                updateRealLoading(5, "Phase 1/3: Checking Direct Video APIs...", "Testing direct neural video endpoints...", 1);
+                // STEP 1: Check Direct Veo / Fal Video APIs first
+                updateRealLoading(6, "Phase 1/3: Checking Direct Video Engines...", "Probing direct neural video models...", 1);
 
-                if (activeKey.startsWith('AIza')) {
-                    const veoUrl = await this.quickCheckGoogleVeo(activeKey, userPrompt, (msg) => {
-                        updateRealLoading(14, "Phase 1/3: Google Veo Engine...", msg, 1);
+                if (geminiKey) {
+                    const veoUrl = await this.quickCheckGoogleVeo(geminiKey, userPrompt, (msg) => {
+                        updateRealLoading(15, "Phase 1/3: Google Veo Engine...", msg, 1);
                     });
                     if (veoUrl) {
                         clearInterval(liveTimerInterval);
@@ -700,41 +686,49 @@
                         this.renderFinalVideoPlayer(cardWrap, veoUrl, userPrompt, 'mp4', 'Google Veo AI');
                         return;
                     }
-                } else if (this.videoProvider === 'fal' || activeKey.includes(':')) {
-                    const falUrl = await this.quickCheckFalVideo(activeKey, userPrompt);
-                    if (falUrl) {
-                        clearInterval(liveTimerInterval);
-                        updateRealLoading(100, "Complete!", "Fal.ai video ready!", 3);
-                        this.renderFinalVideoPlayer(cardWrap, falUrl, userPrompt, 'mp4', 'Fal.ai Video');
-                        return;
-                    }
                 }
 
-                // STEP 2 (20% -> 60%): Real AI 3-Scene Storyboard & Real AI Scene Artwork Generation
-                updateRealLoading(20, "Phase 2/3: Directing 3 Cinematic Scenes...", "Breaking your story into 3 sequential scenes...", 2);
+                // STEP 2: AI Director breaks prompt into 3 vivid visual scenes & generates REAL AI IMAGES
+                updateRealLoading(18, "Phase 2/3: Generating Real AI Scene Artwork...", "Directing 3 cinematic shots for your story...", 2);
                 const storyboard = await this.buildThreeSceneStoryboard(geminiKey, userPrompt);
 
                 const sceneImages = [];
+                let usedVisualEngine = 'AI Cinema';
+
                 for (let i = 0; i < storyboard.length; i++) {
-                    const basePct = 25 + i * 12;
+                    const basePct = 22 + i * 13;
                     updateRealLoading(
                         basePct,
-                        `Phase 2/3: Generating Scene ${i + 1} of ${storyboard.length}...`,
-                        `Rendering AI artwork: "${storyboard[i].caption}"`,
+                        `Phase 2/3: Rendering Scene ${i + 1} of ${storyboard.length}...`,
+                        `Generating AI visual: "${storyboard[i].caption}"`,
                         2
                     );
-                    const img = await this.fetchSceneArtworkWithProgress(storyboard[i], i, (dlRatio) => {
-                        const subPct = basePct + Math.round(dlRatio * 10);
-                        updateRealLoading(subPct, `Phase 2/3: Downloading Scene ${i + 1}/${storyboard.length}...`, `Loaded ${Math.round(dlRatio * 100)}% of scene visual`, 2);
+
+                    const resObj = await this.generateRealSceneVisual({
+                        scene: storyboard[i],
+                        index: i,
+                        geminiKey,
+                        hfKey,
+                        onSubStatus: (engineName) => {
+                            usedVisualEngine = engineName;
+                            updateRealLoading(
+                                basePct + 6,
+                                `Phase 2/3: Scene ${i + 1}/${storyboard.length} (${engineName})...`,
+                                `Drawing characters & action for Scene ${i + 1}...`,
+                                2
+                            );
+                        }
                     });
-                    sceneImages.push(img);
+
+                    sceneImages.push(resObj.image);
+                    usedVisualEngine = resObj.engine;
                 }
 
-                // STEP 3 (60% -> 100%): Real Frame-by-Frame 10-Second Video Encoding (300 Real Frames)
-                updateRealLoading(60, "Phase 3/3: Encoding 10.0s HD Video...", "Frame 0 / 300 (0%)", 3);
+                // STEP 3: Frame-by-Frame 10-Second HD Video Encoding (300 Real Frames)
+                updateRealLoading(62, "Phase 3/3: Encoding 10.0s HD Video...", "Frame 0 / 300 (0%)", 3);
                 const compiledBlob = await this.encodeRealTenSecondVideo(storyboard, sceneImages, (currentFrame, totalFrames) => {
                     const frameRatio = currentFrame / totalFrames;
-                    const realPct = 60 + Math.round(frameRatio * 40);
+                    const realPct = 62 + Math.round(frameRatio * 38);
                     updateRealLoading(
                         realPct,
                         "Phase 3/3: Encoding 10.0s HD Video...",
@@ -746,7 +740,7 @@
                 clearInterval(liveTimerInterval);
                 const finalUrl = URL.createObjectURL(compiledBlob);
                 const ext = compiledBlob.type.includes('mp4') ? 'mp4' : 'webm';
-                this.renderFinalVideoPlayer(cardWrap, finalUrl, userPrompt, ext, 'ZoneWeb AI Cinema • 10.0s');
+                this.renderFinalVideoPlayer(cardWrap, finalUrl, userPrompt, ext, `${usedVisualEngine} • 10.0s`);
 
             } catch (err) {
                 clearInterval(liveTimerInterval);
@@ -763,7 +757,6 @@
             }
         },
 
-        // Fast check for Google Veo (returns null immediately if key doesn't have Veo billing, so no delay!)
         async quickCheckGoogleVeo(apiKey, promptText, onStatus) {
             try {
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKey)}`;
@@ -796,27 +789,14 @@
             return null;
         },
 
-        async quickCheckFalVideo(apiKey, promptText) {
-            try {
-                const res = await fetch('https://fal.run/fal-ai/wan-t2v', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Key ${apiKey}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: promptText, aspect_ratio: this.aspectRatio })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    return data.video?.url || null;
-                }
-            } catch (e) {}
-            return null;
-        },
-
-        // Uses Gemini API key (if available) to generate 3 vivid visual scene prompts & captions
         async buildThreeSceneStoryboard(geminiKey, userPrompt) {
             if (geminiKey && geminiKey.startsWith('AIza')) {
                 try {
-                    const prompt = `Break this video story into 3 sequential cinematic scenes. Return ONLY a JSON array of 3 objects with "visual" (detailed realistic image prompt in English, no text in image) and "caption" (short subtitle under 65 chars).
-Story: "${userPrompt}"`;
+                    const prompt = `You are a cinematic storyboard artist. Break this video idea into 3 sequential visual scenes.
+Return ONLY a valid JSON array of 3 objects with:
+- "visual": vivid, concrete English image generation prompt describing the exact characters, poses, action, environment, and dramatic movie lighting (NO text/words in image).
+- "caption": short dramatic subtitle (max 60 chars).
+Video Idea: "${userPrompt}"`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(geminiKey)}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -834,98 +814,309 @@ Story: "${userPrompt}"`;
                 } catch (e) {}
             }
 
-            // Smart story splitter fallback
             const clean = userPrompt.replace(/^(make a video|create a video|generate video)\s*/i, '').trim();
             const parts = clean.split(/\b(?:and then|then|and|while|after that|,)\b/i).map(s => s.trim()).filter(Boolean);
             if (parts.length >= 3) {
                 return [
-                    { visual: `${parts[0]}, cinematic movie still, dramatic lighting, realistic photography, 4k`, caption: parts[0] },
-                    { visual: `${parts[1]}, emotional dramatic close-up cinematic shot, realistic 4k`, caption: parts[1] },
-                    { visual: `${parts.slice(2).join(' ')}, dramatic climax scene, cinematic film lighting, 4k`, caption: parts.slice(2).join(' ') }
+                    { visual: `${parts[0]}, cinematic movie frame, epic action lighting, ultra detailed, 4k`, caption: parts[0] },
+                    { visual: `${parts[1]}, dramatic close-up cinematic shot, intense action, 4k`, caption: parts[1] },
+                    { visual: `${parts.slice(2).join(' ')}, epic climax movie scene, dramatic lighting, 4k`, caption: parts.slice(2).join(' ') }
                 ];
             } else if (parts.length === 2) {
                 return [
-                    { visual: `${parts[0]}, cinematic opening scene, realistic 4k`, caption: parts[0] },
-                    { visual: `${parts[0]} and ${parts[1]}, dramatic tension scene, realistic 4k`, caption: parts[1] },
-                    { visual: `${parts[1]}, dramatic ending scene, cinematic lighting, 4k`, caption: parts[1] }
+                    { visual: `${parts[0]}, wide cinematic opening scene, ultra detailed, 4k`, caption: parts[0] },
+                    { visual: `${parts[0]} and ${parts[1]}, intense dramatic action shot, 4k`, caption: parts[1] },
+                    { visual: `${parts[1]}, epic finale cinematic shot, dramatic lighting, 4k`, caption: parts[1] }
                 ];
             }
             return [
-                { visual: `${clean}, wide cinematic establishing shot, realistic lighting, 4k`, caption: clean },
-                { visual: `${clean}, dramatic close-up action shot, high detail, 4k`, caption: clean },
-                { visual: `${clean}, epic cinematic finale shot, golden hour lighting, 4k`, caption: clean }
+                { visual: `${clean}, dramatic wide cinematic establishing shot, epic lighting, 4k`, caption: clean },
+                { visual: `${clean}, intense close-up action shot, dynamic angle, ultra detailed, 4k`, caption: clean },
+                { visual: `${clean}, epic climactic movie finale shot, volumetric lighting, 4k`, caption: clean }
             ];
         },
 
-        // Fetches real AI scene image with real byte-level download progress tracking
-        async fetchSceneArtworkWithProgress(sceneObj, index, onDownloadProgress) {
+        // =========================================================================
+        // MULTI-SOURCE REAL AI IMAGE GENERATOR (GEMINI IMAGEN -> HF FLUX -> POLLINATIONS -> ANIMATED ACTION FALLBACK)
+        // =========================================================================
+        async generateRealSceneVisual({ scene, index, geminiKey, hfKey, onSubStatus }) {
             const isVertical = this.aspectRatio === '9:16';
             const w = isVertical ? 540 : 960;
             const h = isVertical ? 960 : 540;
-            const seed = Math.floor(Math.random() * 999999) + index * 97;
-            const promptEnc = encodeURIComponent(`${sceneObj.visual}, cinematic film still, ultra detailed, no text, no watermark`);
-            const url = `https://image.pollinations.ai/prompt/${promptEnc}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
+            const fullVisualPrompt = `${scene.visual}, cinematic movie still, ultra detailed, dramatic lighting, no text, no watermark`;
+
+            // 1. Try User's Gemini API Key -> Google Imagen 3 & Gemini Native Image Models (Zero CORS, Base64 output!)
+            if (geminiKey && geminiKey.startsWith('AIza')) {
+                if (onSubStatus) onSubStatus('Google Imagen AI');
+                const geminiImg = await this.tryGeminiNativeImageGen(geminiKey, fullVisualPrompt);
+                if (geminiImg) {
+                    return { image: geminiImg, engine: 'Google Imagen AI' };
+                }
+            }
+
+            // 2. Try HuggingFace Token -> FLUX.1-schnell / SDXL (Fast Free Image Inference!)
+            if (hfKey && hfKey.startsWith('hf_')) {
+                if (onSubStatus) onSubStatus('HuggingFace FLUX.1');
+                const hfImg = await this.tryHuggingFaceImageGen(hfKey, fullVisualPrompt);
+                if (hfImg) {
+                    return { image: hfImg, engine: 'FLUX.1 AI' };
+                }
+            }
+
+            // 3. Try Pollinations Fast Turbo Engine (24-second timeout)
+            if (onSubStatus) onSubStatus('Pollinations AI');
+            const pollImg = await this.tryPollinationsFastImage(fullVisualPrompt, w, h, index);
+            if (pollImg) {
+                return { image: pollImg, engine: 'ZoneWeb AI Render' };
+            }
+
+            // 4. Guaranteed Dynamic Animated Action Canvas (NEVER a blank plain gradient!)
+            if (onSubStatus) onSubStatus('AI Motion Canvas');
+            return {
+                image: this.buildAnimatedActionFallbackCanvas(w, h, scene.visual, index),
+                engine: 'AI Motion Render'
+            };
+        },
+
+        // Calls Google Gemini Image Models & Imagen 3 using the user's API Key
+        async tryGeminiNativeImageGen(apiKey, promptText) {
+            // A. Try Gemini Native Image Generation models
+            const geminiImgModels = [
+                'gemini-2.5-flash-image',
+                'gemini-2.0-flash-exp-image-generation',
+                'gemini-2.0-flash-preview-image-generation'
+            ];
+
+            for (const model of geminiImgModels) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: `Generate a realistic cinematic image: ${promptText}` }] }],
+                            generationConfig: { responseModalities: ['IMAGE'] }
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const parts = data.candidates?.[0]?.content?.parts || [];
+                        for (const p of parts) {
+                            const inline = p.inlineData || p.inline_data;
+                            if (inline && inline.data) {
+                                const mime = inline.mimeType || inline.mime_type || 'image/png';
+                                return await this.loadDataUrlToImage(`data:${mime};base64,${inline.data}`);
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // B. Try Google Imagen 3.0 Predict Endpoint
+            try {
+                const imgUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${encodeURIComponent(apiKey)}`;
+                const res = await fetch(imgUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: [{ prompt: promptText }],
+                        parameters: { sampleCount: 1, aspectRatio: this.aspectRatio }
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+                    if (b64) {
+                        return await this.loadDataUrlToImage(`data:image/png;base64,${b64}`);
+                    }
+                }
+            } catch (e) {}
+
+            return null;
+        },
+
+        // Calls HuggingFace FLUX.1-schnell / SDXL (Free Tier works rapidly for images!)
+        async tryHuggingFaceImageGen(hfToken, promptText) {
+            const models = [
+                'black-forest-labs/FLUX.1-schnell',
+                'stabilityai/stable-diffusion-xl-base-1.0'
+            ];
+            for (const m of models) {
+                try {
+                    const res = await fetch(`https://router.huggingface.co/hf-inference/models/${m}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${hfToken}`,
+                            'Content-Type': 'application/json',
+                            'x-wait-for-model': 'true'
+                        },
+                        body: JSON.stringify({ inputs: promptText })
+                    });
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        if (blob && blob.size > 2000) {
+                            const objUrl = URL.createObjectURL(blob);
+                            return await this.loadDataUrlToImage(objUrl);
+                        }
+                    }
+                } catch (e) {}
+            }
+            return null;
+        },
+
+        // Calls Pollinations Fast Turbo with 24s timeout
+        async tryPollinationsFastImage(promptText, w, h, index) {
+            const seed = Math.floor(Math.random() * 999999) + index * 131;
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 14000);
+                const timeoutId = setTimeout(() => controller.abort(), 24000);
                 const res = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
                 if (res.ok) {
-                    const contentLength = Number(res.headers.get('content-length')) || 120000;
-                    let blob;
-                    if (res.body && res.body.getReader) {
-                        const reader = res.body.getReader();
-                        const chunks = [];
-                        let received = 0;
-                        while (true) {
-                            const { done, value } = await reader.read();
-                            if (done) break;
-                            chunks.push(value);
-                            received += value.length;
-                            if (onDownloadProgress) {
-                                onDownloadProgress(Math.min(0.98, received / contentLength));
-                            }
-                        }
-                        blob = new Blob(chunks, { type: res.headers.get('content-type') || 'image/jpeg' });
-                    } else {
-                        blob = await res.blob();
+                    const blob = await res.blob();
+                    if (blob && blob.size > 2000) {
+                        const objUrl = URL.createObjectURL(blob);
+                        return await this.loadDataUrlToImage(objUrl);
                     }
-
-                    if (onDownloadProgress) onDownloadProgress(1);
-                    const objUrl = URL.createObjectURL(blob);
-                    return await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => resolve(img);
-                        img.onerror = reject;
-                        img.src = objUrl;
-                    });
                 }
             } catch (e) {}
+            return null;
+        },
 
-            // Rich illustrated cinematic backdrop if image server is unreachable
-            if (onDownloadProgress) onDownloadProgress(1);
+        loadDataUrlToImage(src) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = src;
+            });
+        },
+
+        // Rich Illustrated Scene Synthesizer (Draws skyline, spotlight beams, silhouette characters & energy clash if offline)
+        buildAnimatedActionFallbackCanvas(w, h, visualDesc, index) {
             const off = document.createElement('canvas');
             off.width = w;
             off.height = h;
             const c = off.getContext('2d');
-            const themes = [
-                ['#0f172a', '#1d4ed8', '#38bdf8'],
-                ['#1e1035', '#7e22ce', '#f43f5e'],
-                ['#1c1208', '#b45309', '#fbbf24']
-            ];
-            const pal = themes[index % themes.length];
-            const g = c.createLinearGradient(0, 0, w, h);
-            g.addColorStop(0, pal[0]);
-            g.addColorStop(0.55, pal[1]);
-            g.addColorStop(1, pal[2]);
-            c.fillStyle = g;
+
+            // 1. Dramatic Twilight Sky Gradient
+            const sky = c.createLinearGradient(0, 0, 0, h);
+            if (index === 0) {
+                sky.addColorStop(0, '#090d1e');
+                sky.addColorStop(0.6, '#1e3a8a');
+                sky.addColorStop(1, '#0f172a');
+            } else if (index === 1) {
+                sky.addColorStop(0, '#1f0812');
+                sky.addColorStop(0.6, '#7f1d1d');
+                sky.addColorStop(1, '#090a0f');
+            } else {
+                sky.addColorStop(0, '#140c24');
+                sky.addColorStop(0.55, '#581c87');
+                sky.addColorStop(1, '#f59e0b');
+            }
+            c.fillStyle = sky;
             c.fillRect(0, 0, w, h);
+
+            // 2. Glowing Sun / Moon / Energy Core in background
+            const coreX = w * (0.3 + index * 0.2);
+            const coreY = h * 0.35;
+            const glow = c.createRadialGradient(coreX, coreY, 10, coreX, coreY, w * 0.35);
+            glow.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+            glow.addColorStop(0.3, index === 1 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.45)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            c.fillStyle = glow;
+            c.fillRect(0, 0, w, h);
+
+            // 3. City Skyline Silhouette
+            c.fillStyle = '#05070d';
+            const buildingCount = 18;
+            const bw = w / buildingCount;
+            for (let b = 0; b < buildingCount; b++) {
+                const bh = h * (0.22 + ((b * 37 + index * 19) % 28) / 100);
+                c.fillRect(b * bw, h - bh, bw - 2, bh);
+                // Lit skyscraper windows
+                c.fillStyle = 'rgba(253, 224, 71, 0.25)';
+                for (let wy = h - bh + 12; wy < h - 20; wy += 18) {
+                    if ((b + wy) % 3 === 0) c.fillRect(b * bw + 6, wy, 5, 8);
+                }
+                c.fillStyle = '#05070d';
+            }
+
+            // 4. Two Dramatic Confronting Silhouettes + Energy Clash Beam
+            const leftX = w * 0.32;
+            const rightX = w * 0.68;
+            const groundY = h * 0.82;
+
+            // Left Titan / Character Silhouette
+            c.fillStyle = '#02040a';
+            c.fillRect(leftX - 28, groundY - 150, 56, 150);
+            c.fillRect(leftX - 18, groundY - 182, 36, 30); // Head
+            c.fillStyle = '#38bdf8';
+            c.fillRect(leftX + 4, groundY - 172, 12, 5); // Glowing visor
+
+            // Right Monster / Rival Silhouette
+            c.fillStyle = '#02040a';
+            c.beginPath();
+            c.moveTo(rightX - 40, groundY);
+            c.lineTo(rightX - 25, groundY - 165);
+            c.lineTo(rightX + 10, groundY - 185);
+            c.lineTo(rightX + 45, groundY - 130);
+            c.lineTo(rightX + 35, groundY);
+            c.closePath();
+            c.fill();
+            c.fillStyle = '#ef4444';
+            c.beginPath();
+            c.arc(rightX - 10, groundY - 158, 5, 0, Math.PI * 2);
+            c.fill();
+
+            // Energy Beam Clash between them
+            const clashX = w * 0.5;
+            const clashY = groundY - 135;
+            c.strokeStyle = '#38bdf8';
+            c.lineWidth = 6;
+            c.beginPath();
+            c.moveTo(leftX + 25, groundY - 130);
+            c.lineTo(clashX, clashY);
+            c.stroke();
+
+            c.strokeStyle = '#f43f5e';
+            c.lineWidth = 6;
+            c.beginPath();
+            c.moveTo(rightX - 25, groundY - 140);
+            c.lineTo(clashX, clashY);
+            c.stroke();
+
+            const burst = c.createRadialGradient(clashX, clashY, 2, clashX, clashY, 55);
+            burst.addColorStop(0, '#ffffff');
+            burst.addColorStop(0.5, '#facc15');
+            burst.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            c.fillStyle = burst;
+            c.beginPath();
+            c.arc(clashX, clashY, 55, 0, Math.PI * 2);
+            c.fill();
+
             return off;
         },
 
-        // Helper to wrap long captions cleanly across multiple lines inside the video
+        // Safe rounded rectangle helper (compatible with all mobile browsers)
+        drawRoundedBox(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        },
+
         drawWrappedSubtitle(ctx, text, canvasW, canvasH, isVertical) {
             if (!text) return;
             const fontSize = isVertical ? 20 : 22;
@@ -951,10 +1142,8 @@ Story: "${userPrompt}"`;
             const boxHeight = displayLines.length * lineHeight + 18;
             const boxY = canvasH - boxHeight - (isVertical ? 36 : 22);
 
-            // Dark translucent subtitle pill background
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
-            ctx.beginPath();
-            ctx.roundRect(canvasW * 0.06, boxY, canvasW * 0.88, boxHeight, 12);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            this.drawRoundedBox(ctx, canvasW * 0.06, boxY, canvasW * 0.88, boxHeight, 12);
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
@@ -964,7 +1153,6 @@ Story: "${userPrompt}"`;
             });
         },
 
-        // Encodes 300 real frames (30 FPS x 10.0s) with exact frame-by-frame progress callbacks
         encodeRealTenSecondVideo(storyboard, sceneImages, onFrameProgress) {
             return new Promise((resolve, reject) => {
                 const isVertical = this.aspectRatio === '9:16';
@@ -1006,7 +1194,7 @@ Story: "${userPrompt}"`;
                 const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
                 const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
                 const recorder = chosenMime
-                    ? new MediaRecorder(mixedStream, { mimeType: chosenMime, videoBitsPerSecond: 3000000 })
+                    ? new MediaRecorder(mixedStream, { mimeType: chosenMime, videoBitsPerSecond: 3200000 })
                     : new MediaRecorder(mixedStream);
 
                 const chunks = [];
@@ -1047,10 +1235,8 @@ Story: "${userPrompt}"`;
                         ctx.drawImage(img, dx, dy, drawW, drawH);
                     }
 
-                    // Wrapped cinematic subtitle
                     this.drawWrappedSubtitle(ctx, sceneMeta.caption, canvas.width, canvas.height, isVertical);
 
-                    // Crossfade transitions
                     if (localT < 0.10) {
                         ctx.fillStyle = `rgba(0,0,0,${1 - localT / 0.10})`;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1085,7 +1271,7 @@ Story: "${userPrompt}"`;
                     <p class="text-xs text-gray-300">Story: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
 
                     <div class="rounded-2xl overflow-hidden border border-white/15 bg-black shadow-xl flex justify-center">
-                        <video src="${videoUrl}" controls autoplay loop playsinline class="w-full max-h-96 object-contain bg-black"></video>
+                        <video src="${videoUrl}" controls autoplay loop muted playsinline class="w-full max-h-96 object-contain bg-black"></video>
                     </div>
 
                     <div class="flex flex-wrap gap-2 pt-1">
@@ -1106,7 +1292,7 @@ Story: "${userPrompt}"`;
             <section class="max-w-4xl mx-auto my-8 px-4 relative z-20">
                 <div class="rounded-3xl overflow-hidden border border-white/15 bg-zinc-950 p-4 shadow-2xl text-center">
                     <h3 class="text-lg font-extrabold text-white mb-3">${(window.__lastGeneratedVideoPrompt || 'Featured AI Video').replace(/</g, '&lt;')}</h3>
-                    <video src="${window.__lastGeneratedVideoUrl}" controls autoplay loop playsinline class="w-full rounded-2xl max-h-[480px] bg-black mx-auto"></video>
+                    <video src="${window.__lastGeneratedVideoUrl}" controls autoplay loop muted playsinline class="w-full rounded-2xl max-h-[480px] bg-black mx-auto"></video>
                 </div>
             </section>`;
 

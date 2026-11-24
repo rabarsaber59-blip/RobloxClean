@@ -1,11 +1,13 @@
 /**
- * ZENO-VIDEO.JS - AI Code-to-Video Render Engine & MP4 Compiler
- * 1. Top "Generate Video" button activates Video Mode directly above the AI chat bar.
- * 2. No separate Video API keys — uses the user's connected AI engine to write custom JavaScript
- *    Canvas animation code tailored specifically to the user's story, characters, and actions.
- * 3. Sends the generated animation code to the ZoneWeb Render Engine + MP4 Muxer (WebCodecs H.264 MP4
- *    with automatic MediaRecorder fallback) to compile a real 10-second downloadable .mp4 video.
- * 4. Preserves the global UI emoji-to-custom-logo replacer.
+ * ZENO-VIDEO.JS - AI Dynamic Character Animation Canvas & Sound Engine
+ * 1. Top "Generate Video" button activates Video Mode above the AI chat bar.
+ * 2. Translates ANY prompt (Kurdish, English, Arabic, etc.) into a custom 3-Act animated Canvas script
+ *    with specific characters, settings, props, expressions, dialogue & camera motion (never repeats static scenes).
+ * 3. Articulated 2D Canvas Character Kinematics: walking legs, swinging arms, blinking eyes, lip-syncing
+ *    mouths during speech, facial expressions, vehicles, robots, monsters & weather particles.
+ * 4. Real Synthesized WebAudio Sound Engine: footsteps, speech tones, laughter, laser/explosion impacts,
+ *    and adaptive background score mixed directly into the recorded video file.
+ * 5. Preserves the global UI emoji-to-custom-logo replacer.
  */
 (function () {
     const ZenoVideo = {
@@ -14,12 +16,9 @@
         isReplacingEmojis: false,
         emojiObserver: null,
         aspectRatio: '16:9',
-        mp4MuxerLoaded: false,
 
         init() {
             window.ZenoVideo = this;
-            this.preloadMp4Muxer();
-
             const boot = () => {
                 this.injectTopGenerateVideoButton();
                 this.injectChatVideoPanel();
@@ -33,16 +32,6 @@
             } else {
                 boot();
             }
-        },
-
-        // Loads lightweight pure-JS MP4 Muxer (15KB) for hardware H.264 .mp4 compilation
-        preloadMp4Muxer() {
-            if (window.Mp4Muxer || document.getElementById('zwMp4MuxerScript')) return;
-            const s = document.createElement('script');
-            s.id = 'zwMp4MuxerScript';
-            s.src = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js';
-            s.onload = () => { this.mp4MuxerLoaded = true; };
-            document.head.appendChild(s);
         },
 
         getCustomLogoSvg(sizePx = 14) {
@@ -137,7 +126,7 @@
         },
 
         // =========================================================================
-        // 2. TOP "GENERATE VIDEO" BUTTON & VIDEO MODE BAR ON TOP OF AI CHAT
+        // 2. TOP "GENERATE VIDEO" BUTTON & VIDEO MODE PANEL ON CHAT
         // =========================================================================
         injectTopGenerateVideoButton() {
             const topPreviewBtn = document.getElementById('topPreviewBtn');
@@ -167,13 +156,13 @@
                         </span>
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-white">Video Mode Active</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">AI Code -> MP4 Render Engine</span>
+                                <span class="text-xs font-extrabold text-white">AI Character Animation & Sound Studio</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">Canvas + Audio</span>
                             </div>
-                            <p class="text-[10px] text-gray-300">AI is ready: describe your video scene below to code & render a 10s MP4</p>
+                            <p class="text-[10px] text-gray-300">Describe any story or scene below — AI animates characters & sounds on Canvas</p>
                         </div>
                     </div>
-                    <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition" title="Exit Video Mode">
+                    <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
@@ -185,7 +174,7 @@
                     </div>
 
                     <button type="button" onclick="window.ZenoVideo.triggerInstantVideoFromChat()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition">
-                        Render 10s MP4 Video
+                        Create Animated Video
                     </button>
                 </div>
             `;
@@ -212,7 +201,7 @@
             if (enable) {
                 panel?.classList.remove('hidden');
                 if (chatInput) {
-                    chatInput.placeholder = "Describe the video story, characters & actions you want AI to create...";
+                    chatInput.placeholder = "Write your exact story or scene (characters, actions, place)...";
                     chatInput.focus();
                 }
                 topBtn?.classList.add('ring-2', 'ring-fuchsia-300');
@@ -230,10 +219,10 @@
             const promptText = (chatInput?.value || '').trim();
             if (!promptText) {
                 chatInput?.focus();
-                return alert("Please write a description of the video you want to create first!");
+                return alert("Please describe the video story or scene first!");
             }
             chatInput.value = '';
-            this.createVideoFromPrompt(promptText);
+            this.createAnimatedVideoWithSound(promptText);
         },
 
         hookChatSubmissionForVideo() {
@@ -245,7 +234,7 @@
                 if (this.videoModeActive || /\b(generate video|create video|make a video|make video|ڤیدیۆ دروست بکە|ڤیدیۆیەک دروست بکە)\b/i.test(text)) {
                     if (!text) return;
                     chatInput.value = '';
-                    await this.createVideoFromPrompt(text);
+                    await this.createAnimatedVideoWithSound(text);
                     return;
                 }
 
@@ -256,12 +245,11 @@
         },
 
         // =========================================================================
-        // 3. STEP 1: AI WRITES CUSTOM ANIMATION CODE -> STEP 2: RENDER ENGINE -> MP4
+        // 3. MAIN VIDEO PIPELINE: AI CHOREOGRAPHY -> LIVE CANVAS + SOUND -> VIDEO
         // =========================================================================
-        async createVideoFromPrompt(userPrompt) {
+        async createAnimatedVideoWithSound(userPrompt) {
             if (this.isGeneratingVideo) return;
 
-            // Security check
             if (window.ZenoUltimate && window.ZenoUltimate.forbiddenPattern && window.ZenoUltimate.forbiddenPattern.test(userPrompt)) {
                 if (typeof window.appendMessage === 'function') {
                     window.appendMessage('user', userPrompt);
@@ -274,26 +262,26 @@
             document.getElementById('heroPrompt')?.classList.add('hidden');
 
             if (typeof window.appendMessage === 'function') {
-                window.appendMessage('user', `[Video Mode] ${userPrompt}`);
+                window.appendMessage('user', `[Animated Video] ${userPrompt}`);
             }
 
             const feed = document.getElementById('chatFeed');
-            const cardId = 'zw_vid_engine_' + Date.now();
+            const cardId = 'zw_anim_vid_' + Date.now();
             const startTime = performance.now();
 
             const cardWrap = document.createElement('div');
             cardWrap.id = cardId;
             cardWrap.className = "flex justify-start w-full my-3";
             cardWrap.innerHTML = `
-                <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-fuchsia-500/40 shadow-2xl space-y-3">
+                <div class="w-full max-w-[94%] rounded-2xl p-4 card-bg border border-fuchsia-500/40 shadow-2xl space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center">
-                                <i class="fa-solid fa-code fa-beat text-xs"></i>
+                                <i class="fa-solid fa-film fa-beat text-xs"></i>
                             </div>
                             <div>
-                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Step 1/3: AI is writing custom video code...</p>
-                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Scripting characters, actions & timeline for your prompt...</p>
+                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Step 1/2: AI is directing characters & script...</p>
+                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Building custom scene choreography & sound cues...</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0">
@@ -306,16 +294,13 @@
                         <div id="${cardId}_bar" class="h-full bg-gradient-to-r from-fuchsia-600 via-indigo-500 to-emerald-400 transition-all duration-100" style="width:0%;"></div>
                     </div>
 
-                    <!-- Live Preview Monitor while Render Engine renders frames -->
-                    <div id="${cardId}_monitorWrap" class="hidden rounded-xl overflow-hidden border border-white/15 bg-black relative">
-                        <canvas id="${cardId}_liveMonitor" class="w-full max-h-48 object-contain mx-auto block"></canvas>
-                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-red-600/90 text-white text-[9px] font-black uppercase tracking-wider">LIVE RENDER</span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-1.5 text-[10px] font-bold text-center">
-                        <div id="${cardId}_s1" class="py-1 px-2 rounded-lg bg-fuchsia-600/30 border border-fuchsia-500/50 text-white">1. AI Video Code</div>
-                        <div id="${cardId}_s2" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">2. Render Engine</div>
-                        <div id="${cardId}_s3" class="py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400">3. MP4 Compiler</div>
+                    <!-- LIVE ANIMATION CANVAS STAGE (Shows Characters Moving in Real Time!) -->
+                    <div class="rounded-2xl overflow-hidden border-2 border-white/15 bg-black relative shadow-inner">
+                        <canvas id="${cardId}_stageCanvas" class="w-full max-h-80 object-contain mx-auto block bg-black"></canvas>
+                        <div class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 border border-white/15 text-[10px] font-bold text-emerald-300 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                            <span id="${cardId}_actBadge">LIVE CANVAS ANIMATION + AUDIO</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -327,65 +312,53 @@
                 if (tEl) tEl.innerText = `${((performance.now() - startTime) / 1000).toFixed(1)}s`;
             }, 100);
 
-            const updateStatus = (pct, phaseText, detailText, stepNum) => {
+            const updateProgress = (pct, phase, detail, actText) => {
                 const pEl = document.getElementById(`${cardId}_pct`);
                 const bEl = document.getElementById(`${cardId}_bar`);
                 const phEl = document.getElementById(`${cardId}_phase`);
                 const dtEl = document.getElementById(`${cardId}_detail`);
+                const acEl = document.getElementById(`${cardId}_actBadge`);
                 if (pEl) pEl.innerText = `${Math.min(100, Math.round(pct))}%`;
                 if (bEl) bEl.style.width = `${Math.min(100, Math.round(pct))}%`;
-                if (phEl && phaseText) phEl.innerText = phaseText;
-                if (dtEl && detailText) dtEl.innerText = detailText;
-
-                for (let s = 1; s <= 3; s++) {
-                    const box = document.getElementById(`${cardId}_s${s}`);
-                    if (!box) continue;
-                    if (s < stepNum) box.className = "py-1 px-2 rounded-lg bg-emerald-600/30 border border-emerald-500/50 text-emerald-300";
-                    else if (s === stepNum) box.className = "py-1 px-2 rounded-lg bg-fuchsia-600/35 border border-fuchsia-400 text-white animate-pulse";
-                    else box.className = "py-1 px-2 rounded-lg bg-white/5 border border-white/10 text-gray-400";
-                }
+                if (phEl && phase) phEl.innerText = phase;
+                if (dtEl && detail) dtEl.innerText = detail;
+                if (acEl && actText) acEl.innerText = actText;
             };
 
             try {
-                // STEP 1: Ask the AI Engine to write custom JS Canvas animation code for this exact prompt
-                updateStatus(10, "Step 1/3: AI is writing custom animation code...", "Generating scene choreography & character actions...", 1);
-                const generatedJsBody = await this.generateCustomVideoCodeFromAI(userPrompt, (p) => {
-                    updateStatus(p, "Step 1/3: AI is writing custom animation code...", "Compiling custom JavaScript scene functions...", 1);
-                });
+                // 1. Ask AI to produce a custom JSON Choreography tailored 100% to the user's exact prompt
+                updateProgress(10, "Step 1/2: AI Directing Custom Scene...", "Analyzing characters, setting, actions & dialogue...");
+                const script = await this.generateCustomChoreographyScript(userPrompt);
 
-                // Compile & verify the AI-written animation function
-                const renderFn = this.compileSafeRenderFunction(generatedJsBody, userPrompt);
+                // 2. Render & Record the Live Canvas Character Animation + Synchronized WebAudio Sounds
+                updateProgress(20, "Step 2/2: Animating Characters & Recording Sound...", "Rendering 30 FPS Canvas + Audio...", `ACT 1: ${script.acts[0]?.title || 'Opening'}`);
+                const stageCanvas = document.getElementById(`${cardId}_stageCanvas`);
 
-                // STEP 2 & 3: Send compiled code to Render Engine + MP4 Muxer
-                updateStatus(35, "Step 2/3: Sending code to Render Engine...", "Initializing 30 FPS HD Canvas & MP4 Encoder...", 2);
-                const monitorWrap = document.getElementById(`${cardId}_monitorWrap`);
-                const monitorCanvas = document.getElementById(`${cardId}_liveMonitor`);
-                if (monitorWrap) monitorWrap.classList.remove('hidden');
-
-                const { blob, extension, formatLabel } = await this.executeRenderEngineToMp4(
-                    renderFn,
-                    userPrompt,
-                    monitorCanvas,
-                    (frame, totalFrames, stage) => {
-                        if (stage === 'rendering') {
-                            const pct = 35 + Math.round((frame / totalFrames) * 55);
-                            updateStatus(pct, "Step 2/3: Render Engine Active...", `Rendering Frame ${frame} / ${totalFrames} (${(frame / 30).toFixed(1)}s / 10.0s)`, 2);
-                        } else {
-                            updateStatus(95, "Step 3/3: MP4 Compiler Packaging Video...", "Finalizing MP4 video container & streams...", 3);
-                        }
+                const { blob, extension } = await this.renderAndRecordCanvasWithAudio(
+                    stageCanvas,
+                    script,
+                    (frame, totalFrames, currentActIdx) => {
+                        const pct = 20 + Math.round((frame / totalFrames) * 80);
+                        const actObj = script.acts[currentActIdx] || script.acts[0];
+                        updateProgress(
+                            pct,
+                            "Step 2/2: Animating Characters & Sound...",
+                            `Frame ${frame}/${totalFrames} • ${actObj?.subtitle || ''}`,
+                            `ACT ${currentActIdx + 1}/3 • AUDIO ON`
+                        );
                     }
                 );
 
                 clearInterval(timerInterval);
                 const videoUrl = URL.createObjectURL(blob);
-                this.renderCompletedVideoCard(cardWrap, videoUrl, userPrompt, extension, formatLabel, generatedJsBody);
+                this.renderCompletedVideoPlayer(cardWrap, videoUrl, userPrompt, extension, script);
 
             } catch (err) {
                 clearInterval(timerInterval);
                 cardWrap.innerHTML = `
                     <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-red-500/40 text-xs text-red-300 space-y-2">
-                        <p class="font-bold">Render Engine Notice: ${err.message}</p>
-                        <button onclick="window.ZenoVideo.createVideoFromPrompt(\`${userPrompt.replace(/`/g, '')}\`)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold">Retry Render</button>
+                        <p class="font-bold">Animation Notice: ${err.message}</p>
+                        <button onclick="window.ZenoVideo.createAnimatedVideoWithSound(\`${userPrompt.replace(/`/g, '')}\`)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold">Retry</button>
                     </div>
                 `;
             } finally {
@@ -396,71 +369,91 @@
         },
 
         // =========================================================================
-        // AI CODE GENERATOR FOR VIDEO ANIMATION (Uses User's Connected AI Engine)
+        // 4. AI CHOREOGRAPHY DIRECTOR (PRODUCES UNIQUE JSON FOR EVERY PROMPT)
         // =========================================================================
-        async generateCustomVideoCodeFromAI(userPrompt, onProgress) {
-            const systemInstruction = `You are an expert HTML5 Canvas 2D Animator & Video Director.
-Write the JavaScript body for a function:
-function renderFrame(ctx, w, h, t, helpers)
-that renders a rich, dynamic, multi-act 10-second animated video (where t goes from 0.0 to 10.0 seconds) depicting the EXACT story, characters, objects, and actions requested by the user.
+        async generateCustomChoreographyScript(userPrompt) {
+            const schemaPrompt = `You are an expert 2D Animation Director. Create a UNIQUE, detailed 3-Act animation script (10 seconds total) that accurately depicts the user's EXACT request.
+Never use generic templates—every character, prop, action, setting, and dialogue MUST match the user's prompt!
 
-AVAILABLE BUILT-IN HELPERS (Use them heavily for expressive characters & scenes!):
-- helpers.lerp(a, b, alpha) -> linear interpolation
-- helpers.clamp(val, min, max) -> clamp value
-- helpers.smoothstep(edge0, edge1, x) -> smooth 0..1 transition
-- helpers.drawSky(ctx, w, h, topColor, bottomColor, starsOpacity) -> draws gradient sky & stars
-- helpers.drawGround(ctx, w, h, groundY, topColor, bottomColor) -> draws ground/street/floor
-- helpers.drawCity(ctx, w, h, groundY, buildingColor, windowColor) -> draws city skyline
-- helpers.drawCharacter(ctx, { x, y, scale, shirtColor, pantsColor, skinColor, hairColor, expression, pose, facing, holding, speech })
-  * expression: 'neutral' | 'happy' | 'laughing' | 'sad' | 'angry' | 'shocked'
-  * pose: 'idle' | 'walk' | 'beg' | 'point' | 'celebrate' | 'fall'
-  * facing: 1 (right) or -1 (left)
-  * holding: 'none' | 'money' | 'gold_bag' | 'crown' | 'sword' | 'phone' | 'gift'
-  * speech: string (optional floating speech bubble above character's head!)
-- helpers.drawRobot(ctx, { x, y, scale, color, eyeColor, laserActive, targetX, targetY }) -> draws giant mecha robot
-- helpers.drawMonster(ctx, { x, y, scale, color, roar, fireActive, targetX, targetY }) -> draws giant kaiju monster
-- helpers.drawVehicle(ctx, { x, y, scale, color, type }) -> type: 'car' | 'rocket' | 'police'
-- helpers.drawExplosion(ctx, x, y, radius, progress) -> progress 0..1
-- helpers.drawParticles(ctx, w, h, t, color, count, direction) -> direction: 'up' | 'down' | 'right'
-- helpers.drawSubtitle(ctx, text) -> draws clean cinematic subtitle at bottom
+Return ONLY valid JSON (no markdown fences needed, just raw JSON) with this exact structure:
+{
+  "setting": "street" | "forest" | "space" | "desert" | "room" | "beach" | "night_city",
+  "weather": "none" | "stars" | "rain" | "embers" | "snow",
+  "mood": "dramatic" | "happy" | "action" | "sad",
+  "entities": [
+    {
+      "id": "e1",
+      "kind": "human" | "robot" | "monster" | "car" | "rocket" | "animal",
+      "name": "Short Name",
+      "scale": 1.0,
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#1e293b",
+      "hairColor": "#1f2937",
+      "hat": "none" | "crown" | "police" | "cap",
+      "beard": false
+    }
+  ],
+  "acts": [
+    {
+      "title": "Act 1",
+      "subtitle": "Short subtitle describing Act 1 (max 55 chars)",
+      "sound": "footsteps" | "speech" | "laugh" | "laser" | "explosion" | "engine",
+      "actors": [
+        {
+          "id": "e1",
+          "startX": 0.2,
+          "endX": 0.38,
+          "startY": 0.82,
+          "endY": 0.82,
+          "facing": 1,
+          "pose": "walk" | "idle" | "beg" | "point" | "punch" | "celebrate" | "fall" | "run",
+          "expression": "neutral" | "happy" | "laughing" | "sad" | "angry" | "shocked",
+          "holding": "none" | "money" | "gold_bag" | "sword" | "phone" | "gift" | "food",
+          "speech": "Short spoken line (max 28 chars, or empty string)"
+        }
+      ]
+    },
+    { "title": "Act 2", "subtitle": "...", "sound": "...", "actors": [...] },
+    { "title": "Act 3", "subtitle": "...", "sound": "...", "actors": [...] }
+  ]
+}
 
-CRITICAL RULES:
-1. Script a clear 3-Act story across t = 0..3.3s (Act 1), t = 3.3..6.7s (Act 2), and t = 6.7..10.0s (Act 3) matching the user's exact request!
-2. Animate positions (x, y), poses, expressions, speech bubbles, and effects smoothly using t.
-3. Output ONLY raw JavaScript statements for the inside of renderFrame(ctx, w, h, t, helpers) wrapped in \`\`\`javascript ... \`\`\`. Do NOT wrap in function declaration headers and do NOT use external image URLs.`;
+Rules:
+- Include 1 to 3 entities matching the exact characters/objects in the user's prompt.
+- Coordinates startX, endX, startY, endY are normalized (0.1 to 0.9, ground level is 0.82).
+- Write subtitles and speech in the SAME language the user used (or English if requested).
+USER PROMPT: "${userPrompt}"`;
 
             const rawKey = (window.state?.apiKey || localStorage.getItem('zw_api_key') || '').replace(/[\s"'`]/g, '').trim();
-            let rawAiReply = '';
+            let rawText = '';
 
-            // 1. Try User's Connected Gemini API Key
+            // 1. Call User's Connected Gemini API Key
             if (rawKey.startsWith('AIza')) {
                 const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest'];
                 for (const m of models) {
                     try {
-                        if (onProgress) onProgress(18);
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(rawKey)}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                contents: [{ parts: [{ text: `${systemInstruction}\n\nUSER VIDEO PROMPT: "${userPrompt}"` }] }],
-                                generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+                                contents: [{ parts: [{ text: schemaPrompt }] }],
+                                generationConfig: { temperature: 0.75, responseMimeType: "application/json" }
                             })
                         });
                         if (res.ok) {
                             const data = await res.json();
                             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                            if (txt.length > 40) {
-                                rawAiReply = txt;
+                            if (txt.includes('{')) {
+                                rawText = txt;
                                 break;
                             }
                         }
                     } catch (e) {}
                 }
             }
-            // 2. Try User's OpenAI / Groq Key if connected
+            // 2. Call User's OpenAI / Groq Key if connected
             else if (rawKey.startsWith('sk-') || rawKey.startsWith('gsk_')) {
                 try {
-                    if (onProgress) onProgress(18);
                     const isGroq = rawKey.startsWith('gsk_');
                     const url = isGroq ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
                     const model = isGroq ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
@@ -469,751 +462,939 @@ CRITICAL RULES:
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${rawKey}` },
                         body: JSON.stringify({
                             model,
-                            messages: [
-                                { role: 'system', content: systemInstruction },
-                                { role: 'user', content: `USER VIDEO PROMPT: "${userPrompt}"` }
-                            ]
+                            messages: [{ role: 'user', content: schemaPrompt }]
                         })
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        rawAiReply = data.choices?.[0]?.message?.content || '';
+                        rawText = data.choices?.[0]?.message?.content || '';
                     }
                 } catch (e) {}
             }
 
-            // 3. Cloud Coding AI Fallback if user has no key or rate-limited
-            if (!rawAiReply) {
+            // 3. Cloud AI Fallback
+            if (!rawText) {
                 try {
-                    if (onProgress) onProgress(22);
                     const res = await fetch('https://text.pollinations.ai/openai', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            model: 'qwen-coder',
-                            messages: [
-                                { role: 'system', content: systemInstruction },
-                                { role: 'user', content: `USER VIDEO PROMPT: "${userPrompt}"` }
-                            ]
+                            model: 'openai',
+                            messages: [{ role: 'user', content: schemaPrompt }]
                         })
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        rawAiReply = data.choices?.[0]?.message?.content || '';
+                        rawText = data.choices?.[0]?.message?.content || '';
                     }
                 } catch (e) {}
             }
 
-            const cleanedCode = this.extractCleanJsBody(rawAiReply);
-            if (cleanedCode && cleanedCode.length > 35) {
-                return cleanedCode;
-            }
-
-            // 4. Smart Dynamic Procedural Fallback tailored to keywords in the user's prompt
-            return this.buildDynamicKeywordCode(userPrompt);
-        },
-
-        extractCleanJsBody(rawText) {
-            if (!rawText) return '';
-            let code = rawText;
-            const fenceMatch = rawText.match(/```(?:javascript|js)?\s*([\s\S]*?)```/i);
-            if (fenceMatch && fenceMatch[1]) {
-                code = fenceMatch[1].trim();
-            }
-            // Strip function wrapper if the LLM included `function renderFrame(...) { ... }`
-            code = code.replace(/^function\s+\w+\s*\([^)]*\)\s*\{/, '');
-            if (code.endsWith('}') && (code.match(/\{/g) || []).length < (code.match(/\}/g) || []).length) {
-                code = code.slice(0, -1);
-            }
-            return code.trim();
-        },
-
-        // Compiles the AI's JS code and tests it on sample timestamps so it NEVER crashes during rendering
-        compileSafeRenderFunction(jsBody, fallbackPrompt) {
-            const helpers = this.createCanvasHelpers();
-            const testCanvas = document.createElement('canvas');
-            testCanvas.width = 320;
-            testCanvas.height = 180;
-            const testCtx = testCanvas.getContext('2d');
-
-            const tryBuild = (codeStr) => {
-                const fn = new Function('ctx', 'w', 'h', 't', 'helpers', codeStr);
-                // Dry-run across Act 1, Act 2, Act 3 to verify zero runtime exceptions
-                fn(testCtx, 320, 180, 0.5, helpers);
-                fn(testCtx, 320, 180, 5.0, helpers);
-                fn(testCtx, 320, 180, 9.2, helpers);
-                return fn;
-            };
-
-            try {
-                return tryBuild(jsBody);
-            } catch (err) {
-                console.warn("Auto-healing AI animation code syntax:", err.message);
-                const safeFallbackCode = this.buildDynamicKeywordCode(fallbackPrompt);
-                return tryBuild(safeFallbackCode);
-            }
-        },
-
-        // Tailored procedural animation generator if offline or AI code had a syntax glitch
-        buildDynamicKeywordCode(promptText) {
-            const p = (promptText || '').toLowerCase();
-            const safeSub = (promptText || '').replace(/'/g, "\\'").slice(0, 68);
-
-            if (/(robot|monster|fight|battle|kaiju|war)/i.test(p)) {
-                return `
-                helpers.drawSky(ctx, w, h, '#090d1f', '#3b0764', 0.8);
-                helpers.drawCity(ctx, w, h, h * 0.82, '#090a0f', 'rgba(250,204,21,0.35)');
-                helpers.drawGround(ctx, w, h, h * 0.82, '#1e293b', '#020617');
-                const robX = helpers.lerp(w * 0.15, w * 0.34, helpers.smoothstep(0, 3, t));
-                const monX = helpers.lerp(w * 0.85, w * 0.66, helpers.smoothstep(0, 3, t));
-                const clash = t > 3.2 && t < 7.5;
-                helpers.drawRobot(ctx, { x: robX, y: h * 0.82, scale: 1.1, color: '#3b82f6', eyeColor: '#38bdf8', laserActive: clash, targetX: monX, targetY: h * 0.55 });
-                if (t < 8.2) {
-                    helpers.drawMonster(ctx, { x: monX, y: h * 0.82, scale: 1.15, color: '#166534', roar: true, fireActive: clash, targetX: robX, targetY: h * 0.55 });
-                }
-                if (t >= 7.2) {
-                    helpers.drawExplosion(ctx, monX, h * 0.6, 140, helpers.clamp((t - 7.2) / 2.2, 0, 1));
-                }
-                helpers.drawParticles(ctx, w, h, t, '#f97316', 35, 'up');
-                helpers.drawSubtitle(ctx, '${safeSub}');`;
-            }
-
-            if (/(car|race|racing|drive|police|street)/i.test(p)) {
-                return `
-                helpers.drawSky(ctx, w, h, '#050816', '#1e1b4b', 0.9);
-                helpers.drawCity(ctx, w, h, h * 0.78, '#0f172a', 'rgba(56,189,248,0.4)');
-                helpers.drawGround(ctx, w, h, h * 0.78, '#1e293b', '#090a0f');
-                const car1X = helpers.lerp(w * 0.12, w * 0.78, t / 10);
-                const car2X = helpers.lerp(w * 0.02, w * 0.62, t / 10);
-                helpers.drawVehicle(ctx, { x: car1X, y: h * 0.78, scale: 1.15, color: '#ef4444', type: 'car' });
-                helpers.drawVehicle(ctx, { x: car2X, y: h * 0.84, scale: 1.1, color: '#3b82f6', type: 'police' });
-                helpers.drawParticles(ctx, w, h, t, '#38bdf8', 30, 'right');
-                helpers.drawSubtitle(ctx, '${safeSub}');`;
-            }
-
-            if (/(rocket|space|planet|mars|moon|star)/i.test(p)) {
-                return `
-                helpers.drawSky(ctx, w, h, '#02040a', '#1e1038', 1.0);
-                const ry = helpers.lerp(h * 0.82, h * 0.18, helpers.smoothstep(0, 9, t));
-                helpers.drawVehicle(ctx, { x: w * 0.5, y: ry, scale: 1.2, color: '#f8fafc', type: 'rocket' });
-                helpers.drawParticles(ctx, w, h, t, '#fbbf24', 45, 'down');
-                helpers.drawSubtitle(ctx, '${safeSub}');`;
-            }
-
-            // Default expressive 2-character story animation
-            return `
-            helpers.drawSky(ctx, w, h, '#0f172a', '#1e3a8a', 0.4);
-            helpers.drawCity(ctx, w, h, h * 0.82, '#1e293b', 'rgba(253,224,71,0.25)');
-            helpers.drawGround(ctx, w, h, h * 0.82, '#334155', '#0f172a');
-            const p1X = helpers.lerp(w * 0.22, w * 0.38, helpers.smoothstep(0, 2.5, t));
-            const p2X = helpers.lerp(w * 0.78, w * 0.62, helpers.smoothstep(0, 2.5, t));
-            const act = t < 3.5 ? 1 : (t < 7.0 ? 2 : 3);
-            helpers.drawCharacter(ctx, {
-                x: p1X, y: h * 0.82, scale: 1.1,
-                shirtColor: act === 3 ? '#f59e0b' : '#64748b',
-                pantsColor: '#1e293b',
-                expression: act === 1 ? 'sad' : (act === 2 ? 'shocked' : 'happy'),
-                pose: act === 1 ? 'beg' : (act === 3 ? 'celebrate' : 'idle'),
-                facing: 1,
-                holding: act === 3 ? 'gold_bag' : 'none',
-                speech: act === 1 ? 'Please help...' : (act === 3 ? 'My turn now!' : '')
-            });
-            helpers.drawCharacter(ctx, {
-                x: p2X, y: h * 0.82, scale: 0.92,
-                shirtColor: '#ef4444',
-                pantsColor: '#0f172a',
-                expression: act === 2 ? 'laughing' : (act === 3 ? 'shocked' : 'neutral'),
-                pose: act === 2 ? 'point' : (act === 3 ? 'fall' : 'idle'),
-                facing: -1,
-                holding: act < 3 ? 'money' : 'none',
-                speech: act === 2 ? 'Haha! No way!' : (act === 3 ? 'Oh no!' : '')
-            });
-            helpers.drawSubtitle(ctx, '${safeSub}');`;
-        },
-
-        // Rich Canvas 2D Helper Toolkit injected into every AI-generated animation
-        createCanvasHelpers() {
-            return {
-                lerp: (a, b, t) => a + (b - a) * Math.min(1, Math.max(0, t)),
-                clamp: (v, min, max) => Math.min(max, Math.max(min, v)),
-                smoothstep: (e0, e1, x) => {
-                    const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0 || 1)));
-                    return t * t * (3 - 2 * t);
-                },
-
-                drawSky(ctx, w, h, topCol = '#090d1f', botCol = '#1e3a8a', starsAlpha = 0.6) {
-                    const g = ctx.createLinearGradient(0, 0, 0, h);
-                    g.addColorStop(0, topCol);
-                    g.addColorStop(1, botCol);
-                    ctx.fillStyle = g;
-                    ctx.fillRect(0, 0, w, h);
-
-                    if (starsAlpha > 0) {
-                        ctx.fillStyle = `rgba(255,255,255,${starsAlpha})`;
-                        for (let i = 0; i < 45; i++) {
-                            const sx = (i * 197) % w;
-                            const sy = (i * 89) % (h * 0.65);
-                            ctx.beginPath();
-                            ctx.arc(sx, sy, (i % 2) + 0.8, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    }
-                },
-
-                drawGround(ctx, w, h, groundY, topCol = '#1e293b', botCol = '#090a0f') {
-                    const g = ctx.createLinearGradient(0, groundY, 0, h);
-                    g.addColorStop(0, topCol);
-                    g.addColorStop(1, botCol);
-                    ctx.fillStyle = g;
-                    ctx.fillRect(0, groundY, w, h - groundY);
-                },
-
-                drawCity(ctx, w, h, groundY, bCol = '#0b0f19', winCol = 'rgba(253,224,71,0.3)') {
-                    const cols = 14;
-                    const bw = w / cols;
-                    for (let i = 0; i < cols; i++) {
-                        const bh = h * (0.2 + ((i * 29) % 26) / 100);
-                        ctx.fillStyle = bCol;
-                        ctx.fillRect(i * bw + 2, groundY - bh, bw - 4, bh);
-                        ctx.fillStyle = winCol;
-                        for (let wy = groundY - bh + 12; wy < groundY - 14; wy += 16) {
-                            if ((i + wy) % 2 === 0) ctx.fillRect(i * bw + 8, wy, 5, 7);
-                        }
-                    }
-                },
-
-                drawCharacter(ctx, opts = {}) {
-                    const {
-                        x = 200, y = 380, scale = 1,
-                        shirtColor = '#3b82f6', pantsColor = '#1e293b',
-                        skinColor = '#fcd34d', hairColor = '#1f2937',
-                        expression = 'neutral', pose = 'idle',
-                        facing = 1, holding = 'none', speech = ''
-                    } = opts;
-
-                    ctx.save();
-                    ctx.translate(x, y);
-                    if (pose === 'fall') {
-                        ctx.rotate(facing * 0.45);
-                    }
-                    ctx.scale(scale * facing, scale);
-
-                    const walkSwing = pose === 'walk' ? Math.sin(Date.now() * 0.015) * 14 : 0;
-
-                    // Legs
-                    ctx.strokeStyle = pantsColor;
-                    ctx.lineWidth = 10;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(-8, -55);
-                    ctx.lineTo(-10 - walkSwing, 0);
-                    ctx.moveTo(8, -55);
-                    ctx.lineTo(10 + walkSwing, 0);
-                    ctx.stroke();
-
-                    // Torso
-                    ctx.fillStyle = shirtColor;
-                    ctx.beginPath();
-                    ctx.roundRect ? ctx.roundRect(-18, -112, 36, 60, 10) : ctx.fillRect(-18, -112, 36, 60);
-                    ctx.fill();
-
-                    // Arms
-                    ctx.strokeStyle = skinColor;
-                    ctx.lineWidth = 8;
-                    ctx.beginPath();
-                    if (pose === 'beg' || pose === 'point') {
-                        ctx.moveTo(12, -100);
-                        ctx.lineTo(42, -88);
-                    } else if (pose === 'celebrate') {
-                        ctx.moveTo(-14, -102);
-                        ctx.lineTo(-32, -142);
-                        ctx.moveTo(14, -102);
-                        ctx.lineTo(32, -142);
-                    } else {
-                        ctx.moveTo(-14, -100);
-                        ctx.lineTo(-20 + walkSwing * 0.5, -62);
-                        ctx.moveTo(14, -100);
-                        ctx.lineTo(22 - walkSwing * 0.5, -62);
-                    }
-                    ctx.stroke();
-
-                    // Held Object
-                    if (holding === 'money') {
-                        ctx.fillStyle = '#22c55e';
-                        ctx.fillRect(36, -98, 22, 12);
-                    } else if (holding === 'gold_bag') {
-                        ctx.fillStyle = '#eab308';
-                        ctx.beginPath();
-                        ctx.arc(34, -82, 14, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else if (holding === 'sword') {
-                        ctx.strokeStyle = '#e2e8f0';
-                        ctx.lineWidth = 4;
-                        ctx.beginPath();
-                        ctx.moveTo(35, -85);
-                        ctx.lineTo(75, -125);
-                        ctx.stroke();
-                    }
-
-                    // Head
-                    ctx.fillStyle = skinColor;
-                    ctx.beginPath();
-                    ctx.arc(0, -134, 21, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Hair / Crown
-                    if (holding === 'crown') {
-                        ctx.fillStyle = '#facc15';
-                        ctx.beginPath();
-                        ctx.moveTo(-16, -150);
-                        ctx.lineTo(-10, -168);
-                        ctx.lineTo(0, -155);
-                        ctx.lineTo(10, -168);
-                        ctx.lineTo(16, -150);
-                        ctx.closePath();
-                        ctx.fill();
-                    } else {
-                        ctx.fillStyle = hairColor;
-                        ctx.beginPath();
-                        ctx.arc(0, -138, 21, Math.PI, Math.PI * 2);
-                        ctx.fill();
-                    }
-
-                    // Eyes & Expression
-                    ctx.fillStyle = '#0f172a';
-                    ctx.beginPath();
-                    ctx.arc(7, -136, 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.strokeStyle = '#0f172a';
-                    ctx.lineWidth = 2.5;
-                    ctx.beginPath();
-                    if (expression === 'happy' || expression === 'laughing') {
-                        ctx.arc(6, -128, 7, 0, Math.PI);
-                    } else if (expression === 'sad' || expression === 'angry') {
-                        ctx.arc(6, -121, 6, Math.PI, Math.PI * 2);
-                    } else if (expression === 'shocked') {
-                        ctx.arc(7, -125, 4.5, 0, Math.PI * 2);
-                    } else {
-                        ctx.moveTo(2, -126);
-                        ctx.lineTo(12, -126);
-                    }
-                    ctx.stroke();
-
-                    ctx.restore();
-
-                    // Floating Speech Bubble (always readable, un-mirrored)
-                    if (speech) {
-                        ctx.save();
-                        ctx.font = 'bold 13px Segoe UI, sans-serif';
-                        const tw = ctx.measureText(speech).width + 20;
-                        const bx = x - tw / 2;
-                        const by = y - 195 * scale;
-                        ctx.fillStyle = '#ffffff';
-                        ctx.beginPath();
-                        ctx.roundRect ? ctx.roundRect(bx, by, tw, 28, 10) : ctx.fillRect(bx, by, tw, 28);
-                        ctx.fill();
-                        ctx.fillStyle = '#0f172a';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(speech, x, by + 18);
-                        ctx.restore();
-                    }
-                },
-
-                drawRobot(ctx, opts = {}) {
-                    const { x = 250, y = 400, scale = 1, color = '#3b82f6', eyeColor = '#38bdf8', laserActive = false, targetX = 600, targetY = 260 } = opts;
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.scale(scale, scale);
-
-                    // Legs
-                    ctx.fillStyle = '#334155';
-                    ctx.fillRect(-34, -75, 24, 75);
-                    ctx.fillRect(10, -75, 24, 75);
-                    // Armor Torso
-                    ctx.fillStyle = color;
-                    ctx.fillRect(-46, -165, 92, 92);
-                    // Shoulders
-                    ctx.fillStyle = '#1e293b';
-                    ctx.fillRect(-62, -165, 20, 45);
-                    ctx.fillRect(42, -165, 20, 45);
-                    // Head & Visor
-                    ctx.fillStyle = '#475569';
-                    ctx.fillRect(-24, -202, 48, 36);
-                    ctx.fillStyle = eyeColor;
-                    ctx.fillRect(-14, -190, 32, 9);
-                    ctx.restore();
-
-                    if (laserActive) {
-                        ctx.save();
-                        ctx.strokeStyle = eyeColor;
-                        ctx.lineWidth = 7;
-                        ctx.shadowBlur = 18;
-                        ctx.shadowColor = eyeColor;
-                        ctx.beginPath();
-                        ctx.moveTo(x + 15 * scale, y - 185 * scale);
-                        ctx.lineTo(targetX, targetY);
-                        ctx.stroke();
-                        ctx.restore();
-                    }
-                },
-
-                drawMonster(ctx, opts = {}) {
-                    const { x = 680, y = 400, scale = 1, color = '#15803d', fireActive = false, targetX = 280, targetY = 260 } = opts;
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.scale(scale, scale);
-
-                    // Dorsal Spikes
-                    ctx.fillStyle = '#a855f7';
-                    for (let i = 0; i < 4; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(25, -170 + i * 35);
-                        ctx.lineTo(58, -155 + i * 35);
-                        ctx.lineTo(25, -140 + i * 35);
-                        ctx.fill();
-                    }
-                    // Monster Body
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.moveTo(-45, 0);
-                    ctx.lineTo(-35, -180);
-                    ctx.lineTo(15, -205);
-                    ctx.lineTo(45, -140);
-                    ctx.lineTo(40, 0);
-                    ctx.closePath();
-                    ctx.fill();
-                    // Glowing Eye
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(-16, -175, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-
-                    if (fireActive) {
-                        ctx.save();
-                        ctx.strokeStyle = '#f97316';
-                        ctx.lineWidth = 9;
-                        ctx.shadowBlur = 20;
-                        ctx.shadowColor = '#ef4444';
-                        ctx.beginPath();
-                        ctx.moveTo(x - 25 * scale, y - 165 * scale);
-                        ctx.lineTo(targetX, targetY);
-                        ctx.stroke();
-                        ctx.restore();
-                    }
-                },
-
-                drawVehicle(ctx, opts = {}) {
-                    const { x = 300, y = 380, scale = 1, color = '#ef4444', type = 'car' } = opts;
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.scale(scale, scale);
-
-                    if (type === 'rocket') {
-                        // Exhaust Flame
-                        ctx.fillStyle = '#f97316';
-                        ctx.beginPath();
-                        ctx.moveTo(-14, 0);
-                        ctx.lineTo(0, 38 + Math.random() * 14);
-                        ctx.lineTo(14, 0);
-                        ctx.fill();
-                        // Rocket Body
-                        ctx.fillStyle = color;
-                        ctx.beginPath();
-                        ctx.moveTo(0, -95);
-                        ctx.lineTo(22, -45);
-                        ctx.lineTo(22, 0);
-                        ctx.lineTo(-22, 0);
-                        ctx.lineTo(-22, -45);
-                        ctx.closePath();
-                        ctx.fill();
-                        // Window
-                        ctx.fillStyle = '#38bdf8';
-                        ctx.beginPath();
-                        ctx.arc(0, -45, 9, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else {
-                        // Sports / Police Car
-                        ctx.fillStyle = color;
-                        ctx.beginPath();
-                        ctx.roundRect ? ctx.roundRect(-55, -36, 110, 24, 8) : ctx.fillRect(-55, -36, 110, 24);
-                        ctx.fill();
-                        ctx.fillStyle = '#0f172a';
-                        ctx.beginPath();
-                        ctx.roundRect ? ctx.roundRect(-30, -54, 58, 22, 6) : ctx.fillRect(-30, -54, 58, 22);
-                        ctx.fill();
-                        if (type === 'police') {
-                            ctx.fillStyle = Math.floor(Date.now() / 150) % 2 === 0 ? '#ef4444' : '#3b82f6';
-                            ctx.fillRect(-8, -60, 16, 6);
-                        }
-                        // Wheels
-                        ctx.fillStyle = '#020617';
-                        ctx.beginPath();
-                        ctx.arc(-32, -10, 12, 0, Math.PI * 2);
-                        ctx.arc(32, -10, 12, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                },
-
-                drawExplosion(ctx, x, y, radius = 90, progress = 0.5) {
-                    if (progress <= 0 || progress >= 1) return;
-                    const r = radius * Math.sin(progress * Math.PI);
-                    const g = ctx.createRadialGradient(x, y, 4, x, y, Math.max(10, r));
-                    g.addColorStop(0, '#ffffff');
-                    g.addColorStop(0.4, '#facc15');
-                    g.addColorStop(0.8, '#ef4444');
-                    g.addColorStop(1, 'rgba(239,68,68,0)');
-                    ctx.fillStyle = g;
-                    ctx.beginPath();
-                    ctx.arc(x, y, Math.max(10, r), 0, Math.PI * 2);
-                    ctx.fill();
-                },
-
-                drawParticles(ctx, w, h, t, color = '#ffffff', count = 30, direction = 'up') {
-                    ctx.fillStyle = color;
-                    for (let i = 0; i < count; i++) {
-                        const seed = i * 73.13;
-                        let px = (seed * 19) % w;
-                        let py = (seed * 31) % h;
-                        if (direction === 'up') py = (h - ((py + t * 90) % h));
-                        else if (direction === 'down') py = (py + t * 140) % h;
-                        else if (direction === 'right') px = (px + t * 180) % w;
-                        ctx.globalAlpha = 0.65;
-                        ctx.beginPath();
-                        ctx.arc(px, py, (i % 3) + 1.5, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.globalAlpha = 1;
-                },
-
-                drawSubtitle(ctx, text) {
-                    if (!text) return;
-                    const w = ctx.canvas.width;
-                    const h = ctx.canvas.height;
-                    ctx.save();
-                    ctx.font = 'bold 19px Segoe UI, sans-serif';
-                    const maxW = w * 0.86;
-                    const words = String(text).split(' ');
-                    const lines = [];
-                    let line = '';
-                    for (const word of words) {
-                        const test = line ? `${line} ${word}` : word;
-                        if (ctx.measureText(test).width > maxW && line) {
-                            lines.push(line);
-                            line = word;
-                        } else {
-                            line = test;
-                        }
-                    }
-                    if (line) lines.push(line);
-
-                    const showLines = lines.slice(0, 2);
-                    const boxH = showLines.length * 26 + 16;
-                    const boxY = h - boxH - 18;
-
-                    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-                    ctx.beginPath();
-                    ctx.roundRect ? ctx.roundRect(w * 0.06, boxY, w * 0.88, boxH, 12) : ctx.fillRect(w * 0.06, boxY, w * 0.88, boxH);
-                    ctx.fill();
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.textAlign = 'center';
-                    showLines.forEach((ln, idx) => {
-                        ctx.fillText(ln, w / 2, boxY + 24 + idx * 26);
-                    });
-                    ctx.restore();
-                }
-            };
-        },
-
-        // =========================================================================
-        // 4. RENDER ENGINE + MP4 COMPILER (WebCodecs H.264 MP4 + MediaRecorder Fallback)
-        // =========================================================================
-        async executeRenderEngineToMp4(renderFn, promptText, monitorCanvas, onProgress) {
-            const isVertical = this.aspectRatio === '9:16';
-            // Even dimensions required by H.264 MP4 encoders
-            const width = isVertical ? 480 : 854;
-            const height = isVertical ? 854 : 480;
-            const fps = 30;
-            const durationSec = 10;
-            const totalFrames = fps * durationSec; // 300 frames
-
-            const renderCanvas = document.createElement('canvas');
-            renderCanvas.width = width;
-            renderCanvas.height = height;
-            const ctx = renderCanvas.getContext('2d');
-
-            if (monitorCanvas) {
-                monitorCanvas.width = width;
-                monitorCanvas.height = height;
-            }
-            const monitorCtx = monitorCanvas ? monitorCanvas.getContext('2d') : null;
-            const helpers = this.createCanvasHelpers();
-
-            // METHOD A: Hardware WebCodecs VideoEncoder + Mp4Muxer -> Genuine .MP4 File
-            if (typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined' && window.Mp4Muxer) {
+            // Parse & validate JSON choreography
+            if (rawText) {
                 try {
-                    const muxer = new window.Mp4Muxer.Muxer({
-                        target: new window.Mp4Muxer.ArrayBufferTarget(),
-                        video: {
-                            codec: 'avc',
-                            width,
-                            height
-                        },
-                        fastStart: 'in-memory'
-                    });
-
-                    let encoderError = null;
-                    const encoder = new VideoEncoder({
-                        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-                        error: (e) => { encoderError = e; }
-                    });
-
-                    encoder.configure({
-                        codec: 'avc1.42001f',
-                        width,
-                        height,
-                        bitrate: 2_500_000,
-                        framerate: fps
-                    });
-
-                    for (let frame = 0; frame < totalFrames; frame++) {
-                        if (encoderError) throw encoderError;
-                        const t = frame / fps;
-
-                        ctx.fillStyle = '#000000';
-                        ctx.fillRect(0, 0, width, height);
-                        try {
-                            renderFn(ctx, width, height, t, helpers);
-                        } catch (frameErr) {
-                            helpers.drawSubtitle(ctx, promptText);
-                        }
-
-                        if (monitorCtx && frame % 3 === 0) {
-                            monitorCtx.drawImage(renderCanvas, 0, 0);
-                        }
-
-                        const timestampUs = Math.round((frame * 1_000_000) / fps);
-                        const vf = new VideoFrame(renderCanvas, { timestamp: timestampUs });
-                        encoder.encode(vf, { keyFrame: frame % 30 === 0 });
-                        vf.close();
-
-                        if (frame % 5 === 0) {
-                            if (onProgress) onProgress(frame + 1, totalFrames, 'rendering');
-                            await new Promise(r => setTimeout(r, 0)); // Keep UI responsive
+                    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const parsed = JSON.parse(jsonMatch[0]);
+                        if (Array.isArray(parsed.entities) && parsed.entities.length > 0 && Array.isArray(parsed.acts) && parsed.acts.length >= 2) {
+                            while (parsed.acts.length < 3) {
+                                parsed.acts.push(JSON.parse(JSON.stringify(parsed.acts[parsed.acts.length - 1])));
+                            }
+                            return parsed;
                         }
                     }
+                } catch (e) {}
+            }
 
-                    if (onProgress) onProgress(totalFrames, totalFrames, 'compiling');
-                    await encoder.flush();
-                    muxer.finalize();
+            // 4. Deep Prompt-Specific Local Builder (Never repeats a generic story—builds from user's exact words!)
+            return this.buildCustomScriptFromPromptWords(userPrompt);
+        },
 
-                    const mp4Buffer = muxer.target.buffer;
-                    if (mp4Buffer && mp4Buffer.byteLength > 1000) {
-                        return {
-                            blob: new Blob([mp4Buffer], { type: 'video/mp4' }),
-                            extension: 'mp4',
-                            formatLabel: 'MP4 • H.264 • 10.0s'
-                        };
-                    }
-                } catch (mp4Err) {
-                    console.warn("WebCodecs MP4 fallback to MediaRecorder:", mp4Err);
+        buildCustomScriptFromPromptWords(promptText) {
+            const p = (promptText || '').toLowerCase();
+            const isForest = /(forest|tree|jungle|nature|park|garden|دارستان|باخچە)/i.test(p);
+            const isSpace = /(space|planet|moon|rocket|galaxy|star|ئاسمان|ئەستێرە|مانگ)/i.test(p);
+            const isDesert = /(desert|sand|camel|sun|بیابان)/i.test(p);
+            const isBeach = /(beach|ocean|sea|water|دەریا|ئاو)/i.test(p);
+            const isRoom = /(room|house|home|office|school|ماڵ|ژوور|قوتابخانە)/i.test(p);
+
+            const setting = isForest ? 'forest' : isSpace ? 'space' : isDesert ? 'desert' : isBeach ? 'beach' : isRoom ? 'room' : 'night_city';
+            const weather = isSpace ? 'stars' : /(rain|باران)/i.test(p) ? 'rain' : /(snow|بەفر)/i.test(p) ? 'snow' : /(fight|fire|war|robot|monster|شەڕ|ئاگر)/i.test(p) ? 'embers' : 'none';
+
+            // Detect specific entities mentioned by the user
+            const entities = [];
+            if (/(robot|mecha|cyborg|ڕۆبۆت)/i.test(p)) {
+                entities.push({ id: 'e1', kind: 'robot', name: 'Mecha', scale: 1.15, primaryColor: '#3b82f6', secondaryColor: '#38bdf8' });
+            }
+            if (/(monster|dragon|kaiju|beast|دڕندە)/i.test(p)) {
+                entities.push({ id: 'e' + (entities.length + 1), kind: 'monster', name: 'Monster', scale: 1.2, primaryColor: '#15803d', secondaryColor: '#ef4444' });
+            }
+            if (/(rocket|spaceship|موشەک)/i.test(p)) {
+                entities.push({ id: 'e' + (entities.length + 1), kind: 'rocket', name: 'Rocket', scale: 1.1, primaryColor: '#f8fafc', secondaryColor: '#f97316' });
+            }
+            if (/(car|police|race|truck|ئۆتۆمبێل|پۆلیس)/i.test(p)) {
+                entities.push({ id: 'e' + (entities.length + 1), kind: 'car', name: 'Car', scale: 1.1, primaryColor: '#ef4444', secondaryColor: '#1e293b' });
+            }
+            if (/(dog|cat|wolf|lion|animal|سەگ|پشیلە|شێر|گورگ)/i.test(p)) {
+                entities.push({ id: 'e' + (entities.length + 1), kind: 'animal', name: 'Animal', scale: 1.0, primaryColor: '#d97706', secondaryColor: '#78350f' });
+            }
+
+            // Fill remaining slots with custom humans tailored to user words
+            if (entities.length === 0) {
+                const isKing = /(king|prince|queen|پاشا|شازادە)/i.test(p);
+                const isKid = /(kid|child|boy|girl|منداڵ|کوڕ|کچ)/i.test(p);
+                entities.push({
+                    id: 'e1',
+                    kind: 'human',
+                    name: 'Hero',
+                    scale: 1.05,
+                    primaryColor: isKing ? '#eab308' : '#3b82f6',
+                    secondaryColor: '#1e293b',
+                    hat: isKing ? 'crown' : 'none',
+                    beard: /(old|man|پیاو|پیر)/i.test(p)
+                });
+                if (isKid || /(two|friend|enemy|thief|police|against|with|and|لەگەڵ|هاوڕێ|دز)/i.test(p)) {
+                    entities.push({
+                        id: 'e2',
+                        kind: 'human',
+                        name: 'Character 2',
+                        scale: isKid ? 0.85 : 1.05,
+                        primaryColor: '#ef4444',
+                        secondaryColor: '#0f172a',
+                        hat: /(police|پۆلیس)/i.test(p) ? 'police' : 'none'
+                    });
                 }
             }
 
-            // METHOD B: Universal MediaRecorder Engine (Works on all mobile/desktop browsers)
-            return await new Promise((resolve, reject) => {
-                if (!renderCanvas.captureStream || typeof MediaRecorder === 'undefined') {
-                    return reject(new Error("Video rendering is not supported on this browser."));
+            // Split the user's exact prompt into 3 sequential subtitles
+            const words = promptText.trim().split(/\s+/);
+            const chunk = Math.max(1, Math.ceil(words.length / 3));
+            const s1 = words.slice(0, chunk).join(' ');
+            const s2 = words.slice(chunk, chunk * 2).join(' ') || s1;
+            const s3 = words.slice(chunk * 2).join(' ') || s2;
+
+            const isFight = /(fight|battle|punch|attack|revenge|war|شەڕ|تۆڵە|لێدان)/i.test(p);
+
+            return {
+                setting,
+                weather,
+                mood: isFight ? 'action' : 'happy',
+                entities,
+                acts: [
+                    {
+                        title: 'Act 1',
+                        subtitle: s1,
+                        sound: 'footsteps',
+                        actors: entities.map((ent, idx) => ({
+                            id: ent.id,
+                            startX: idx === 0 ? 0.15 : 0.85,
+                            endX: idx === 0 ? 0.36 : 0.64,
+                            startY: 0.82,
+                            endY: 0.82,
+                            facing: idx === 0 ? 1 : -1,
+                            pose: 'walk',
+                            expression: 'neutral',
+                            holding: 'none',
+                            speech: idx === 0 ? s1.slice(0, 22) : ''
+                        }))
+                    },
+                    {
+                        title: 'Act 2',
+                        subtitle: s2,
+                        sound: isFight ? 'laser' : 'speech',
+                        actors: entities.map((ent, idx) => ({
+                            id: ent.id,
+                            startX: idx === 0 ? 0.36 : 0.64,
+                            endX: idx === 0 ? 0.42 : 0.58,
+                            startY: 0.82,
+                            endY: 0.82,
+                            facing: idx === 0 ? 1 : -1,
+                            pose: isFight ? 'punch' : (idx === 1 ? 'point' : 'idle'),
+                            expression: isFight ? 'angry' : 'shocked',
+                            holding: isFight && idx === 0 ? 'sword' : 'none',
+                            speech: idx === 1 ? s2.slice(0, 22) : ''
+                        }))
+                    },
+                    {
+                        title: 'Act 3',
+                        subtitle: s3,
+                        sound: isFight ? 'explosion' : 'laugh',
+                        actors: entities.map((ent, idx) => ({
+                            id: ent.id,
+                            startX: idx === 0 ? 0.42 : 0.58,
+                            endX: idx === 0 ? 0.48 : 0.72,
+                            startY: 0.82,
+                            endY: 0.82,
+                            facing: idx === 0 ? 1 : -1,
+                            pose: idx === 0 ? 'celebrate' : (isFight ? 'fall' : 'celebrate'),
+                            expression: idx === 0 ? 'happy' : (isFight ? 'shocked' : 'laughing'),
+                            holding: idx === 0 ? 'gold_bag' : 'none',
+                            speech: idx === 0 ? s3.slice(0, 22) : ''
+                        }))
+                    }
+                ]
+            };
+        },
+
+        // =========================================================================
+        // 5. REAL-TIME CANVAS CHARACTER ANIMATOR & SYNCHRONIZED WEBAUDIO SOUND ENGINE
+        // =========================================================================
+        renderAndRecordCanvasWithAudio(canvas, script, onFrameProgress) {
+            return new Promise((resolve, reject) => {
+                const isVertical = this.aspectRatio === '9:16';
+                const width = isVertical ? 480 : 854;
+                const height = isVertical ? 854 : 480;
+
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
+                    return reject(new Error("Canvas recording is not supported on this browser."));
                 }
 
-                const stream = renderCanvas.captureStream(fps);
-                const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+                const fps = 30;
+                const durationSec = 10;
+                const totalFrames = fps * durationSec; // 300 frames
+                const framesPerAct = totalFrames / 3;
+
+                // --- SETUP REAL WEBAUDIO SOUND SYNTHESIZER & STREAM MIXER ---
+                let audioCtx = null;
+                let mixedStream = canvas.captureStream(fps);
+                let soundControllers = null;
+
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioCtx();
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume().catch(() => {});
+                    }
+                    const dest = audioCtx.createMediaStreamDestination();
+                    const masterGain = audioCtx.createGain();
+                    masterGain.gain.value = 0.25;
+                    masterGain.connect(dest);
+                    // Also route softly to speakers if user interacts so they can hear live sound!
+                    masterGain.connect(audioCtx.destination);
+
+                    // Continuous Background Mood Pad
+                    const padOsc1 = audioCtx.createOscillator();
+                    const padOsc2 = audioCtx.createOscillator();
+                    const padGain = audioCtx.createGain();
+                    padOsc1.type = 'sine';
+                    padOsc2.type = 'triangle';
+                    padOsc1.frequency.value = script.mood === 'action' ? 110 : (script.mood === 'sad' ? 130.81 : 146.83);
+                    padOsc2.frequency.value = script.mood === 'action' ? 164.81 : (script.mood === 'sad' ? 155.56 : 220.0);
+                    padGain.gain.value = 0.14;
+                    padOsc1.connect(padGain);
+                    padOsc2.connect(padGain);
+                    padGain.connect(masterGain);
+                    padOsc1.start();
+                    padOsc2.start();
+
+                    soundControllers = {
+                        ctx: audioCtx,
+                        master: masterGain,
+                        pad1: padOsc1,
+                        pad2: padOsc2,
+                        playFootstep() {
+                            const o = audioCtx.createOscillator();
+                            const g = audioCtx.createGain();
+                            o.type = 'sine';
+                            o.frequency.setValueAtTime(115, audioCtx.currentTime);
+                            o.frequency.exponentialRampToValueAtTime(42, audioCtx.currentTime + 0.08);
+                            g.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.09);
+                            o.connect(g);
+                            g.connect(masterGain);
+                            o.start();
+                            o.stop(audioCtx.currentTime + 0.09);
+                        },
+                        playSpeechBlip(pitch = 260) {
+                            const o = audioCtx.createOscillator();
+                            const g = audioCtx.createGain();
+                            o.type = 'triangle';
+                            o.frequency.setValueAtTime(pitch + (Math.random() - 0.5) * 70, audioCtx.currentTime);
+                            g.gain.setValueAtTime(0.22, audioCtx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.07);
+                            o.connect(g);
+                            g.connect(masterGain);
+                            o.start();
+                            o.stop(audioCtx.currentTime + 0.07);
+                        },
+                        playLaugh() {
+                            const notes = [420, 380, 440, 360];
+                            notes.forEach((f, idx) => {
+                                const t0 = audioCtx.currentTime + idx * 0.09;
+                                const o = audioCtx.createOscillator();
+                                const g = audioCtx.createGain();
+                                o.type = 'sine';
+                                o.frequency.setValueAtTime(f, t0);
+                                g.gain.setValueAtTime(0.28, t0);
+                                g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.07);
+                                o.connect(g);
+                                g.connect(masterGain);
+                                o.start(t0);
+                                o.stop(t0 + 0.08);
+                            });
+                        },
+                        playExplosion() {
+                            const bufferSize = audioCtx.sampleRate * 0.45;
+                            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                            const data = buffer.getChannelData(0);
+                            for (let i = 0; i < bufferSize; i++) {
+                                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.14));
+                            }
+                            const noise = audioCtx.createBufferSource();
+                            noise.buffer = buffer;
+                            const filter = audioCtx.createBiquadFilter();
+                            filter.type = 'lowpass';
+                            filter.frequency.value = 320;
+                            const g = audioCtx.createGain();
+                            g.gain.setValueAtTime(0.65, audioCtx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+                            noise.connect(filter);
+                            filter.connect(g);
+                            g.connect(masterGain);
+                            noise.start();
+                        },
+                        playLaser() {
+                            const o = audioCtx.createOscillator();
+                            const g = audioCtx.createGain();
+                            o.type = 'sawtooth';
+                            o.frequency.setValueAtTime(880, audioCtx.currentTime);
+                            o.frequency.exponentialRampToValueAtTime(140, audioCtx.currentTime + 0.18);
+                            g.gain.setValueAtTime(0.28, audioCtx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+                            o.connect(g);
+                            g.connect(masterGain);
+                            o.start();
+                            o.stop(audioCtx.currentTime + 0.19);
+                        },
+                        stopAll() {
+                            try {
+                                padOsc1.stop();
+                                padOsc2.stop();
+                                audioCtx.close();
+                            } catch (e) {}
+                        }
+                    };
+
+                    const audioTrack = dest.stream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        mixedStream.addTrack(audioTrack);
+                    }
+                } catch (audioErr) {
+                    console.warn("WebAudio fallback:", audioErr);
+                }
+
+                const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
                 const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
                 const recorder = chosenMime
-                    ? new MediaRecorder(stream, { mimeType: chosenMime, videoBitsPerSecond: 2500000 })
-                    : new MediaRecorder(stream);
+                    ? new MediaRecorder(mixedStream, { mimeType: chosenMime, videoBitsPerSecond: 3000000 })
+                    : new MediaRecorder(mixedStream);
 
                 const chunks = [];
                 recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
                 recorder.onstop = () => {
+                    if (soundControllers) soundControllers.stopAll();
                     const isMp4 = (chosenMime || '').includes('mp4');
                     resolve({
                         blob: new Blob(chunks, { type: chosenMime || 'video/webm' }),
-                        extension: isMp4 ? 'mp4' : 'webm',
-                        formatLabel: `${isMp4 ? 'MP4' : 'WEBM'} • 10.0s`
+                        extension: isMp4 ? 'mp4' : 'webm'
                     });
                 };
 
                 recorder.start(250);
                 let frame = 0;
 
-                const interval = setInterval(() => {
+                const renderLoop = setInterval(() => {
                     if (frame >= totalFrames) {
-                        clearInterval(interval);
-                        if (onProgress) onProgress(totalFrames, totalFrames, 'compiling');
+                        clearInterval(renderLoop);
                         if (recorder.state !== 'inactive') recorder.stop();
                         return;
                     }
 
-                    const t = frame / fps;
-                    ctx.fillStyle = '#000000';
-                    ctx.fillRect(0, 0, width, height);
-                    try {
-                        renderFn(ctx, width, height, t, helpers);
-                    } catch (e) {
-                        helpers.drawSubtitle(ctx, promptText);
+                    const t = frame / fps; // 0.0 -> 10.0s
+                    const actIdx = Math.min(2, Math.floor(frame / framesPerAct));
+                    const localT = (frame % framesPerAct) / framesPerAct; // 0.0 -> 1.0 inside Act
+                    const currentAct = script.acts[actIdx] || script.acts[0];
+
+                    // Trigger Synchronized Sound Effects on specific frames
+                    if (soundControllers) {
+                        const snd = currentAct.sound || 'speech';
+                        if (snd === 'footsteps' && frame % 12 === 0) soundControllers.playFootstep();
+                        else if (snd === 'speech' && frame % 8 === 0) soundControllers.playSpeechBlip(actIdx === 1 ? 310 : 230);
+                        else if (snd === 'laugh' && frame % 28 === 0) soundControllers.playLaugh();
+                        else if (snd === 'laser' && frame % 14 === 0) soundControllers.playLaser();
+                        else if (snd === 'explosion' && (frame % framesPerAct === 6)) soundControllers.playExplosion();
+                        else if (snd === 'engine' && frame % 10 === 0) soundControllers.playFootstep();
                     }
 
-                    if (monitorCtx && frame % 3 === 0) {
-                        monitorCtx.drawImage(renderCanvas, 0, 0);
+                    // Draw Background Environment
+                    this.drawEnvironmentStage(ctx, width, height, t, script.setting, script.weather);
+
+                    // Draw & Animate Each Entity in Current Act
+                    const entityMap = {};
+                    (script.entities || []).forEach(e => { entityMap[e.id] = e; });
+
+                    const actActors = currentAct.actors || [];
+                    actActors.forEach((actorState, idx) => {
+                        const meta = entityMap[actorState.id] || script.entities[idx] || { kind: 'human', primaryColor: '#3b82f6' };
+                        const ease = localT * localT * (3 - 2 * localT);
+                        const px = (actorState.startX + (actorState.endX - actorState.startX) * ease) * width;
+                        const py = (actorState.startY + (actorState.endY - actorState.startY) * ease) * height;
+
+                        this.drawAnimatedEntity(ctx, {
+                            meta,
+                            actor: actorState,
+                            x: px,
+                            y: py,
+                            t,
+                            localT,
+                            frame
+                        });
+                    });
+
+                    // Draw Explosion Effect if Act sound is explosion
+                    if (currentAct.sound === 'explosion' && localT > 0.05 && localT < 0.75) {
+                        const expProg = (localT - 0.05) / 0.7;
+                        this.drawExplosionEffect(ctx, width * 0.55, height * 0.62, 135, expProg);
+                    }
+
+                    // Draw Cinematic Subtitle Bar
+                    this.drawCinemaSubtitle(ctx, currentAct.subtitle, width, height);
+
+                    // Act Transition Crossfade
+                    if (localT < 0.08) {
+                        ctx.fillStyle = `rgba(0,0,0,${1 - localT / 0.08})`;
+                        ctx.fillRect(0, 0, width, height);
                     }
 
                     frame++;
-                    if (onProgress && frame % 3 === 0) {
-                        onProgress(frame, totalFrames, 'rendering');
+                    if (onFrameProgress && (frame % 3 === 0 || frame === totalFrames)) {
+                        onFrameProgress(frame, totalFrames, actIdx);
                     }
                 }, 1000 / fps);
             });
         },
 
-        renderCompletedVideoCard(cardWrap, videoUrl, promptText, ext, formatLabel, generatedCode) {
-            const fileName = `zoneweb-ai-video.${ext}`;
+        // =========================================================================
+        // 6. CANVAS 2D STAGE & ARTICULATED CHARACTER RENDERING FUNCTIONS
+        // =========================================================================
+        drawEnvironmentStage(ctx, w, h, t, setting, weather) {
+            const groundY = h * 0.82;
+            const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+
+            if (setting === 'forest') {
+                sky.addColorStop(0, '#0c4a6e');
+                sky.addColorStop(1, '#38bdf8');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, groundY);
+
+                // Sun
+                ctx.fillStyle = '#fde047';
+                ctx.beginPath();
+                ctx.arc(w * 0.82, h * 0.18, 32, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Layered Trees
+                for (let i = 0; i < 9; i++) {
+                    const tx = (i + 0.5) * (w / 9);
+                    const th = 95 + (i % 3) * 28;
+                    ctx.fillStyle = '#451a03';
+                    ctx.fillRect(tx - 7, groundY - th * 0.45, 14, th * 0.45);
+                    ctx.fillStyle = i % 2 === 0 ? '#15803d' : '#166534';
+                    ctx.beginPath();
+                    ctx.arc(tx, groundY - th * 0.65, 36, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = '#14532d';
+                ctx.fillRect(0, groundY, w, h - groundY);
+            } else if (setting === 'space') {
+                sky.addColorStop(0, '#02040a');
+                sky.addColorStop(1, '#1e1038');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, h);
+
+                // Planet
+                const pg = ctx.createRadialGradient(w * 0.75, h * 0.28, 10, w * 0.75, h * 0.28, 65);
+                pg.addColorStop(0, '#a855f7');
+                pg.addColorStop(1, '#3b0764');
+                ctx.fillStyle = pg;
+                ctx.beginPath();
+                ctx.arc(w * 0.75, h * 0.28, 62, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (setting === 'desert') {
+                sky.addColorStop(0, '#ea580c');
+                sky.addColorStop(1, '#fde047');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, groundY);
+                ctx.fillStyle = '#d97706';
+                ctx.fillRect(0, groundY, w, h - groundY);
+            } else if (setting === 'beach') {
+                sky.addColorStop(0, '#0284c7');
+                sky.addColorStop(1, '#bae6fd');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, groundY * 0.75);
+                ctx.fillStyle = '#0369a1';
+                ctx.fillRect(0, groundY * 0.75, w, groundY * 0.25);
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(0, groundY, w, h - groundY);
+            } else if (setting === 'room') {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, w, groundY);
+                // Window
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(w * 0.38, h * 0.2, w * 0.24, h * 0.28);
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(w * 0.38, h * 0.2, w * 0.24, h * 0.28);
+                ctx.fillStyle = '#334155';
+                ctx.fillRect(0, groundY, w, h - groundY);
+            } else {
+                // Night City / Street
+                sky.addColorStop(0, '#060918');
+                sky.addColorStop(1, '#1e1b4b');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, groundY);
+
+                const cols = 12;
+                const bw = w / cols;
+                for (let i = 0; i < cols; i++) {
+                    const bh = h * (0.22 + ((i * 31) % 25) / 100);
+                    ctx.fillStyle = '#0b0f1d';
+                    ctx.fillRect(i * bw + 2, groundY - bh, bw - 4, bh);
+                    ctx.fillStyle = 'rgba(253, 224, 71, 0.28)';
+                    for (let wy = groundY - bh + 12; wy < groundY - 14; wy += 16) {
+                        if ((i + wy) % 2 === 0) ctx.fillRect(i * bw + 8, wy, 5, 8);
+                    }
+                }
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, groundY, w, h - groundY);
+            }
+
+            // Weather / Particles
+            if (weather && weather !== 'none') {
+                const count = 45;
+                for (let i = 0; i < count; i++) {
+                    const sx = (i * 173 + (weather === 'rain' ? -t * 120 : 0) + w * 10) % w;
+                    const sy = (i * 97 + (weather === 'embers' ? -t * 110 : t * 160) + h * 10) % h;
+                    ctx.fillStyle = weather === 'embers' ? '#f97316' : (weather === 'rain' ? '#38bdf8' : '#ffffff');
+                    ctx.globalAlpha = 0.7;
+                    ctx.beginPath();
+                    if (weather === 'rain') {
+                        ctx.rect(sx, sy, 2, 10);
+                    } else {
+                        ctx.arc(sx, sy, (i % 2) + 1.2, 0, Math.PI * 2);
+                    }
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+        },
+
+        drawAnimatedEntity(ctx, { meta, actor, x, y, t, localT, frame }) {
+            const kind = meta.kind || 'human';
+            const scale = meta.scale || 1;
+            const facing = actor.facing || 1;
+            const pose = actor.pose || 'idle';
+            const expr = actor.expression || 'neutral';
+            const speech = actor.speech || '';
+
+            if (kind === 'robot') {
+                this.drawArticulatedRobot(ctx, x, y, scale, facing, pose, meta.primaryColor || '#3b82f6', meta.secondaryColor || '#38bdf8', t);
+            } else if (kind === 'monster') {
+                this.drawArticulatedMonster(ctx, x, y, scale, facing, pose, meta.primaryColor || '#15803d', meta.secondaryColor || '#ef4444', t);
+            } else if (kind === 'car' || kind === 'rocket') {
+                this.drawArticulatedVehicle(ctx, x, y, scale, facing, kind, meta.primaryColor || '#ef4444', t);
+            } else if (kind === 'animal') {
+                this.drawArticulatedAnimal(ctx, x, y, scale, facing, pose, meta.primaryColor || '#d97706', t);
+            } else {
+                this.drawArticulatedHuman(ctx, {
+                    x, y, scale, facing, pose, expr,
+                    holding: actor.holding || 'none',
+                    shirtColor: meta.primaryColor || '#3b82f6',
+                    pantsColor: meta.secondaryColor || '#1e293b',
+                    hairColor: meta.hairColor || '#1f2937',
+                    hat: meta.hat || 'none',
+                    beard: Boolean(meta.beard),
+                    speech,
+                    t,
+                    frame
+                });
+            }
+        },
+
+        // Fully Articulated Human Character with Walking Legs, Swinging Arms, Blinking & Lip-Sync
+        drawArticulatedHuman(ctx, opts) {
+            const { x, y, scale, facing, pose, expr, holding, shirtColor, pantsColor, hairColor, hat, beard, speech, t, frame } = opts;
+
+            const isMoving = pose === 'walk' || pose === 'run';
+            const freq = pose === 'run' ? 18 : 11;
+            const legAngle = isMoving ? Math.sin(t * freq) * 0.55 : 0;
+            const bounceY = isMoving ? Math.abs(Math.sin(t * freq)) * 6 : (pose === 'celebrate' ? Math.abs(Math.sin(t * 10)) * 14 : 0);
+            const laughShake = expr === 'laughing' ? Math.sin(t * 28) * 3 : 0;
+
+            ctx.save();
+            ctx.translate(x, y - bounceY);
+            if (pose === 'fall') {
+                ctx.rotate(facing * 1.15);
+            }
+            ctx.scale(scale * facing, scale);
+
+            // Animated Left & Right Legs
+            ctx.strokeStyle = pantsColor;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+
+            ctx.save();
+            ctx.translate(-6, -54);
+            ctx.rotate(legAngle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, 52);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(6, -54);
+            ctx.rotate(-legAngle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, 52);
+            ctx.stroke();
+            ctx.restore();
+
+            // Torso
+            ctx.fillStyle = shirtColor;
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(-18, -112 + laughShake, 36, 60, 10) : ctx.fillRect(-18, -112 + laughShake, 36, 60);
+            ctx.fill();
+
+            // Articulated Arms
+            ctx.strokeStyle = '#fcd34d';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            if (pose === 'beg' || pose === 'point') {
+                ctx.moveTo(12, -100);
+                ctx.lineTo(44, -90 + Math.sin(t * 8) * 4);
+            } else if (pose === 'punch') {
+                const jab = Math.max(0, Math.sin(t * 16)) * 26;
+                ctx.moveTo(12, -100);
+                ctx.lineTo(36 + jab, -100);
+            } else if (pose === 'celebrate') {
+                ctx.moveTo(-14, -102);
+                ctx.lineTo(-32, -145 + Math.sin(t * 14) * 6);
+                ctx.moveTo(14, -102);
+                ctx.lineTo(32, -145 - Math.sin(t * 14) * 6);
+            } else {
+                const armSwing = isMoving ? Math.sin(t * freq) * 16 : Math.sin(t * 3) * 3;
+                ctx.moveTo(-14, -100);
+                ctx.lineTo(-18 - armSwing, -60);
+                ctx.moveTo(14, -100);
+                ctx.lineTo(18 + armSwing, -60);
+            }
+            ctx.stroke();
+
+            // Held Prop
+            if (holding === 'money') {
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(36, -100, 22, 12);
+            } else if (holding === 'gold_bag') {
+                ctx.fillStyle = '#eab308';
+                ctx.beginPath();
+                ctx.arc(34, -82, 14, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (holding === 'sword') {
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(35, -85);
+                ctx.lineTo(78, -125);
+                ctx.stroke();
+            } else if (holding === 'phone') {
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(36, -102, 10, 16);
+            }
+
+            // Head
+            ctx.fillStyle = '#fcd34d';
+            ctx.beginPath();
+            ctx.arc(0, -134 + laughShake, 21, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hair or Hat
+            if (hat === 'crown') {
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.moveTo(-16, -150);
+                ctx.lineTo(-10, -168);
+                ctx.lineTo(0, -155);
+                ctx.lineTo(10, -168);
+                ctx.lineTo(16, -150);
+                ctx.closePath();
+                ctx.fill();
+            } else if (hat === 'police') {
+                ctx.fillStyle = '#1d4ed8';
+                ctx.fillRect(-20, -156, 40, 10);
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(-4, -154, 8, 5);
+            } else {
+                ctx.fillStyle = hairColor;
+                ctx.beginPath();
+                ctx.arc(0, -138 + laughShake, 21, Math.PI, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (beard) {
+                ctx.fillStyle = hairColor;
+                ctx.beginPath();
+                ctx.arc(2, -126 + laughShake, 14, 0, Math.PI);
+                ctx.fill();
+            }
+
+            // Blinking Eye
+            const isBlinking = (frame % 75) < 4;
+            ctx.fillStyle = '#0f172a';
+            if (isBlinking) {
+                ctx.fillRect(4, -137 + laughShake, 7, 2);
+            } else {
+                ctx.beginPath();
+                ctx.arc(7, -136 + laughShake, 2.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Animated Lip-Sync Mouth & Facial Expression
+            const isSpeaking = speech && speech.length > 0;
+            const mouthOpen = (isSpeaking || expr === 'laughing') ? (Math.abs(Math.sin(t * 22)) * 6 + 2) : 0;
+
+            ctx.strokeStyle = '#0f172a';
+            ctx.fillStyle = '#7f1d1d';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            if (mouthOpen > 0) {
+                ctx.ellipse(7, -125 + laughShake, 5, mouthOpen, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (expr === 'happy') {
+                ctx.arc(6, -128, 7, 0, Math.PI);
+                ctx.stroke();
+            } else if (expr === 'sad' || expr === 'angry') {
+                ctx.arc(6, -120, 6, Math.PI, Math.PI * 2);
+                ctx.stroke();
+            } else if (expr === 'shocked') {
+                ctx.arc(7, -125, 4.5, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                ctx.moveTo(2, -126);
+                ctx.lineTo(12, -126);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Speech Bubble
+            if (speech) {
+                ctx.save();
+                ctx.font = 'bold 13px Segoe UI, sans-serif';
+                const tw = ctx.measureText(speech).width + 20;
+                const bx = Math.min(ctx.canvas.width - tw - 10, Math.max(10, x - tw / 2));
+                const by = Math.max(14, y - 192 * scale);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(bx, by, tw, 28, 10) : ctx.fillRect(bx, by, tw, 28);
+                ctx.fill();
+                ctx.fillStyle = '#0f172a';
+                ctx.textAlign = 'center';
+                ctx.fillText(speech, bx + tw / 2, by + 18);
+                ctx.restore();
+            }
+        },
+
+        drawArticulatedRobot(ctx, x, y, scale, facing, pose, color, eyeColor, t) {
+            const stride = pose === 'walk' || pose === 'run' ? Math.sin(t * 10) * 14 : 0;
+            ctx.save();
+            ctx.translate(x, y - Math.abs(stride) * 0.3);
+            ctx.scale(scale * facing, scale);
+
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(-32 + stride, -75, 22, 75);
+            ctx.fillRect(10 - stride, -75, 22, 75);
+
+            ctx.fillStyle = color;
+            ctx.fillRect(-44, -162, 88, 90);
+
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(-22, -198, 44, 34);
+            ctx.fillStyle = eyeColor;
+            ctx.fillRect(-12, -186, 30, 8);
+            ctx.restore();
+
+            if (pose === 'punch') {
+                ctx.save();
+                ctx.strokeStyle = eyeColor;
+                ctx.lineWidth = 7;
+                ctx.beginPath();
+                ctx.moveTo(x + facing * 20 * scale, y - 182 * scale);
+                ctx.lineTo(x + facing * 260 * scale, y - 150 * scale);
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
+
+        drawArticulatedMonster(ctx, x, y, scale, facing, pose, color, accent, t) {
+            const stomp = Math.sin(t * 9) * 8;
+            ctx.save();
+            ctx.translate(x, y - Math.abs(stomp));
+            ctx.scale(scale * facing, scale);
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(-42, 0);
+            ctx.lineTo(-32, -175);
+            ctx.lineTo(18, -198);
+            ctx.lineTo(44, -135);
+            ctx.lineTo(38, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = accent;
+            ctx.beginPath();
+            ctx.arc(16, -172, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        },
+
+        drawArticulatedVehicle(ctx, x, y, scale, facing, kind, color, t) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale * facing, scale);
+            if (kind === 'rocket') {
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.moveTo(-14, 0);
+                ctx.lineTo(0, 36 + Math.random() * 14);
+                ctx.lineTo(14, 0);
+                ctx.fill();
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(0, -92);
+                ctx.lineTo(22, -42);
+                ctx.lineTo(22, 0);
+                ctx.lineTo(-22, 0);
+                ctx.lineTo(-22, -42);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                ctx.fillStyle = color;
+                ctx.fillRect(-52, -36, 104, 24);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(-28, -54, 54, 20);
+                ctx.fillStyle = '#020617';
+                ctx.beginPath();
+                ctx.arc(-30, -10, 12, 0, Math.PI * 2);
+                ctx.arc(30, -10, 12, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        },
+
+        drawArticulatedAnimal(ctx, x, y, scale, facing, pose, color, t) {
+            const hop = Math.abs(Math.sin(t * 12)) * 10;
+            ctx.save();
+            ctx.translate(x, y - hop);
+            ctx.scale(scale * facing, scale);
+            ctx.fillStyle = color;
+            ctx.fillRect(-28, -42, 56, 26);
+            ctx.fillRect(-24, -16, 8, 16);
+            ctx.fillRect(16, -16, 8, 16);
+            ctx.beginPath();
+            ctx.arc(30, -44, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        },
+
+        drawExplosionEffect(ctx, x, y, maxR, progress) {
+            const r = Math.max(12, maxR * Math.sin(progress * Math.PI));
+            const g = ctx.createRadialGradient(x, y, 4, x, y, r);
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(0.4, '#facc15');
+            g.addColorStop(0.8, '#ef4444');
+            g.addColorStop(1, 'rgba(239,68,68,0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        },
+
+        drawCinemaSubtitle(ctx, text, w, h) {
+            if (!text) return;
+            ctx.save();
+            ctx.font = 'bold 18px Segoe UI, sans-serif';
+            const maxW = w * 0.86;
+            const words = String(text).split(' ');
+            const lines = [];
+            let cur = '';
+            for (const wd of words) {
+                const test = cur ? `${cur} ${wd}` : wd;
+                if (ctx.measureText(test).width > maxW && cur) {
+                    lines.push(cur);
+                    cur = wd;
+                } else {
+                    cur = test;
+                }
+            }
+            if (cur) lines.push(cur);
+
+            const show = lines.slice(0, 2);
+            const boxH = show.length * 24 + 14;
+            const boxY = h - boxH - 14;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.78)';
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(w * 0.06, boxY, w * 0.88, boxH, 10) : ctx.fillRect(w * 0.06, boxY, w * 0.88, boxH);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            show.forEach((ln, idx) => {
+                ctx.fillText(ln, w / 2, boxY + 22 + idx * 24);
+            });
+            ctx.restore();
+        },
+
+        renderCompletedVideoPlayer(cardWrap, videoUrl, promptText, ext, script) {
+            const fileName = `zoneweb-animated-video.${ext}`;
             window.__lastGeneratedVideoUrl = videoUrl;
             window.__lastGeneratedVideoPrompt = promptText;
-            const codePreviewId = 'zw_code_box_' + Date.now();
 
             cardWrap.innerHTML = `
-                <div class="w-full max-w-[92%] rounded-2xl p-4 card-bg border border-fuchsia-500/40 shadow-2xl space-y-3">
+                <div class="w-full max-w-[94%] rounded-2xl p-4 card-bg border border-fuchsia-500/40 shadow-2xl space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             ${this.getCustomLogoSvg(18)}
-                            <span class="text-xs md:text-sm font-extrabold text-white">AI Video Compiled</span>
+                            <span class="text-xs md:text-sm font-extrabold text-white">Animated Canvas Video Ready</span>
                         </div>
-                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">${formatLabel}</span>
+                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">10.0s • WITH SOUND</span>
                     </div>
 
-                    <p class="text-xs text-gray-300">Prompt: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
+                    <p class="text-xs text-gray-300">Scene: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>
 
                     <div class="rounded-2xl overflow-hidden border border-white/15 bg-black shadow-xl flex justify-center">
-                        <video src="${videoUrl}" controls autoplay loop muted playsinline class="w-full max-h-96 object-contain bg-black"></video>
+                        <video src="${videoUrl}" controls autoplay loop playsinline class="w-full max-h-96 object-contain bg-black"></video>
                     </div>
 
                     <div class="flex flex-wrap gap-2 pt-1">
                         <a href="${videoUrl}" download="${fileName}" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
-                            <i class="fa-solid fa-download"></i> Download ${ext.toUpperCase()}
+                            <i class="fa-solid fa-download"></i> Download Video
                         </a>
                         <button onclick="window.ZenoVideo.embedVideoIntoCurrentWebsite()" class="px-4 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow transition">
-                            <i class="fa-solid fa-plus-circle"></i> Add to Website
-                        </button>
-                        <button onclick="document.getElementById('${codePreviewId}').classList.toggle('hidden')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition">
-                            <i class="fa-solid fa-code"></i> View AI Code
+                            <i class="fa-solid fa-plus-circle"></i> Add Video to Website
                         </button>
                     </div>
-
-                    <pre id="${codePreviewId}" class="hidden p-3 rounded-xl bg-black/80 border border-white/10 text-[10px] font-mono text-emerald-300 overflow-x-auto max-h-48">${generatedCode.replace(/</g, '&lt;')}</pre>
                 </div>
             `;
         },
@@ -1224,7 +1405,7 @@ CRITICAL RULES:
             <section class="max-w-4xl mx-auto my-8 px-4 relative z-20">
                 <div class="rounded-3xl overflow-hidden border border-white/15 bg-zinc-950 p-4 shadow-2xl text-center">
                     <h3 class="text-lg font-extrabold text-white mb-3">${(window.__lastGeneratedVideoPrompt || 'Featured AI Video').replace(/</g, '&lt;')}</h3>
-                    <video src="${window.__lastGeneratedVideoUrl}" controls autoplay loop muted playsinline class="w-full rounded-2xl max-h-[480px] bg-black mx-auto"></video>
+                    <video src="${window.__lastGeneratedVideoUrl}" controls playsinline class="w-full rounded-2xl max-h-[480px] bg-black mx-auto"></video>
                 </div>
             </section>`;
 
@@ -1244,7 +1425,7 @@ CRITICAL RULES:
                     window.openPreviewModal();
                 }
             } else {
-                alert("Please build or select a website first, then click Add to Website!");
+                alert("Please build or select a website first, then click Add Video to Website!");
             }
         }
     };

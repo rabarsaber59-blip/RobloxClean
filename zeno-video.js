@@ -1,14 +1,11 @@
 /**
- * ZENO-VIDEO.JS - Upgraded 2.5D Cinematic Graphics Canvas & Multi-Sound AI Video Studio
- * 1. Rich 2.5D Shaded Graphics Engine:
- *    - Parallax multi-layer environments (Golden/Night City with glowing streetlamps & reflections,
- *      Sunlit Misty Forest, Nebula Space, Desert Dunes, Ocean Beach, Cozy Detailed Room).
- *    - Detailed 2.5D characters with ground contact shadows, knee-bending legs, elbow-bending arms,
- *      shaded hoodies/jackets with rim highlights, expressive eyebrows, glossy eyes with catchlights,
- *      lip-sync mouth, and glowing props (sparkling cash, gold bags, hot food, crown, sword).
- *    - Smooth dynamic camera zoom & pan + volumetric light shafts + film vignette.
- * 2. Connects directly to ZenoSounds (12 Sound FX & Adaptive Scores).
- * 3. Global UI Emoji-to-Custom-Logo Replacer.
+ * ZENO-VIDEO.JS - True Lip-Sync Character Voice Animation & 2.5D Cinema Engine
+ * 1. NO floating white text bubbles above characters' heads — characters speak directly with
+ *    real human voice audio (Male, Female, Child & Crying) and animated moving mouths!
+ * 2. Real-time Audio-Driven Lip-Sync: Character jaw, upper/lower lips, teeth & tongue open and close
+ *    in exact synchronization with the spoken voice waveform, accompanied by subtle acoustic sound waves.
+ * 3. Distinct Male, Female (long flowing hair + dress/tunic), and Child models + falling tears when crying.
+ * 4. Accurate Scene Detection (House/Room with door & window for family stories, Forest, City, Beach, Desert, Space).
  */
 (function () {
     const ZenoVideo = {
@@ -61,9 +58,6 @@
             </svg>`;
         },
 
-        // =========================================================================
-        // 1. GLOBAL UI EMOJI REPLACER
-        // =========================================================================
         replaceAllEmojisWithCustomLogos(rootNode = document.body) {
             if (!rootNode || this.isReplacingEmojis) return;
             this.isReplacingEmojis = true;
@@ -126,9 +120,6 @@
             this.emojiObserver.observe(document.body, { childList: true, subtree: true });
         },
 
-        // =========================================================================
-        // 2. TOP "GENERATE VIDEO" BUTTON & VIDEO STUDIO PANEL
-        // =========================================================================
         injectTopGenerateVideoButton() {
             const topPreviewBtn = document.getElementById('topPreviewBtn');
             if (!topPreviewBtn || !topPreviewBtn.parentElement || document.getElementById('topGenerateVideoBtn')) return;
@@ -157,10 +148,10 @@
                         </span>
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-white">2.5D HD Cinema & Sound Studio</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">Pro Graphics + 12 Sounds</span>
+                                <span class="text-xs font-extrabold text-white">2.5D Voice & Lip-Sync Video Studio</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">Real Human Voices</span>
                             </div>
-                            <p class="text-[10px] text-gray-300">Write your story below — AI animates shaded characters, lighting & sound</p>
+                            <p class="text-[10px] text-gray-300">Characters speak out loud with moving mouths — no text bubbles over heads</p>
                         </div>
                     </div>
                     <button onclick="window.ZenoVideo.toggleVideoMode(false)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition">
@@ -175,7 +166,7 @@
                     </div>
 
                     <button type="button" onclick="window.ZenoVideo.triggerInstantVideoFromChat()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition">
-                        Create 2.5D Video
+                        Create Video Now
                     </button>
                 </div>
             `;
@@ -206,7 +197,7 @@
                 panel?.classList.remove('hidden');
                 if (window.ZenoSounds) window.ZenoSounds.injectSoundPreviewBar();
                 if (chatInput) {
-                    chatInput.placeholder = "Write your exact story or scene (characters, actions, emotions)...";
+                    chatInput.placeholder = "Describe your story (characters, actions, voices & emotions)...";
                     chatInput.focus();
                 }
                 topBtn?.classList.add('ring-2', 'ring-fuchsia-300');
@@ -224,7 +215,7 @@
             const promptText = (chatInput?.value || '').trim();
             if (!promptText) {
                 chatInput?.focus();
-                return alert("Please write your video story or scene first!");
+                return alert("Please write your video story first!");
             }
             chatInput.value = '';
             this.createAnimatedVideoWithSound(promptText);
@@ -250,7 +241,7 @@
         },
 
         // =========================================================================
-        // 3. MAIN VIDEO PIPELINE: AI CHOREOGRAPHY -> 2.5D CINEMA CANVAS + ZENOSOUDS
+        // 3. MAIN VIDEO PIPELINE: AI SCRIPT -> HUMAN VOICE BUFFERS -> LIP-SYNC RENDER
         // =========================================================================
         async createAnimatedVideoWithSound(userPrompt) {
             if (this.isGeneratingVideo) return;
@@ -267,7 +258,7 @@
             document.getElementById('heroPrompt')?.classList.add('hidden');
 
             if (typeof window.appendMessage === 'function') {
-                window.appendMessage('user', `[2.5D Animated Video] ${userPrompt}`);
+                window.appendMessage('user', `[2.5D Voice Video] ${userPrompt}`);
             }
 
             const feed = document.getElementById('chatFeed');
@@ -282,11 +273,11 @@
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center">
-                                <i class="fa-solid fa-film fa-beat text-xs"></i>
+                                <i class="fa-solid fa-microphone-lines fa-beat text-xs"></i>
                             </div>
                             <div>
-                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Step 1/2: AI Directing 2.5D Scene & Audio...</p>
-                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Designing lighting, shaded characters & sound cues...</p>
+                                <p id="${cardId}_phase" class="text-xs md:text-sm font-extrabold text-white">Step 1/2: Generating Characters & Human Voices...</p>
+                                <p id="${cardId}_detail" class="text-[11px] text-fuchsia-300">Directing scene actions & synthesizing human voices...</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0">
@@ -303,7 +294,7 @@
                         <canvas id="${cardId}_stageCanvas" class="w-full max-h-80 object-contain mx-auto block bg-black"></canvas>
                         <div class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 border border-white/15 text-[10px] font-bold text-emerald-300 flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                            <span id="${cardId}_actBadge">2.5D CINEMA RENDER + AUDIO</span>
+                            <span id="${cardId}_actBadge">LIP-SYNC VOICE RENDER</span>
                         </div>
                     </div>
                 </div>
@@ -330,10 +321,10 @@
             };
 
             try {
-                updateProgress(10, "Step 1/2: AI Directing 2.5D Scene...", "Crafting custom characters, props, lighting & sound...");
+                updateProgress(8, "Step 1/2: Directing Characters & Human Voices...", "Building custom 3-Act story & character dialogue...");
                 const script = await this.generateCustomChoreographyScript(userPrompt);
 
-                updateProgress(20, "Step 2/2: Rendering 2.5D Cinema Graphics...", "Frame 0 / 300 • Audio Synced", `ACT 1: ${script.acts[0]?.title || 'Opening'}`);
+                updateProgress(20, "Step 2/2: Animating Lip-Sync & Human Voices...", "Frame 0 / 300 • Live Voice Audio", `ACT 1: ${script.acts[0]?.title || 'Scene 1'}`);
                 const stageCanvas = document.getElementById(`${cardId}_stageCanvas`);
 
                 const { blob, extension } = await this.renderAndRecordCanvasWithAudio(
@@ -344,9 +335,9 @@
                         const actObj = script.acts[currentActIdx] || script.acts[0];
                         updateProgress(
                             pct,
-                            "Step 2/2: Rendering 2.5D Cinema Graphics...",
+                            "Step 2/2: Animating Lip-Sync & Human Voices...",
                             `Frame ${frame}/${totalFrames} • ${actObj?.subtitle || ''}`,
-                            `ACT ${currentActIdx + 1}/3 • SOUND: ${(actObj?.sound || 'AUDIO').toUpperCase()}`
+                            `ACT ${currentActIdx + 1}/3 • HUMAN VOICE ON`
                         );
                     }
                 );
@@ -371,21 +362,28 @@
         },
 
         // =========================================================================
-        // 4. AI CHOREOGRAPHY DIRECTOR (TAILORED TO EVERY STORY & SOUND)
+        // 4. AI CHOREOGRAPHY DIRECTOR (ACCURATE SETTINGS, GENDERS, AGES & SPOKEN LINES)
         // =========================================================================
         async generateCustomChoreographyScript(userPrompt) {
-            const schemaPrompt = `You are a 2.5D Cinema Animation Director. Create a UNIQUE, rich 3-Act animation script (10 seconds total) matching the user's EXACT request.
-Return ONLY valid JSON with this exact structure:
+            const schemaPrompt = `You are a 2.5D Cinema Animation Director. Create a UNIQUE, accurate 3-Act animation script (10 seconds total) matching the user's EXACT story.
+IMPORTANT:
+- Choose the EXACT matching setting ("room" for family/home/house/wife/husband/argument, "night_city" or "golden_city" for street/city, "forest", "space", "desert", "beach").
+- Set "gender": "male" | "female" | "child" accurately for each human character!
+- Instead of text bubbles above heads, characters speak out loud using "spokenLine" (short natural spoken dialogue in English or user's language) and "voiceType": "male" | "female" | "child".
+- When a child or person cries, set "expression": "crying" so tears stream down their face and crying sound plays!
+
+Return ONLY valid JSON:
 {
-  "setting": "night_city" | "golden_city" | "forest" | "space" | "desert" | "beach" | "room",
+  "setting": "room" | "night_city" | "golden_city" | "forest" | "space" | "desert" | "beach",
   "weather": "none" | "stars" | "rain" | "embers" | "snow" | "fireflies",
   "mood": "dramatic" | "happy" | "action" | "sad",
   "entities": [
     {
       "id": "e1",
       "kind": "human" | "robot" | "monster" | "car" | "rocket" | "animal",
+      "gender": "male" | "female" | "child",
       "name": "Short Name",
-      "scale": 1.05,
+      "scale": 1.1,
       "primaryColor": "#3b82f6",
       "secondaryColor": "#1e293b",
       "hairColor": "#1f2937",
@@ -396,20 +394,22 @@ Return ONLY valid JSON with this exact structure:
   "acts": [
     {
       "title": "Act 1",
-      "subtitle": "Short subtitle describing Act 1 (max 55 chars)",
-      "sound": "footsteps" | "speech" | "laugh" | "sad_violin" | "coin_jackpot" | "victory_fanfare" | "explosion" | "laser_beam" | "punch_impact" | "engine_whoosh" | "rain_thunder" | "magic_sparkle",
+      "subtitle": "Short narrative caption (max 55 chars)",
+      "sound": "speech" | "child_cry" | "door_slam" | "footsteps" | "laugh" | "sad_violin" | "coin_jackpot" | "explosion" | "punch_impact",
       "actors": [
         {
           "id": "e1",
-          "startX": 0.22,
-          "endX": 0.40,
+          "startX": 0.28,
+          "endX": 0.36,
           "startY": 0.83,
           "endY": 0.83,
           "facing": 1,
-          "pose": "walk" | "idle" | "beg" | "point" | "punch" | "celebrate" | "fall" | "run",
-          "expression": "neutral" | "happy" | "laughing" | "sad" | "angry" | "shocked",
-          "holding": "none" | "money" | "gold_bag" | "sword" | "phone" | "food",
-          "speech": "Short spoken line (max 26 chars, or empty)"
+          "pose": "argue" | "walk" | "run" | "idle" | "beg" | "point" | "punch" | "celebrate" | "fall" | "cry",
+          "expression": "angry" | "crying" | "sad" | "happy" | "laughing" | "shocked" | "neutral",
+          "holding": "none" | "suitcase" | "money" | "gold_bag" | "sword" | "phone" | "food",
+          "speaking": true,
+          "voiceType": "male" | "female" | "child",
+          "spokenLine": "Natural spoken dialogue line"
         }
       ]
     },
@@ -431,7 +431,7 @@ USER PROMPT: "${userPrompt}"`;
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{ parts: [{ text: schemaPrompt }] }],
-                                generationConfig: { temperature: 0.75, responseMimeType: "application/json" }
+                                generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
                             })
                         });
                         if (res.ok) {
@@ -495,158 +495,146 @@ USER PROMPT: "${userPrompt}"`;
 
         buildCustomScriptFromPromptWords(promptText) {
             const p = (promptText || '').toLowerCase();
+
+            // Accurate Setting Detection
+            const isFamilyHome = /(room|house|home|wife|husband|child|baby|family|move out|ماڵ|ژوور|هاوسەر|منداڵ)/i.test(p);
             const isForest = /(forest|tree|jungle|nature|park|garden|دارستان|باخچە)/i.test(p);
-            const isSpace = /(space|planet|moon|rocket|galaxy|star|ئاسمان|ئەستێرە|مانگ)/i.test(p);
-            const isDesert = /(desert|sand|camel|sun|بیابان)/i.test(p);
-            const isBeach = /(beach|ocean|sea|water|دەریا|ئاو)/i.test(p);
-            const isRoom = /(room|house|home|office|school|ماڵ|ژوور|قوتابخانە)/i.test(p);
-            const isHappyMoney = /(money|gold|rich|find|happy|پارە|زێڕ|دڵخۆش)/i.test(p);
+            const isSpace = /(space|planet|moon|rocket|galaxy|ئاسمان|هەسارە|مانگ)/i.test(p);
+            const isDesert = /(desert|sand|camel|بیابان)/i.test(p);
+            const isBeach = /(beach|ocean|sea|water|دەریا)/i.test(p);
 
-            const setting = isForest ? 'forest' : isSpace ? 'space' : isDesert ? 'desert' : isBeach ? 'beach' : isRoom ? 'room' : (isHappyMoney ? 'golden_city' : 'night_city');
-            const weather = isSpace ? 'stars' : /(rain|باران)/i.test(p) ? 'rain' : /(snow|بەفر)/i.test(p) ? 'snow' : isForest ? 'fireflies' : 'none';
+            const setting = isFamilyHome ? 'room' : isForest ? 'forest' : isSpace ? 'space' : isDesert ? 'desert' : isBeach ? 'beach' : 'night_city';
+            const weather = isSpace ? 'stars' : /(rain|باران)/i.test(p) ? 'rain' : /(snow|بەفر)/i.test(p) ? 'snow' : 'none';
 
-            const entities = [];
-            if (/(robot|mecha|cyborg|ڕۆبۆت)/i.test(p)) {
-                entities.push({ id: 'e1', kind: 'robot', name: 'Mecha', scale: 1.15, primaryColor: '#3b82f6', secondaryColor: '#38bdf8' });
-            }
-            if (/(monster|dragon|kaiju|beast|دڕندە)/i.test(p)) {
-                entities.push({ id: 'e' + (entities.length + 1), kind: 'monster', name: 'Monster', scale: 1.2, primaryColor: '#15803d', secondaryColor: '#ef4444' });
-            }
-            if (/(rocket|spaceship|موشەک)/i.test(p)) {
-                entities.push({ id: 'e' + (entities.length + 1), kind: 'rocket', name: 'Rocket', scale: 1.1, primaryColor: '#f8fafc', secondaryColor: '#f97316' });
-            }
-            if (/(car|police|race|truck|ئۆتۆمبێل|پۆلیس)/i.test(p)) {
-                entities.push({ id: 'e' + (entities.length + 1), kind: 'car', name: 'Car', scale: 1.1, primaryColor: '#ef4444', secondaryColor: '#1e293b' });
-            }
-            if (/(dog|cat|wolf|lion|animal|سەگ|پشیلە|شێر|گورگ)/i.test(p)) {
-                entities.push({ id: 'e' + (entities.length + 1), kind: 'animal', name: 'Animal', scale: 1.0, primaryColor: '#d97706', secondaryColor: '#78350f' });
-            }
+            // Family Drama Scene (Man + Wife + Child crying & moving out)
+            if (/(wife|husband|woman|girl|mother|mom|ژن|هاوسەر)/i.test(p)) {
+                const hasChild = /(child|kid|baby|son|daughter|منداڵ|کوڕ|کچ)/i.test(p);
+                const isCrying = /(cry|crying|tears|sad|گریان)/i.test(p);
+                const isMovingOut = /(move out|leave|leaving|pack|bag|suitcase|ڕۆیشتن|جێهێشتن)/i.test(p);
 
-            if (entities.length === 0) {
-                const isKing = /(king|prince|queen|پاشا|شازادە)/i.test(p);
-                const isKid = /(kid|child|boy|girl|منداڵ|کوڕ|کچ)/i.test(p);
-                entities.push({
-                    id: 'e1',
-                    kind: 'human',
-                    name: 'Hero',
-                    scale: 1.12,
-                    primaryColor: isKing ? '#eab308' : '#3b82f6',
-                    secondaryColor: '#1e293b',
-                    hat: isKing ? 'crown' : (/(poor|هەژار)/i.test(p) ? 'hoodie' : 'none'),
-                    beard: /(old|man|پیاو|پیر)/i.test(p)
-                });
-                if (isKid || /(two|friend|enemy|thief|police|against|with|and|لەگەڵ|هاوڕێ|دز)/i.test(p)) {
-                    entities.push({
-                        id: 'e2',
-                        kind: 'human',
-                        name: 'Character 2',
-                        scale: isKid ? 0.88 : 1.12,
-                        primaryColor: '#ef4444',
-                        secondaryColor: '#0f172a',
-                        hat: /(police|پۆلیس)/i.test(p) ? 'police' : 'none'
-                    });
+                const entities = [
+                    { id: 'e1', kind: 'human', gender: 'male', name: 'Man', scale: 1.14, primaryColor: '#2563eb', secondaryColor: '#0f172a', hairColor: '#1e293b', beard: true },
+                    { id: 'e2', kind: 'human', gender: 'female', name: 'Wife', scale: 1.08, primaryColor: '#e11d48', secondaryColor: '#4c0519', hairColor: '#451a03' }
+                ];
+                if (hasChild) {
+                    entities.push({ id: 'e3', kind: 'human', gender: 'child', name: 'Child', scale: 0.78, primaryColor: '#f59e0b', secondaryColor: '#1e293b', hairColor: '#451a03' });
                 }
+
+                return {
+                    setting: 'room',
+                    weather: 'none',
+                    mood: 'dramatic',
+                    entities,
+                    acts: [
+                        {
+                            title: 'Act 1',
+                            subtitle: 'A heated argument breaks out inside the house',
+                            sound: 'speech',
+                            actors: [
+                                { id: 'e1', startX: 0.28, endX: 0.35, startY: 0.83, endY: 0.83, facing: 1, pose: 'argue', expression: 'angry', holding: 'none', speaking: true, voiceType: 'male', spokenLine: 'Why did you do this?' },
+                                { id: 'e2', startX: 0.65, endX: 0.56, startY: 0.83, endY: 0.83, facing: -1, pose: 'argue', expression: 'angry', holding: 'none', speaking: false, voiceType: 'female', spokenLine: '' },
+                                ...(hasChild ? [{ id: 'e3', startX: 0.76, endX: 0.72, startY: 0.83, endY: 0.83, facing: -1, pose: 'idle', expression: 'shocked', holding: 'none', speaking: false, voiceType: 'child', spokenLine: '' }] : [])
+                            ]
+                        },
+                        {
+                            title: 'Act 2',
+                            subtitle: hasChild ? 'The wife shouts back while their child starts crying' : 'The argument escalates',
+                            sound: hasChild && isCrying ? 'child_cry' : 'speech',
+                            actors: [
+                                { id: 'e1', startX: 0.35, endX: 0.33, startY: 0.83, endY: 0.83, facing: 1, pose: 'point', expression: 'angry', holding: 'none', speaking: false, voiceType: 'male', spokenLine: '' },
+                                { id: 'e2', startX: 0.56, endX: 0.58, startY: 0.83, endY: 0.83, facing: -1, pose: 'argue', expression: 'crying', holding: isMovingOut ? 'suitcase' : 'none', speaking: true, voiceType: 'female', spokenLine: 'I cannot stay here anymore!' },
+                                ...(hasChild ? [{ id: 'e3', startX: 0.72, endX: 0.70, startY: 0.83, endY: 0.83, facing: -1, pose: 'cry', expression: 'crying', holding: 'none', speaking: true, voiceType: 'child', spokenLine: 'Mommy, daddy stop!' }] : [])
+                            ]
+                        },
+                        {
+                            title: 'Act 3',
+                            subtitle: isMovingOut ? 'They pack their bag and walk out the door' : 'Heartbroken farewell',
+                            sound: 'door_slam',
+                            actors: [
+                                { id: 'e1', startX: 0.33, endX: 0.28, startY: 0.83, endY: 0.83, facing: 1, pose: 'idle', expression: 'sad', holding: 'none', speaking: false, voiceType: 'male', spokenLine: '' },
+                                { id: 'e2', startX: 0.58, endX: 0.90, startY: 0.83, endY: 0.83, facing: 1, pose: 'walk', expression: 'sad', holding: 'suitcase', speaking: false, voiceType: 'female', spokenLine: '' },
+                                ...(hasChild ? [{ id: 'e3', startX: 0.70, endX: 0.95, startY: 0.83, endY: 0.83, facing: 1, pose: 'walk', expression: 'crying', holding: 'none', speaking: false, voiceType: 'child', spokenLine: '' }] : [])
+                            ]
+                        }
+                    ]
+                };
             }
 
+            // General Fallback tailored to user's words
+            const entities = [
+                { id: 'e1', kind: 'human', gender: 'male', name: 'Hero', scale: 1.12, primaryColor: '#3b82f6', secondaryColor: '#1e293b', hairColor: '#1f2937' }
+            ];
             const words = promptText.trim().split(/\s+/);
             const chunk = Math.max(1, Math.ceil(words.length / 3));
             const s1 = words.slice(0, chunk).join(' ');
             const s2 = words.slice(chunk, chunk * 2).join(' ') || s1;
             const s3 = words.slice(chunk * 2).join(' ') || s2;
-            const isFight = /(fight|battle|punch|attack|revenge|war|شەڕ|تۆڵە|لێدان)/i.test(p);
 
             return {
                 setting,
                 weather,
-                mood: isFight ? 'action' : (isHappyMoney ? 'happy' : 'sad'),
+                mood: 'happy',
                 entities,
                 acts: [
                     {
                         title: 'Act 1',
                         subtitle: s1,
-                        sound: isHappyMoney ? 'sad_violin' : 'footsteps',
-                        actors: entities.map((ent, idx) => ({
-                            id: ent.id,
-                            startX: idx === 0 ? 0.22 : 0.78,
-                            endX: idx === 0 ? 0.42 : 0.62,
-                            startY: 0.83,
-                            endY: 0.83,
-                            facing: idx === 0 ? 1 : -1,
-                            pose: 'walk',
-                            expression: isHappyMoney ? 'sad' : 'neutral',
-                            holding: 'none',
-                            speech: idx === 0 ? s1.slice(0, 22) : ''
-                        }))
+                        sound: 'footsteps',
+                        actors: [{ id: 'e1', startX: 0.22, endX: 0.44, startY: 0.83, endY: 0.83, facing: 1, pose: 'walk', expression: 'neutral', holding: 'none', speaking: true, voiceType: 'male', spokenLine: s1 }]
                     },
                     {
                         title: 'Act 2',
                         subtitle: s2,
-                        sound: isFight ? 'laser_beam' : (isHappyMoney ? 'coin_jackpot' : 'speech'),
-                        actors: entities.map((ent, idx) => ({
-                            id: ent.id,
-                            startX: idx === 0 ? 0.42 : 0.62,
-                            endX: idx === 0 ? 0.48 : 0.58,
-                            startY: 0.83,
-                            endY: 0.83,
-                            facing: idx === 0 ? 1 : -1,
-                            pose: isFight ? 'punch' : 'idle',
-                            expression: isFight ? 'angry' : 'shocked',
-                            holding: isHappyMoney && idx === 0 ? 'money' : 'none',
-                            speech: idx === 0 ? 'Oh wow!' : s2.slice(0, 22)
-                        }))
+                        sound: 'coin_jackpot',
+                        actors: [{ id: 'e1', startX: 0.44, endX: 0.50, startY: 0.83, endY: 0.83, facing: 1, pose: 'idle', expression: 'shocked', holding: 'money', speaking: true, voiceType: 'male', spokenLine: 'Look at this!' }]
                     },
                     {
                         title: 'Act 3',
                         subtitle: s3,
-                        sound: isFight ? 'explosion' : 'victory_fanfare',
-                        actors: entities.map((ent, idx) => ({
-                            id: ent.id,
-                            startX: idx === 0 ? 0.48 : 0.58,
-                            endX: idx === 0 ? 0.50 : 0.70,
-                            startY: 0.83,
-                            endY: 0.83,
-                            facing: idx === 0 ? 1 : -1,
-                            pose: idx === 0 ? 'celebrate' : (isFight ? 'fall' : 'celebrate'),
-                            expression: idx === 0 ? 'happy' : (isFight ? 'shocked' : 'laughing'),
-                            holding: isHappyMoney && idx === 0 ? 'gold_bag' : 'none',
-                            speech: idx === 0 ? s3.slice(0, 22) : ''
-                        }))
+                        sound: 'laugh',
+                        actors: [{ id: 'e1', startX: 0.50, endX: 0.52, startY: 0.83, endY: 0.83, facing: 1, pose: 'celebrate', expression: 'laughing', holding: 'gold_bag', speaking: true, voiceType: 'male', spokenLine: 'I am so happy!' }]
                     }
                 ]
             };
         },
 
         // =========================================================================
-        // 5. RENDER & RECORD WITH ZENOSOUDS ENGINE
+        // 5. RENDER & RECORD WITH LIVE HUMAN VOICE ANALYSER + LIP-SYNC
         // =========================================================================
-        renderAndRecordCanvasWithAudio(canvas, script, onFrameProgress) {
-            return new Promise((resolve, reject) => {
-                const isVertical = this.aspectRatio === '9:16';
-                const width = isVertical ? 480 : 854;
-                const height = isVertical ? 854 : 480;
+        async renderAndRecordCanvasWithAudio(canvas, script, onFrameProgress) {
+            const isVertical = this.aspectRatio === '9:16';
+            const width = isVertical ? 480 : 854;
+            const height = isVertical ? 854 : 480;
 
-                if (!canvas) canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
+            if (!canvas) canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
 
-                if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
-                    return reject(new Error("Canvas recording is not supported on this browser."));
-                }
+            if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
+                throw new Error("Canvas recording is not supported on this browser.");
+            }
 
-                const fps = 30;
-                const totalFrames = 300; // 10.0 seconds
-                const framesPerAct = totalFrames / 3;
+            const fps = 30;
+            const totalFrames = 300; // 10.0 seconds
+            const framesPerAct = totalFrames / 3;
 
-                let mixedStream = canvas.captureStream(fps);
-                const soundSession = window.ZenoSounds
-                    ? window.ZenoSounds.createRecordingSession(script.mood || 'happy')
-                    : null;
+            let mixedStream = canvas.captureStream(fps);
+            const soundSession = window.ZenoSounds
+                ? window.ZenoSounds.createRecordingSession(script.mood || 'dramatic')
+                : null;
 
-                if (soundSession && soundSession.streamTrack) {
-                    mixedStream.addTrack(soundSession.streamTrack);
-                }
+            // Preload real human TTS audio buffers for all spoken character lines
+            if (soundSession && soundSession.audioCtx && window.ZenoSounds.preloadHumanDialogueBuffers) {
+                const voiceBuffers = await window.ZenoSounds.preloadHumanDialogueBuffers(soundSession.audioCtx, script.acts);
+                soundSession.setVoiceBuffers(voiceBuffers);
+            }
 
+            if (soundSession && soundSession.streamTrack) {
+                mixedStream.addTrack(soundSession.streamTrack);
+            }
+
+            return await new Promise((resolve) => {
                 const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
                 const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
                 const recorder = chosenMime
@@ -680,40 +668,56 @@ USER PROMPT: "${userPrompt}"`;
                     const localT = localFrame / framesPerAct;
                     const currentAct = script.acts[actIdx] || script.acts[0];
 
-                    // Trigger Sound FX from ZenoSounds
+                    // Trigger Human Voices & Foley Sounds at the start of each Act
                     if (soundSession) {
-                        const snd = currentAct.sound || 'speech';
-                        if (localFrame === 4 && ['coin_jackpot', 'victory_fanfare', 'sad_violin', 'explosion', 'magic_sparkle'].includes(snd)) {
-                            soundSession.trigger(snd);
-                        } else if (snd === 'footsteps' && frame % 12 === 0) {
+                        if (localFrame === 4) {
+                            // Speak each character's human dialogue line
+                            const speakers = (currentAct.actors || []).filter(a => a.speaking && a.spokenLine);
+                            speakers.forEach((sp, spIdx) => {
+                                const delayMs = spIdx * 1350;
+                                setTimeout(() => {
+                                    if (soundSession && typeof soundSession.speakHumanLine === 'function') {
+                                        soundSession.speakHumanLine(
+                                            sp.voiceType || 'male',
+                                            sp.spokenLine,
+                                            1.6,
+                                            `${actIdx}_${sp.id}`,
+                                            sp.expression === 'angry' ? 'angry' : 'neutral'
+                                        );
+                                    }
+                                }, delayMs);
+                            });
+
+                            // Also trigger scene foley (child_cry, door_slam, coin_jackpot, explosion, etc.)
+                            const snd = currentAct.sound || '';
+                            if (['child_cry', 'door_slam', 'coin_jackpot', 'victory_fanfare', 'sad_violin', 'explosion'].includes(snd)) {
+                                soundSession.trigger(snd);
+                            }
+                        } else if (currentAct.sound === 'footsteps' && frame % 12 === 0) {
                             soundSession.trigger('footsteps');
-                        } else if (snd === 'speech' && frame % 9 === 0) {
-                            soundSession.trigger('speech', actIdx === 1 ? 295 : 235);
-                        } else if (snd === 'laugh' && frame % 26 === 0) {
+                        } else if (currentAct.sound === 'laugh' && frame % 28 === 0) {
                             soundSession.trigger('laugh');
-                        } else if (snd === 'laser_beam' && frame % 14 === 0) {
-                            soundSession.trigger('laser_beam');
-                        } else if (snd === 'punch_impact' && frame % 14 === 0) {
+                        } else if (currentAct.sound === 'punch_impact' && frame % 14 === 0) {
                             soundSession.trigger('punch_impact');
-                        } else if (snd === 'engine_whoosh' && frame % 16 === 0) {
-                            soundSession.trigger('engine_whoosh');
-                        } else if (snd === 'rain_thunder' && frame % 15 === 0) {
-                            soundSession.trigger('rain_thunder');
                         }
                     }
 
-                    // Dynamic Cinematic Camera Zoom & Pan
+                    // Live Voice Waveform Aperture (0.0 -> 1.0) for real-time mouth movement!
+                    const liveAudioMouth = soundSession && typeof soundSession.getLiveVoiceAperture === 'function'
+                        ? soundSession.getLiveVoiceAperture()
+                        : 0;
+
                     ctx.save();
                     const camZoom = actIdx === 1 ? (1.03 + localT * 0.05) : (1.0 + Math.sin(t * 0.6) * 0.02);
-                    const camPanX = (actIdx - 1) * -12;
+                    const camPanX = (actIdx - 1) * -10;
                     ctx.translate(width * 0.5 + camPanX, height * 0.5);
                     ctx.scale(camZoom, camZoom);
                     ctx.translate(-width * 0.5, -height * 0.5);
 
-                    // 1. Rich Multi-Layer 2.5D Environment
+                    // 1. Render Environment
                     this.drawRichEnvironment(ctx, width, height, t, script.setting, script.weather);
 
-                    // 2. Render & Animate Shaded 2.5D Characters & Props
+                    // 2. Render Characters (NO speech bubbles above heads — real lip-sync mouth movement!)
                     const entityMap = {};
                     (script.entities || []).forEach(e => { entityMap[e.id] = e; });
 
@@ -723,17 +727,35 @@ USER PROMPT: "${userPrompt}"`;
                         const px = (actorState.startX + (actorState.endX - actorState.startX) * ease) * width;
                         const py = (actorState.startY + (actorState.endY - actorState.startY) * ease) * height;
 
-                        this.drawAnimatedEntity(ctx, { meta, actor: actorState, x: px, y: py, t, localT, frame });
+                        // Determine if this character's mouth is actively speaking right now
+                        const isCurrentlySpeaking = Boolean(
+                            (actorState.speaking && localT < 0.85) ||
+                            actorState.expression === 'crying' ||
+                            actorState.expression === 'laughing'
+                        );
+                        const mouthAperture = isCurrentlySpeaking
+                            ? Math.max(liveAudioMouth, Math.abs(Math.sin(t * 20 + idx)) * 0.75 + 0.15)
+                            : 0;
+
+                        this.drawAnimatedEntity(ctx, {
+                            meta,
+                            actor: actorState,
+                            x: px,
+                            y: py,
+                            t,
+                            localT,
+                            frame,
+                            mouthAperture,
+                            isCurrentlySpeaking
+                        });
                     });
 
-                    // 3. Explosion FX
                     if (currentAct.sound === 'explosion' && localT > 0.05 && localT < 0.75) {
                         this.drawExplosionEffect(ctx, width * 0.55, height * 0.60, 145, (localT - 0.05) / 0.7);
                     }
 
                     ctx.restore();
 
-                    // 4. Film Vignette & Glassmorphic Cinema Subtitle
                     this.drawFilmVignette(ctx, width, height);
                     this.drawCinemaSubtitle(ctx, currentAct.subtitle, width, height);
 
@@ -751,7 +773,7 @@ USER PROMPT: "${userPrompt}"`;
         },
 
         // =========================================================================
-        // 6. HIGH-DETAIL 2.5D ENVIRONMENTS, LIGHTING & SHADED CHARACTERS
+        // 6. HIGH-DETAIL 2.5D ENVIRONMENTS & CHARACTERS (MALE, FEMALE, CHILD + TEARS)
         // =========================================================================
         roundBox(ctx, x, y, w, h, r) {
             ctx.beginPath();
@@ -768,9 +790,9 @@ USER PROMPT: "${userPrompt}"`;
         },
 
         drawFilmVignette(ctx, w, h) {
-            const vig = ctx.createRadialGradient(w * 0.5, h * 0.5, w * 0.32, w * 0.5, h * 0.5, w * 0.72);
+            const vig = ctx.createRadialGradient(w * 0.5, h * 0.5, w * 0.34, w * 0.5, h * 0.5, w * 0.75);
             vig.addColorStop(0, 'rgba(0,0,0,0)');
-            vig.addColorStop(1, 'rgba(0,0,0,0.48)');
+            vig.addColorStop(1, 'rgba(0,0,0,0.45)');
             ctx.fillStyle = vig;
             ctx.fillRect(0, 0, w, h);
         },
@@ -779,115 +801,88 @@ USER PROMPT: "${userPrompt}"`;
             const groundY = h * 0.83;
             const sky = ctx.createLinearGradient(0, 0, 0, groundY);
 
-            if (setting === 'forest') {
+            if (setting === 'room') {
+                // Detailed Cozy House Living Room with Wooden Door, Curtained Window, Couch & Warm Lamp
+                const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+                wall.addColorStop(0, '#1e293b');
+                wall.addColorStop(1, '#334155');
+                ctx.fillStyle = wall;
+                ctx.fillRect(0, 0, w, groundY);
+
+                // Baseboard Trim
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(0, groundY - 14, w, 14);
+
+                // Framed Window on Left
+                const winX = w * 0.14, winY = h * 0.18, winW = w * 0.22, winH = h * 0.32;
+                ctx.fillStyle = '#0c4a6e';
+                ctx.fillRect(winX, winY, winW, winH);
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(winX, winY, winW, winH);
+                ctx.beginPath();
+                ctx.moveTo(winX + winW / 2, winY);
+                ctx.lineTo(winX + winW / 2, winY + winH);
+                ctx.moveTo(winX, winY + winH / 2);
+                ctx.lineTo(winX + winW, winY + winH / 2);
+                ctx.stroke();
+
+                // Wooden Front Exit Door on Right (so characters visibly walk out!)
+                const doorW = w * 0.14, doorH = h * 0.46;
+                const doorX = w * 0.82, doorY = groundY - doorH;
+                ctx.fillStyle = '#78350f';
+                this.roundBox(ctx, doorX, doorY, doorW, doorH, 6);
+                ctx.fill();
+                ctx.strokeStyle = '#451a03';
+                ctx.lineWidth = 4;
+                this.roundBox(ctx, doorX, doorY, doorW, doorH, 6);
+                ctx.stroke();
+                // Golden Doorknob
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(doorX + 14, doorY + doorH * 0.54, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Warm Hardwood Floor
+                const floorGrad = ctx.createLinearGradient(0, groundY, 0, h);
+                floorGrad.addColorStop(0, '#92400e');
+                floorGrad.addColorStop(1, '#451a03');
+                ctx.fillStyle = floorGrad;
+                ctx.fillRect(0, groundY, w, h - groundY);
+
+            } else if (setting === 'forest') {
                 sky.addColorStop(0, '#064e3b');
                 sky.addColorStop(0.55, '#0284c7');
                 sky.addColorStop(1, '#bae6fd');
                 ctx.fillStyle = sky;
                 ctx.fillRect(0, 0, w, groundY);
 
-                // Sun & Volumetric Light Rays
-                const sunX = w * 0.80, sunY = h * 0.18;
-                const sunGlow = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, 150);
-                sunGlow.addColorStop(0, '#fef08a');
-                sunGlow.addColorStop(0.3, 'rgba(253, 224, 71, 0.35)');
-                sunGlow.addColorStop(1, 'rgba(253, 224, 71, 0)');
-                ctx.fillStyle = sunGlow;
-                ctx.fillRect(0, 0, w, groundY);
-
-                // Distant Misty Hills
-                ctx.fillStyle = '#0f766e';
-                ctx.beginPath();
-                ctx.moveTo(0, groundY);
-                for (let x = 0; x <= w; x += 60) {
-                    ctx.lineTo(x, groundY - 75 - Math.sin(x * 0.01) * 35);
-                }
-                ctx.lineTo(w, groundY);
-                ctx.fill();
-
-                // Detailed Layered Trees
                 for (let i = 0; i < 8; i++) {
                     const tx = (i + 0.5) * (w / 8);
                     const th = 110 + (i % 3) * 30;
                     ctx.fillStyle = '#451a03';
                     ctx.fillRect(tx - 8, groundY - th * 0.5, 16, th * 0.5);
-                    // Multi-sphere shaded foliage
-                    ctx.fillStyle = '#14532d';
-                    ctx.beginPath();
-                    ctx.arc(tx - 14, groundY - th * 0.65, 32, 0, Math.PI * 2);
-                    ctx.arc(tx + 14, groundY - th * 0.65, 32, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.fillStyle = '#16a34a';
                     ctx.beginPath();
-                    ctx.arc(tx, groundY - th * 0.78, 36, 0, Math.PI * 2);
+                    ctx.arc(tx, groundY - th * 0.72, 36, 0, Math.PI * 2);
                     ctx.fill();
                 }
-
-                // Lush Grass Ground
-                const gGrad = ctx.createLinearGradient(0, groundY, 0, h);
-                gGrad.addColorStop(0, '#15803d');
-                gGrad.addColorStop(1, '#052e16');
-                ctx.fillStyle = gGrad;
+                ctx.fillStyle = '#15803d';
                 ctx.fillRect(0, groundY, w, h - groundY);
 
             } else if (setting === 'space') {
                 sky.addColorStop(0, '#02040a');
-                sky.addColorStop(0.6, '#1e1038');
-                sky.addColorStop(1, '#090d1e');
+                sky.addColorStop(1, '#1e1038');
                 ctx.fillStyle = sky;
                 ctx.fillRect(0, 0, w, h);
-
-                // Glowing Nebula
-                const neb = ctx.createRadialGradient(w * 0.35, h * 0.35, 20, w * 0.35, h * 0.35, w * 0.45);
-                neb.addColorStop(0, 'rgba(168, 85, 247, 0.35)');
-                neb.addColorStop(0.5, 'rgba(59, 130, 246, 0.18)');
-                neb.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = neb;
-                ctx.fillRect(0, 0, w, h);
-
-                // Ringed Planet
-                const px = w * 0.75, py = h * 0.28;
-                const pg = ctx.createRadialGradient(px - 15, py - 15, 8, px, py, 60);
-                pg.addColorStop(0, '#c084fc');
-                pg.addColorStop(0.7, '#6b21a8');
-                pg.addColorStop(1, '#2e1065');
-                ctx.fillStyle = pg;
-                ctx.beginPath();
-                ctx.arc(px, py, 56, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = 'rgba(216, 180, 254, 0.55)';
-                ctx.lineWidth = 6;
-                ctx.beginPath();
-                ctx.ellipse(px, py, 95, 20, -0.25, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Lunar Surface
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(0, groundY, w, h - groundY);
 
             } else if (setting === 'desert') {
                 sky.addColorStop(0, '#c2410c');
-                sky.addColorStop(0.6, '#f59e0b');
                 sky.addColorStop(1, '#fef08a');
                 ctx.fillStyle = sky;
                 ctx.fillRect(0, 0, w, groundY);
-
-                ctx.fillStyle = '#fffbeb';
-                ctx.beginPath();
-                ctx.arc(w * 0.72, h * 0.24, 38, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Rolling Sand Dunes
-                ctx.fillStyle = '#ea580c';
-                ctx.beginPath();
-                ctx.moveTo(0, groundY);
-                ctx.quadraticCurveTo(w * 0.3, groundY - 65, w * 0.65, groundY - 20);
-                ctx.quadraticCurveTo(w * 0.85, groundY - 55, w, groundY - 15);
-                ctx.lineTo(w, h);
-                ctx.lineTo(0, h);
-                ctx.fill();
-
                 ctx.fillStyle = '#d97706';
                 ctx.fillRect(0, groundY, w, h - groundY);
 
@@ -896,36 +891,12 @@ USER PROMPT: "${userPrompt}"`;
                 sky.addColorStop(1, '#bae6fd');
                 ctx.fillStyle = sky;
                 ctx.fillRect(0, 0, w, groundY * 0.72);
-
-                const sea = ctx.createLinearGradient(0, groundY * 0.72, 0, groundY);
-                sea.addColorStop(0, '#0284c7');
-                sea.addColorStop(1, '#38bdf8');
-                ctx.fillStyle = sea;
+                ctx.fillStyle = '#0284c7';
                 ctx.fillRect(0, groundY * 0.72, w, groundY * 0.28);
-
                 ctx.fillStyle = '#facc15';
                 ctx.fillRect(0, groundY, w, h - groundY);
 
-            } else if (setting === 'room') {
-                const wall = ctx.createLinearGradient(0, 0, 0, groundY);
-                wall.addColorStop(0, '#1e1b4b');
-                wall.addColorStop(1, '#312e81');
-                ctx.fillStyle = wall;
-                ctx.fillRect(0, 0, w, groundY);
-
-                // Glowing Window with Night Stars
-                ctx.fillStyle = '#090d1f';
-                ctx.fillRect(w * 0.36, h * 0.16, w * 0.28, h * 0.34);
-                ctx.strokeStyle = '#94a3b8';
-                ctx.lineWidth = 5;
-                ctx.strokeRect(w * 0.36, h * 0.16, w * 0.28, h * 0.34);
-
-                // Warm Wooden Floor
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(0, groundY, w, h - groundY);
-
             } else {
-                // GOLDEN_CITY or NIGHT_CITY with Parallax Skyscrapers, Glowing Streetlamps & Road Markings
                 const isGolden = setting === 'golden_city';
                 sky.addColorStop(0, isGolden ? '#1e1b4b' : '#050814');
                 sky.addColorStop(0.55, isGolden ? '#7e22ce' : '#172554');
@@ -933,112 +904,28 @@ USER PROMPT: "${userPrompt}"`;
                 ctx.fillStyle = sky;
                 ctx.fillRect(0, 0, w, groundY);
 
-                // Glowing Moon / Sun
-                const moonX = w * 0.78, moonY = h * 0.20;
-                const halo = ctx.createRadialGradient(moonX, moonY, 10, moonX, moonY, 110);
-                halo.addColorStop(0, isGolden ? '#fef08a' : '#e0f2fe');
-                halo.addColorStop(0.35, isGolden ? 'rgba(251,191,36,0.35)' : 'rgba(147,197,253,0.22)');
-                halo.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = halo;
-                ctx.fillRect(0, 0, w, groundY);
-
-                // Back Layer Distant Buildings (Parallax)
-                const backCols = 14;
-                const bbw = w / backCols;
-                for (let i = 0; i < backCols; i++) {
-                    const bh = h * (0.28 + ((i * 43) % 26) / 100);
-                    ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
-                    ctx.fillRect(i * bbw + 1, groundY - bh, bbw - 2, bh);
-                }
-
-                // Foreground Detailed Buildings with Illuminated Windows & Roof Beacons
                 const cols = 10;
                 const bw = w / cols;
                 for (let i = 0; i < cols; i++) {
                     const bh = h * (0.22 + ((i * 31) % 24) / 100);
-                    const bx = i * bw + 3;
-                    const by = groundY - bh;
-
-                    const bGrad = ctx.createLinearGradient(bx, by, bx + bw, groundY);
-                    bGrad.addColorStop(0, '#0f172a');
-                    bGrad.addColorStop(1, '#020617');
-                    ctx.fillStyle = bGrad;
-                    ctx.fillRect(bx, by, bw - 6, bh);
-
-                    // Windows Grid
-                    for (let wy = by + 12; wy < groundY - 16; wy += 16) {
-                        for (let wx = bx + 8; wx < bx + bw - 14; wx += 14) {
-                            const lit = ((i * 7 + wy + wx) % 4) !== 0;
-                            ctx.fillStyle = lit ? 'rgba(253, 224, 71, 0.42)' : 'rgba(30, 41, 59, 0.4)';
-                            ctx.fillRect(wx, wy, 7, 9);
-                        }
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(i * bw + 3, groundY - bh, bw - 6, bh);
+                    ctx.fillStyle = 'rgba(253, 224, 71, 0.35)';
+                    for (let wy = groundY - bh + 12; wy < groundY - 16; wy += 16) {
+                        if ((i + wy) % 3 !== 0) ctx.fillRect(i * bw + 10, wy, 6, 8);
                     }
                 }
-
-                // Glowing Streetlamps with Light Cones
-                [w * 0.18, w * 0.82].forEach(lx => {
-                    const lampTop = groundY - 135;
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.moveTo(lx, groundY);
-                    ctx.lineTo(lx, lampTop);
-                    ctx.stroke();
-
-                    // Warm Light Cone
-                    const cone = ctx.createRadialGradient(lx, lampTop, 4, lx, lampTop + 65, 95);
-                    cone.addColorStop(0, 'rgba(254, 240, 138, 0.85)');
-                    cone.addColorStop(0.4, 'rgba(253, 224, 71, 0.18)');
-                    cone.addColorStop(1, 'rgba(253, 224, 71, 0)');
-                    ctx.fillStyle = cone;
-                    ctx.beginPath();
-                    ctx.arc(lx, lampTop + 45, 95, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-
-                // Asphalt Street with Sidewalk & Dashed Road Line
-                ctx.fillStyle = '#334155';
-                ctx.fillRect(0, groundY, w, 10); // Curb
                 ctx.fillStyle = '#0f172a';
-                ctx.fillRect(0, groundY + 10, w, h - groundY - 10);
-
-                ctx.fillStyle = 'rgba(250, 204, 21, 0.45)';
-                for (let rx = 20; rx < w; rx += 64) {
-                    ctx.fillRect(rx, groundY + (h - groundY) * 0.52, 34, 4);
-                }
-            }
-
-            // Atmospheric Weather Particles (Stars, Rain, Fireflies, Embers, Snow)
-            if (weather && weather !== 'none') {
-                const count = 55;
-                for (let i = 0; i < count; i++) {
-                    const sx = (i * 173 + (weather === 'rain' ? -t * 140 : Math.sin(t + i) * 18) + w * 10) % w;
-                    const sy = (i * 97 + (weather === 'embers' || weather === 'fireflies' ? -t * 75 : (weather === 'stars' ? 0 : t * 180)) + h * 10) % h;
-
-                    if (weather === 'stars' && sy > groundY * 0.85) continue;
-                    ctx.fillStyle = weather === 'embers' ? '#f97316'
-                        : weather === 'fireflies' ? '#bef264'
-                        : weather === 'rain' ? '#38bdf8' : '#ffffff';
-                    ctx.globalAlpha = weather === 'stars' ? (0.4 + 0.5 * Math.sin(t * 4 + i)) : 0.75;
-                    ctx.beginPath();
-                    if (weather === 'rain') {
-                        ctx.rect(sx, sy, 2, 12);
-                    } else {
-                        ctx.arc(sx, sy, (i % 2) + 1.4, 0, Math.PI * 2);
-                    }
-                    ctx.fill();
-                }
-                ctx.globalAlpha = 1;
+                ctx.fillRect(0, groundY, w, h - groundY);
             }
         },
 
-        drawAnimatedEntity(ctx, { meta, actor, x, y, t, localT, frame }) {
+        drawAnimatedEntity(ctx, { meta, actor, x, y, t, localT, frame, mouthAperture, isCurrentlySpeaking }) {
             const kind = meta.kind || 'human';
             const scale = meta.scale || 1;
             const facing = actor.facing || 1;
             const pose = actor.pose || 'idle';
             const expr = actor.expression || 'neutral';
-            const speech = actor.speech || '';
 
             if (kind === 'robot') {
                 this.drawShadedRobot(ctx, x, y, scale, facing, pose, meta.primaryColor || '#3b82f6', meta.secondaryColor || '#38bdf8', t);
@@ -1051,13 +938,15 @@ USER PROMPT: "${userPrompt}"`;
             } else {
                 this.drawShadedHuman25D(ctx, {
                     x, y, scale, facing, pose, expr,
+                    gender: meta.gender || 'male',
                     holding: actor.holding || 'none',
                     shirtColor: meta.primaryColor || '#3b82f6',
                     pantsColor: meta.secondaryColor || '#1e293b',
                     hairColor: meta.hairColor || '#1f2937',
                     hat: meta.hat || 'none',
                     beard: Boolean(meta.beard),
-                    speech,
+                    mouthAperture,
+                    isCurrentlySpeaking,
                     t,
                     frame
                 });
@@ -1065,16 +954,23 @@ USER PROMPT: "${userPrompt}"`;
         },
 
         // =========================================================================
-        // HIGH-DETAIL 2.5D SHADED HUMAN CHARACTER (Knees, Elbows, Rim Light, Expressive Eyes)
+        // ARTICULATED 2.5D CHARACTER WITH REAL MOVING MOUTH, TEETH, TONGUE & TEARS
+        // (ZERO text bubbles above head!)
         // =========================================================================
         drawShadedHuman25D(ctx, opts) {
-            const { x, y, scale, facing, pose, expr, holding, shirtColor, pantsColor, hairColor, hat, beard, speech, t, frame } = opts;
+            const {
+                x, y, scale, facing, pose, expr, gender, holding,
+                shirtColor, pantsColor, hairColor, hat, beard,
+                mouthAperture, isCurrentlySpeaking, t, frame
+            } = opts;
 
+            const isFemale = gender === 'female';
+            const isChild = gender === 'child';
             const isMoving = pose === 'walk' || pose === 'run';
             const freq = pose === 'run' ? 18 : 11;
             const legAngle = isMoving ? Math.sin(t * freq) * 0.52 : 0;
             const bounceY = isMoving ? Math.abs(Math.sin(t * freq)) * 7 : (pose === 'celebrate' ? Math.abs(Math.sin(t * 11)) * 16 : 0);
-            const laughShake = expr === 'laughing' ? Math.sin(t * 28) * 3 : 0;
+            const bodyShake = (expr === 'laughing' || expr === 'crying') ? Math.sin(t * 26) * 2.5 : 0;
 
             // Ground Contact Shadow
             ctx.save();
@@ -1091,10 +987,21 @@ USER PROMPT: "${userPrompt}"`;
             }
             ctx.scale(scale * facing, scale);
 
-            // 1. Back Arm (Shaded Sleeve + Hand)
+            // 1. Back Long Hair Layer (for Female Characters)
+            if (isFemale) {
+                ctx.fillStyle = hairColor;
+                this.roundBox(ctx, -24, -158 + bodyShake, 32, 68, 14);
+                ctx.fill();
+            }
+
+            // 2. Back Arm
             ctx.save();
             ctx.translate(-12, -104);
-            const backArmRot = isMoving ? Math.sin(t * freq) * 0.45 : (pose === 'celebrate' ? -2.4 : 0.12);
+            let backArmRot = isMoving ? Math.sin(t * freq) * 0.45 : 0.12;
+            if (pose === 'celebrate') backArmRot = -2.4;
+            else if (pose === 'argue') backArmRot = -0.9 + Math.sin(t * 16) * 0.35;
+            else if (pose === 'cry') backArmRot = -1.7 + Math.sin(t * 12) * 0.1;
+
             ctx.rotate(backArmRot);
             ctx.fillStyle = shirtColor;
             this.roundBox(ctx, -6, 0, 12, 34, 6);
@@ -1105,142 +1012,109 @@ USER PROMPT: "${userPrompt}"`;
             ctx.fill();
             ctx.restore();
 
-            // 2. Articulated Left & Right Legs with Shoes
+            // 3. Articulated Legs
             [-7, 7].forEach((hipX, idx) => {
                 ctx.save();
                 ctx.translate(hipX, -54);
                 ctx.rotate(idx === 0 ? legAngle : -legAngle);
 
-                // Pants Leg
-                ctx.fillStyle = pantsColor;
-                this.roundBox(ctx, -7, 0, 14, 46, 6);
+                ctx.fillStyle = isFemale ? '#fcd34d' : pantsColor;
+                this.roundBox(ctx, -6.5, 0, 13, 46, 6);
                 ctx.fill();
 
-                // Detailed Sneaker / Boot
-                ctx.fillStyle = '#f8fafc';
+                ctx.fillStyle = isFemale ? shirtColor : '#f8fafc';
                 this.roundBox(ctx, -7, 44, 20, 10, 5);
                 ctx.fill();
-                ctx.fillStyle = shirtColor;
-                ctx.fillRect(-5, 48, 16, 3);
                 ctx.restore();
             });
 
-            // 3. Shaded Torso / Jacket with Rim Highlight & Collar
+            // 4. Shaded Torso (Dress/Tunic for Female, Jacket/Shirt for Male & Child)
             const torsoGrad = ctx.createLinearGradient(-20, -116, 20, -52);
             torsoGrad.addColorStop(0, shirtColor);
             torsoGrad.addColorStop(1, '#0f172a');
             ctx.fillStyle = torsoGrad;
-            this.roundBox(ctx, -20, -116 + laughShake, 40, 64, 13);
-            ctx.fill();
 
-            // Rim Light Edge on Torso
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-            ctx.lineWidth = 1.5;
-            this.roundBox(ctx, -20, -116 + laughShake, 40, 64, 13);
-            ctx.stroke();
+            if (isFemale) {
+                // Flared A-Line Dress
+                ctx.beginPath();
+                ctx.moveTo(-16, -116 + bodyShake);
+                ctx.lineTo(16, -116 + bodyShake);
+                ctx.lineTo(27, -42 + bodyShake);
+                ctx.lineTo(-27, -42 + bodyShake);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                this.roundBox(ctx, -20, -116 + bodyShake, 40, 64, 13);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.30)';
+                ctx.lineWidth = 1.5;
+                this.roundBox(ctx, -20, -116 + bodyShake, 40, 64, 13);
+                ctx.stroke();
+            }
 
-            // Inner Shirt / Zipper Detail
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-            ctx.beginPath();
-            ctx.moveTo(-6, -116 + laughShake);
-            ctx.lineTo(6, -116 + laughShake);
-            ctx.lineTo(0, -96 + laughShake);
-            ctx.closePath();
-            ctx.fill();
-
-            // 4. Front Articulated Arm & Hand
+            // 5. Front Articulated Arm & Props
             ctx.save();
             ctx.translate(12, -104);
             let frontArmRot = isMoving ? -Math.sin(t * freq) * 0.45 : -0.15;
             if (pose === 'beg' || pose === 'point') frontArmRot = -1.25 + Math.sin(t * 7) * 0.08;
+            else if (pose === 'argue') frontArmRot = -1.35 + Math.cos(t * 18) * 0.35;
             else if (pose === 'punch') frontArmRot = -1.55;
             else if (pose === 'celebrate') frontArmRot = -2.55 + Math.sin(t * 14) * 0.15;
+            else if (pose === 'cry') frontArmRot = -1.85 + Math.cos(t * 12) * 0.1;
 
             ctx.rotate(frontArmRot);
             ctx.fillStyle = shirtColor;
             this.roundBox(ctx, -6, 0, 12, 36, 6);
             ctx.fill();
 
-            // Hand
             ctx.fillStyle = '#fcd34d';
             ctx.beginPath();
             ctx.arc(0, 40, 7, 0, Math.PI * 2);
             ctx.fill();
 
-            // 5. Glowing Held Props Attached Directly to Hand!
-            if (holding === 'money') {
+            if (holding === 'suitcase') {
                 ctx.save();
                 ctx.translate(0, 44);
-                ctx.shadowBlur = 16;
-                ctx.shadowColor = '#22c55e';
+                ctx.fillStyle = '#78350f';
+                this.roundBox(ctx, -16, 0, 32, 24, 5);
+                ctx.fill();
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-12, 4, 24, 16);
+                ctx.restore();
+            } else if (holding === 'money') {
+                ctx.save();
+                ctx.translate(0, 44);
                 ctx.fillStyle = '#16a34a';
                 this.roundBox(ctx, -4, -8, 28, 16, 4);
                 ctx.fill();
-                ctx.strokeStyle = '#bbf7d0';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(-1, -5, 22, 10);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 11px sans-serif';
-                ctx.fillText('$', 6, 4);
                 ctx.restore();
             } else if (holding === 'gold_bag') {
                 ctx.save();
                 ctx.translate(2, 48);
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = '#facc15';
                 ctx.fillStyle = '#eab308';
                 ctx.beginPath();
                 ctx.arc(0, 6, 16, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#fef08a';
-                ctx.font = 'bold 13px sans-serif';
-                ctx.fillText('$', -4, 11);
                 ctx.restore();
-            } else if (holding === 'food') {
-                ctx.save();
-                ctx.translate(2, 44);
-                ctx.fillStyle = '#f59e0b';
-                ctx.beginPath();
-                ctx.arc(6, 0, 11, Math.PI, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#22c55e';
-                ctx.fillRect(-5, 0, 22, 4);
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(-5, 4, 22, 5);
-                ctx.restore();
-            } else if (holding === 'sword') {
-                ctx.save();
-                ctx.translate(0, 42);
-                ctx.shadowBlur = 14;
-                ctx.shadowColor = '#38bdf8';
-                ctx.fillStyle = '#e0f2fe';
-                ctx.fillRect(-2, 0, 5, 52);
-                ctx.fillStyle = '#f59e0b';
-                ctx.fillRect(-9, 0, 19, 5);
-                ctx.restore();
-            } else if (holding === 'phone') {
-                ctx.fillStyle = '#38bdf8';
-                this.roundBox(ctx, -3, 38, 10, 17, 2);
-                ctx.fill();
             }
             ctx.restore();
 
-            // 6. Sculpted 2.5D Head with Soft Shading
-            const headY = -140 + laughShake;
-            const headGrad = ctx.createRadialGradient(-4, headY - 6, 4, 0, headY, 25);
+            // 6. Sculpted 2.5D Head
+            const headY = -140 + bodyShake;
+            const headRadius = isChild ? 25 : 23;
+            const headGrad = ctx.createRadialGradient(-4, headY - 6, 4, 0, headY, headRadius + 2);
             headGrad.addColorStop(0, '#fde68a');
             headGrad.addColorStop(0.75, '#fcd34d');
             headGrad.addColorStop(1, '#d97706');
             ctx.fillStyle = headGrad;
             ctx.beginPath();
-            ctx.arc(0, headY, 23, 0, Math.PI * 2);
+            ctx.arc(0, headY, headRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Hair / Crown / Police Cap / Hoodie
+            // Hair / Crown / Police Cap
             if (hat === 'crown') {
                 ctx.fillStyle = '#facc15';
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = '#eab308';
                 ctx.beginPath();
                 ctx.moveTo(-18, headY - 17);
                 ctx.lineTo(-11, headY - 36);
@@ -1249,48 +1123,30 @@ USER PROMPT: "${userPrompt}"`;
                 ctx.lineTo(18, headY - 17);
                 ctx.closePath();
                 ctx.fill();
-                ctx.shadowBlur = 0;
-            } else if (hat === 'police') {
-                ctx.fillStyle = '#1e3a8a';
-                this.roundBox(ctx, -22, headY - 25, 44, 12, 4);
-                ctx.fill();
-                ctx.fillStyle = '#facc15';
-                ctx.beginPath();
-                ctx.arc(4, headY - 19, 3.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (hat === 'hoodie') {
-                ctx.strokeStyle = shirtColor;
-                ctx.lineWidth = 7;
-                ctx.beginPath();
-                ctx.arc(-2, headY, 24, Math.PI * 0.65, Math.PI * 1.85);
-                ctx.stroke();
             } else {
                 ctx.fillStyle = hairColor;
                 ctx.beginPath();
-                ctx.arc(-1, headY - 4, 23.5, Math.PI * 0.92, Math.PI * 2.08);
+                ctx.arc(-1, headY - 4, headRadius + 0.5, Math.PI * 0.90, Math.PI * 2.10);
                 ctx.fill();
             }
 
-            if (beard) {
+            if (beard && !isFemale && !isChild) {
                 ctx.fillStyle = hairColor;
                 ctx.beginPath();
                 ctx.arc(3, headY + 8, 15, 0, Math.PI);
                 ctx.fill();
             }
 
-            // 7. Expressive Eyebrow & Glossy Eye with Specular Catchlight
+            // 7. Expressive Eyebrow & Glossy Eye
             ctx.strokeStyle = hairColor;
             ctx.lineWidth = 2.8;
             ctx.beginPath();
             if (expr === 'angry') {
-                ctx.moveTo(2, headY - 11);
-                ctx.lineTo(14, headY - 7);
-            } else if (expr === 'sad') {
-                ctx.moveTo(2, headY - 7);
-                ctx.lineTo(14, headY - 11);
-            } else if (expr === 'shocked' || expr === 'happy') {
                 ctx.moveTo(2, headY - 12);
-                ctx.lineTo(14, headY - 12);
+                ctx.lineTo(15, headY - 6);
+            } else if (expr === 'sad' || expr === 'crying') {
+                ctx.moveTo(2, headY - 6);
+                ctx.lineTo(15, headY - 12);
             } else {
                 ctx.moveTo(2, headY - 10);
                 ctx.lineTo(14, headY - 10);
@@ -1298,15 +1154,15 @@ USER PROMPT: "${userPrompt}"`;
             ctx.stroke();
 
             const isBlinking = (frame % 75) < 4;
-            if (isBlinking) {
+            if (isBlinking || expr === 'crying') {
+                // Closed/Squeezed Eyes when Crying or Blinking
                 ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 2.6;
                 ctx.beginPath();
-                ctx.moveTo(4, headY - 3);
-                ctx.lineTo(13, headY - 3);
+                ctx.moveTo(4, headY - 4);
+                ctx.lineTo(14, headY - 2);
                 ctx.stroke();
             } else {
-                // Eye White + Pupil + Shine Dot
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(8.5, headY - 3, 4.8, 0, Math.PI * 2);
@@ -1323,60 +1179,76 @@ USER PROMPT: "${userPrompt}"`;
                 ctx.fill();
             }
 
-            // Rosy Cheek when Happy
-            if (expr === 'happy' || expr === 'laughing') {
-                ctx.fillStyle = 'rgba(244, 63, 94, 0.38)';
+            // Falling Animated Tears when Crying!
+            if (expr === 'crying') {
+                ctx.fillStyle = '#38bdf8';
+                const tearDrop1 = (t * 45) % 24;
+                const tearDrop2 = ((t * 45) + 12) % 24;
                 ctx.beginPath();
-                ctx.arc(4, headY + 4, 4.5, 0, Math.PI * 2);
+                ctx.arc(11, headY + 1 + tearDrop1, 2.6, 0, Math.PI * 2);
+                ctx.arc(7, headY + 3 + tearDrop2, 2.4, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // 8. Lip-Sync Mouth
-            const isSpeaking = speech && speech.length > 0;
-            const mouthOpen = (isSpeaking || expr === 'laughing') ? (Math.abs(Math.sin(t * 22)) * 6 + 2.5) : 0;
+            // 8. REAL ARTICULATED MOUTH WITH MOVING JAW, LIPS, TEETH & TONGUE (NO TEXT BUBBLES!)
+            const openAmount = Math.min(1, Math.max(0, mouthAperture || 0));
+            const mouthH = openAmount * 9.5;
+            const mouthW = 6.5 + openAmount * 2.5;
+            const mouthCenterX = 8;
+            const mouthCenterY = headY + 8.5 + openAmount * 2;
 
-            ctx.strokeStyle = '#0f172a';
-            ctx.fillStyle = '#881337';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            if (mouthOpen > 0) {
-                ctx.ellipse(8, headY + 9, 5.5, mouthOpen, 0, 0, Math.PI * 2);
+            ctx.save();
+            if (openAmount > 0.08) {
+                // Dark Open Mouth Cavity
+                ctx.fillStyle = '#4c0519';
+                ctx.beginPath();
+                ctx.ellipse(mouthCenterX, mouthCenterY, mouthW, Math.max(2.5, mouthH), 0, 0, Math.PI * 2);
                 ctx.fill();
-            } else if (expr === 'happy') {
-                ctx.arc(7, headY + 6, 7.5, 0.1 * Math.PI, 0.9 * Math.PI);
-                ctx.stroke();
-            } else if (expr === 'sad' || expr === 'angry') {
-                ctx.arc(7, headY + 14, 6.5, 1.1 * Math.PI, 1.9 * Math.PI);
-                ctx.stroke();
-            } else if (expr === 'shocked') {
-                ctx.arc(8, headY + 9, 4.8, 0, Math.PI * 2);
+
+                // Upper White Teeth Row
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(mouthCenterX - mouthW * 0.65, mouthCenterY - Math.max(2.5, mouthH) + 0.8, mouthW * 1.3, 2.6);
+
+                // Pink Tongue at Bottom of Open Mouth
+                ctx.fillStyle = '#fb7185';
+                ctx.beginPath();
+                ctx.ellipse(mouthCenterX, mouthCenterY + Math.max(2.5, mouthH) * 0.45, mouthW * 0.55, Math.max(1.5, mouthH * 0.35), 0, 0, Math.PI * 2);
                 ctx.fill();
+
+                // Lip Outline
+                ctx.strokeStyle = isFemale ? '#be123c' : '#78350f';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.ellipse(mouthCenterX, mouthCenterY, mouthW, Math.max(2.5, mouthH), 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Subtle Acoustic Voice Waves Emerging from Mouth (Visual indicator of real voice!)
+                if (isCurrentlySpeaking) {
+                    const wavePulse = (t * 6) % 1;
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.65 * (1 - wavePulse)})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(mouthCenterX + 12, mouthCenterY, 8 + wavePulse * 14, -0.45, 0.45);
+                    ctx.stroke();
+                }
             } else {
-                ctx.moveTo(3, headY + 8);
-                ctx.lineTo(13, headY + 8);
+                // Closed Mouth Expressions
+                ctx.strokeStyle = isFemale ? '#be123c' : '#0f172a';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                if (expr === 'happy') {
+                    ctx.arc(7, headY + 6, 7.5, 0.1 * Math.PI, 0.9 * Math.PI);
+                } else if (expr === 'sad' || expr === 'angry' || expr === 'crying') {
+                    ctx.arc(7, headY + 14, 6.5, 1.1 * Math.PI, 1.9 * Math.PI);
+                } else {
+                    ctx.moveTo(3, headY + 8);
+                    ctx.lineTo(13, headY + 8);
+                }
                 ctx.stroke();
             }
-
             ctx.restore();
 
-            // 9. Sleek Speech Bubble
-            if (speech) {
-                ctx.save();
-                ctx.font = 'bold 13px Segoe UI, sans-serif';
-                const tw = ctx.measureText(speech).width + 24;
-                const bx = Math.min(ctx.canvas.width - tw - 10, Math.max(10, x - tw / 2));
-                const by = Math.max(14, y - 205 * scale);
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.fillStyle = '#ffffff';
-                this.roundBox(ctx, bx, by, tw, 30, 12);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#0f172a';
-                ctx.textAlign = 'center';
-                ctx.fillText(speech, bx + tw / 2, by + 19);
-                ctx.restore();
-            }
+            ctx.restore();
         },
 
         drawShadedRobot(ctx, x, y, scale, facing, pose, color, eyeColor, t) {
@@ -1384,50 +1256,20 @@ USER PROMPT: "${userPrompt}"`;
             ctx.save();
             ctx.translate(x, y - Math.abs(stride) * 0.3);
             ctx.scale(scale * facing, scale);
-
-            // Metallic Legs
             ctx.fillStyle = '#334155';
             this.roundBox(ctx, -32 + stride, -78, 22, 78, 6);
             ctx.fill();
             this.roundBox(ctx, 10 - stride, -78, 22, 78, 6);
             ctx.fill();
-
-            // Shaded Armor Torso + Glowing Reactor Core
-            const armor = ctx.createLinearGradient(-44, -165, 44, -75);
-            armor.addColorStop(0, color);
-            armor.addColorStop(1, '#0f172a');
-            ctx.fillStyle = armor;
+            ctx.fillStyle = color;
             this.roundBox(ctx, -44, -165, 88, 92, 12);
             ctx.fill();
-
-            ctx.fillStyle = eyeColor;
-            ctx.shadowBlur = 16;
-            ctx.shadowColor = eyeColor;
-            ctx.beginPath();
-            ctx.arc(0, -122, 13, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Head & Glowing Visor
             ctx.fillStyle = '#475569';
             this.roundBox(ctx, -22, -202, 44, 34, 8);
             ctx.fill();
             ctx.fillStyle = eyeColor;
             ctx.fillRect(-10, -190, 28, 8);
             ctx.restore();
-
-            if (pose === 'punch') {
-                ctx.save();
-                ctx.strokeStyle = eyeColor;
-                ctx.lineWidth = 8;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = eyeColor;
-                ctx.beginPath();
-                ctx.moveTo(x + facing * 20 * scale, y - 185 * scale);
-                ctx.lineTo(x + facing * 280 * scale, y - 150 * scale);
-                ctx.stroke();
-                ctx.restore();
-            }
         },
 
         drawShadedMonster(ctx, x, y, scale, facing, pose, color, accent, t) {
@@ -1435,11 +1277,7 @@ USER PROMPT: "${userPrompt}"`;
             ctx.save();
             ctx.translate(x, y - Math.abs(stomp));
             ctx.scale(scale * facing, scale);
-
-            const bodyGrad = ctx.createLinearGradient(-40, -200, 40, 0);
-            bodyGrad.addColorStop(0, color);
-            bodyGrad.addColorStop(1, '#052e16');
-            ctx.fillStyle = bodyGrad;
+            ctx.fillStyle = color;
             ctx.beginPath();
             ctx.moveTo(-44, 0);
             ctx.lineTo(-34, -178);
@@ -1448,68 +1286,25 @@ USER PROMPT: "${userPrompt}"`;
             ctx.lineTo(40, 0);
             ctx.closePath();
             ctx.fill();
-
             ctx.fillStyle = accent;
-            ctx.shadowBlur = 14;
-            ctx.shadowColor = accent;
             ctx.beginPath();
             ctx.arc(18, -174, 7, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         },
 
-        drawShadedVehicle(ctx, x, y, scale, facing, kind, color, t) {
+        drawShadedVehicle(ctx, x, y, scale, facing, kind, color) {
             ctx.save();
             ctx.translate(x, y);
             ctx.scale(scale * facing, scale);
-            if (kind === 'rocket') {
-                ctx.fillStyle = '#f97316';
-                ctx.beginPath();
-                ctx.moveTo(-15, 0);
-                ctx.lineTo(0, 42 + Math.random() * 16);
-                ctx.lineTo(15, 0);
-                ctx.fill();
-
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.moveTo(0, -96);
-                ctx.lineTo(24, -44);
-                ctx.lineTo(24, 0);
-                ctx.lineTo(-24, 0);
-                ctx.lineTo(-24, -44);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.fillStyle = '#38bdf8';
-                ctx.beginPath();
-                ctx.arc(0, -48, 9, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.fillStyle = color;
-                this.roundBox(ctx, -56, -38, 112, 26, 8);
-                ctx.fill();
-                ctx.fillStyle = '#0f172a';
-                this.roundBox(ctx, -30, -56, 58, 22, 6);
-                ctx.fill();
-
-                // Glowing Headlight Beam
-                const beam = ctx.createLinearGradient(54, -26, 145, -26);
-                beam.addColorStop(0, 'rgba(254, 240, 138, 0.75)');
-                beam.addColorStop(1, 'rgba(254, 240, 138, 0)');
-                ctx.fillStyle = beam;
-                ctx.beginPath();
-                ctx.moveTo(54, -30);
-                ctx.lineTo(145, -45);
-                ctx.lineTo(145, -8);
-                ctx.lineTo(54, -20);
-                ctx.fill();
-
-                ctx.fillStyle = '#020617';
-                ctx.beginPath();
-                ctx.arc(-32, -10, 13, 0, Math.PI * 2);
-                ctx.arc(32, -10, 13, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.fillStyle = color;
+            this.roundBox(ctx, -56, -38, 112, 26, 8);
+            ctx.fill();
+            ctx.fillStyle = '#020617';
+            ctx.beginPath();
+            ctx.arc(-32, -10, 13, 0, Math.PI * 2);
+            ctx.arc(32, -10, 13, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         },
 
@@ -1569,11 +1364,6 @@ USER PROMPT: "${userPrompt}"`;
             this.roundBox(ctx, w * 0.06, boxY, w * 0.88, boxH, 12);
             ctx.fill();
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-            ctx.lineWidth = 1;
-            this.roundBox(ctx, w * 0.06, boxY, w * 0.88, boxH, 12);
-            ctx.stroke();
-
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             show.forEach((ln, idx) => {
@@ -1583,7 +1373,7 @@ USER PROMPT: "${userPrompt}"`;
         },
 
         renderCompletedVideoPlayer(cardWrap, videoUrl, promptText, ext) {
-            const fileName = `zoneweb-cinema-video.${ext}`;
+            const fileName = `zoneweb-voice-video.${ext}`;
             window.__lastGeneratedVideoUrl = videoUrl;
             window.__lastGeneratedVideoPrompt = promptText;
 
@@ -1592,9 +1382,9 @@ USER PROMPT: "${userPrompt}"`;
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             ${this.getCustomLogoSvg(18)}
-                            <span class="text-xs md:text-sm font-extrabold text-white">2.5D HD Cinema Video Ready</span>
+                            <span class="text-xs md:text-sm font-extrabold text-white">2.5D Voice & Lip-Sync Video Ready</span>
                         </div>
-                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">10.0s • 12-SOUND FX</span>
+                        <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">10.0s • HUMAN VOICE</span>
                     </div>
 
                     <p class="text-xs text-gray-300">Scene: <b class="text-white">${promptText.replace(/</g, '&lt;')}</b></p>

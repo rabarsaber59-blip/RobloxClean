@@ -1,16 +1,19 @@
 /**
- * ZENO-SOUNDS.JS - Real Human TTS Voice Engine (Male, Female, Child) & Foley Audio Studio
- * 1. Fetches real human TTS speech audio buffers for Male, Female, and Child characters
- *    (with multi-voice Neural TTS + WebSpeech preview + Formant Vocal fallback).
- * 2. Mixes real human voices & foley effects directly into the recorded video MediaStream.
- * 3. Live AnalyserNode waveform metering drives exact character lip-sync mouth movement.
+ * ZENO-SOUNDS.JS - True Neural Human TTS Voice Engine (Male, Female, Child) & Foley Studio
+ * 1. Eliminates robotic buzzer oscillators — uses real Neural Human Speech Audio:
+ *    - Google Gemini Native Human Audio (Charon/Fenrir for Male, Aoede/Kore for Female, Leda for Child)
+ *    - OpenAI Neural TTS (onyx, nova, shimmer) if OpenAI key is active
+ *    - Multi-mirror Neural TTS (Brian, Amy, Ivy & Google Neural TTS)
+ * 2. Decodes both compressed audio (MP3/WAV) and raw 24kHz 16-bit PCM directly into AudioBuffers
+ *    and mixes them into the recorded 3D video MediaStream.
+ * 3. Real-time AnalyserNode mouth-aperture metering drives exact 3D jaw & lip movement.
  */
 (function () {
     const ZenoSounds = {
         soundLibrary: [
-            { id: 'male_voice', label: 'Male Voice (TTS)' },
-            { id: 'female_voice', label: 'Female Voice (TTS)' },
-            { id: 'child_voice', label: 'Child Voice (TTS)' },
+            { id: 'male_voice', label: 'Male Human Voice' },
+            { id: 'female_voice', label: 'Female Human Voice' },
+            { id: 'child_voice', label: 'Child Human Voice' },
             { id: 'child_cry', label: 'Child Crying' },
             { id: 'laugh', label: 'Human Laugh' },
             { id: 'footsteps', label: 'Footsteps' },
@@ -20,8 +23,13 @@
             { id: 'explosion', label: 'Explosion' }
         ],
 
-        // Distinct Human TTS Voices mapped to Male, Female, and Child roles
-        ttsVoiceProfiles: {
+        geminiVoices: {
+            male: 'Charon',
+            female: 'Aoede',
+            child: 'Leda'
+        },
+
+        streamElementsVoices: {
             male: ['Brian', 'Matthew', 'Russell'],
             female: ['Amy', 'Joanna', 'Emma'],
             child: ['Ivy', 'Justin', 'Kevin']
@@ -37,7 +45,7 @@
             } else {
                 boot();
             }
-            console.log("ZenoSounds Human TTS & Foley Engine Active.");
+            console.log("Neural Human TTS Voice Engine Ready.");
         },
 
         injectSoundPreviewBar() {
@@ -51,9 +59,9 @@
                 bar.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">
-                            <i class="fa-solid fa-microphone-lines mr-1"></i>Human TTS Voices & Sound FX (Tap to Hear):
+                            <i class="fa-solid fa-microphone-lines mr-1"></i>Neural Human Voices & Sound FX (Tap to Hear):
                         </span>
-                        <span class="text-[9px] text-gray-400">Male • Female • Child</span>
+                        <span class="text-[9px] text-gray-400">3D Lip-Synced</span>
                     </div>
                     <div class="flex gap-1.5 overflow-x-auto pb-1">
                         ${this.soundLibrary.map(s => `
@@ -71,15 +79,119 @@
             setTimeout(tryAttach, 600);
         },
 
-        // Fetches a single real human TTS AudioBuffer for the given voiceType ('male' | 'female' | 'child')
+        // Decodes raw 16-bit Linear PCM (returned by Gemini Native Audio) into an AudioBuffer
+        decodeLinear16PcmToAudioBuffer(audioCtx, base64Data, mimeType = '') {
+            const rateMatch = String(mimeType).match(/rate=(\d+)/i);
+            const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+
+            const binaryStr = atob(base64Data);
+            const len = binaryStr.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
+            }
+
+            const sampleCount = Math.floor(bytes.byteLength / 2);
+            const view = new DataView(bytes.buffer);
+            const float32 = new Float32Array(sampleCount);
+            for (let i = 0; i < sampleCount; i++) {
+                const int16 = view.getInt16(i * 2, true);
+                float32[i] = int16 / 32768.0;
+            }
+
+            const audioBuffer = audioCtx.createBuffer(1, sampleCount, sampleRate);
+            audioBuffer.copyToChannel(float32, 0);
+            return audioBuffer;
+        },
+
+        // Fetches genuine human speech AudioBuffer from Gemini Native Audio -> OpenAI TTS -> StreamElements -> Google TTS
         async fetchHumanTtsBuffer(audioCtx, voiceType, text) {
-            const cleanText = String(text || '').trim().slice(0, 110);
+            const cleanText = String(text || '').trim().slice(0, 130);
             if (!cleanText || !audioCtx) return null;
 
             const role = (voiceType === 'female' || voiceType === 'child') ? voiceType : 'male';
-            const voices = this.ttsVoiceProfiles[role] || this.ttsVoiceProfiles.male;
+            const rawKey = (window.state?.apiKey || localStorage.getItem('zw_api_key') || '').replace(/[\s"'`]/g, '').trim();
 
-            for (const voiceName of voices) {
+            // 1. GOOGLE GEMINI NATIVE HUMAN AUDIO (Uses user's Gemini API Key — Studio-Grade Natural Human Voice)
+            if (rawKey.startsWith('AIza')) {
+                const geminiVoice = this.geminiVoices[role] || 'Charon';
+                const styleCue = role === 'child'
+                    ? 'Speak in a natural, emotional young child voice:'
+                    : role === 'female'
+                        ? 'Speak in a natural, expressive adult woman voice:'
+                        : 'Speak in a natural, expressive adult man voice:';
+
+                for (const model of ['gemini-2.5-flash', 'gemini-2.0-flash']) {
+                    try {
+                        const controller = new AbortController();
+                        const timer = setTimeout(() => controller.abort(), 6500);
+                        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(rawKey)}`;
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: `${styleCue} "${cleanText}"` }] }],
+                                generationConfig: {
+                                    responseModalities: ['AUDIO'],
+                                    speechConfig: {
+                                        voiceConfig: {
+                                            prebuiltVoiceConfig: { voiceName: geminiVoice }
+                                        }
+                                    }
+                                }
+                            }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timer);
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            const parts = data.candidates?.[0]?.content?.parts || [];
+                            for (const p of parts) {
+                                const inline = p.inlineData || p.inline_data;
+                                if (inline && inline.data) {
+                                    const mime = inline.mimeType || inline.mime_type || '';
+                                    if (mime.includes('pcm') || mime.includes('L16')) {
+                                        return this.decodeLinear16PcmToAudioBuffer(audioCtx, inline.data, mime);
+                                    } else {
+                                        const bin = atob(inline.data);
+                                        const arr = new Uint8Array(bin.length);
+                                        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                                        return await audioCtx.decodeAudioData(arr.buffer);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            // 2. OPENAI NEURAL TTS (If user connected an OpenAI key)
+            if (rawKey.startsWith('sk-') && !rawKey.startsWith('sk-ant-') && !rawKey.startsWith('sk-or-')) {
+                try {
+                    const oaVoice = role === 'female' ? 'nova' : (role === 'child' ? 'shimmer' : 'onyx');
+                    const res = await fetch('https://api.openai.com/v1/audio/speech', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${rawKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: 'tts-1',
+                            voice: oaVoice,
+                            input: cleanText
+                        })
+                    });
+                    if (res.ok) {
+                        const arr = await res.arrayBuffer();
+                        return await audioCtx.decodeAudioData(arr);
+                    }
+                } catch (e) {}
+            }
+
+            // 3. STREAMELEMENTS NEURAL HUMAN TTS (Free, No Key Required)
+            const seVoices = this.streamElementsVoices[role] || this.streamElementsVoices.male;
+            for (const voiceName of seVoices) {
                 try {
                     const controller = new AbortController();
                     const timer = setTimeout(() => controller.abort(), 4500);
@@ -95,10 +207,27 @@
                     }
                 } catch (e) {}
             }
+
+            // 4. GOOGLE TRANSLATE HUMAN TTS MIRROR (With role pitch rate)
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 4000);
+                const gUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=en&q=${encodeURIComponent(cleanText)}`;
+                const res = await fetch(gUrl, { signal: controller.signal });
+                clearTimeout(timer);
+                if (res.ok) {
+                    const arr = await res.arrayBuffer();
+                    if (arr && arr.byteLength > 600) {
+                        const buf = await audioCtx.decodeAudioData(arr);
+                        buf.__playbackRate = role === 'child' ? 1.24 : (role === 'female' ? 1.08 : 0.94);
+                        return buf;
+                    }
+                }
+            } catch (e) {}
+
             return null;
         },
 
-        // Pre-fetches real human TTS MP3 audio for EVERY dialogue line across all acts (10s, 20s, or 30s)
         async preloadHumanDialogueBuffers(audioCtx, acts, onProgress) {
             const buffers = {};
             if (!audioCtx || !Array.isArray(acts)) return buffers;
@@ -116,9 +245,8 @@
                 });
             });
 
-            // Fetch in parallel batches of 4 for fast startup even on 30-second (9-act) stories
             let completed = 0;
-            const batchSize = 4;
+            const batchSize = 3;
             for (let i = 0; i < tasks.length; i += batchSize) {
                 const batch = tasks.slice(i, i + batchSize);
                 await Promise.all(batch.map(async (item) => {
@@ -140,7 +268,7 @@
                 const ctx = new AudioCtx();
                 if (ctx.state === 'suspended') await ctx.resume();
                 const master = ctx.createGain();
-                master.gain.value = 0.45;
+                master.gain.value = 0.5;
                 master.connect(ctx.destination);
 
                 const session = this.createSoundSession(ctx, master, 'dramatic', false, {});
@@ -150,17 +278,19 @@
                     const sampleLine = role === 'female'
                         ? 'Please listen to me, we need to talk right now.'
                         : role === 'child'
-                            ? 'Mommy, daddy, please do not fight anymore!'
-                            : 'I am working hard to make everything better for us.';
+                            ? 'Mommy, daddy, please stop fighting, I am scared!'
+                            : 'I promise I will make everything better for our family.';
 
                     const buf = await this.fetchHumanTtsBuffer(ctx, role, sampleLine);
                     if (buf) {
                         session.setVoiceBuffers({ preview: buf });
-                        session.speakHumanLine(role, sampleLine, 2.5, 'preview', 'neutral');
-                    } else {
-                        session.speakHumanLine(role, sampleLine, 2.2, null, 'neutral');
+                        session.speakHumanLine(role, sampleLine, 2.5, 'preview');
+                    } else if ('speechSynthesis' in window) {
+                        const u = new SpeechSynthesisUtterance(sampleLine);
+                        u.pitch = role === 'child' ? 1.55 : (role === 'female' ? 1.2 : 0.85);
+                        window.speechSynthesis.speak(u);
                     }
-                    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 3500);
+                    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 4000);
                 } else {
                     session.trigger(soundId);
                     setTimeout(() => { try { ctx.close(); } catch (e) {} }, 2200);
@@ -176,7 +306,7 @@
 
                 const dest = ctx.createMediaStreamDestination();
                 const master = ctx.createGain();
-                master.gain.value = 0.38;
+                master.gain.value = 0.42;
                 master.connect(dest);
                 master.connect(ctx.destination);
 
@@ -204,25 +334,11 @@
                 bgOsc2 = ctx.createOscillator();
                 const bgGain = ctx.createGain();
 
-                if (mood === 'action') {
-                    bgOsc1.type = 'sawtooth';
-                    bgOsc2.type = 'triangle';
-                    bgOsc1.frequency.value = 82.41;
-                    bgOsc2.frequency.value = 123.47;
-                    bgGain.gain.value = 0.04;
-                } else if (mood === 'sad' || mood === 'dramatic') {
-                    bgOsc1.type = 'sine';
-                    bgOsc2.type = 'triangle';
-                    bgOsc1.frequency.value = 130.81;
-                    bgOsc2.frequency.value = 155.56;
-                    bgGain.gain.value = 0.055;
-                } else {
-                    bgOsc1.type = 'sine';
-                    bgOsc2.type = 'triangle';
-                    bgOsc1.frequency.value = 146.83;
-                    bgOsc2.frequency.value = 220.00;
-                    bgGain.gain.value = 0.05;
-                }
+                bgOsc1.type = 'sine';
+                bgOsc2.type = 'sine';
+                bgOsc1.frequency.value = mood === 'action' ? 98.00 : (mood === 'sad' || mood === 'dramatic' ? 130.81 : 146.83);
+                bgOsc2.frequency.value = mood === 'action' ? 146.83 : (mood === 'sad' || mood === 'dramatic' ? 155.56 : 220.00);
+                bgGain.gain.value = 0.035;
 
                 bgOsc1.connect(bgGain);
                 bgOsc2.connect(bgGain);
@@ -231,59 +347,34 @@
                 bgOsc2.start();
             }
 
-            // Formant Human Vocal Synthesizer Fallback (distinct Male 115Hz, Female 220Hz, Child 320Hz)
-            const synthesizeHumanSyllables = (voiceType = 'male', durationSec = 1.6, emotion = 'neutral') => {
+            // Warm, Non-Robotic Soft Breath & Vowel Murmur Fallback (never uses harsh sawtooth!)
+            const playSoftHumanFallback = (voiceType = 'male', durationSec = 1.5) => {
                 const now = ctx.currentTime;
-                const baseFreq = voiceType === 'female' ? 220 : (voiceType === 'child' ? 320 : 115);
-                const syllableDur = 0.16;
-                const count = Math.max(3, Math.floor(durationSec / syllableDur));
-
-                const vowelFormants = [
-                    [730, 1090],
-                    [530, 1840],
-                    [390, 1990],
-                    [570, 840],
-                    [440, 1020]
-                ];
+                const baseFreq = voiceType === 'female' ? 210 : (voiceType === 'child' ? 305 : 118);
+                const count = Math.max(3, Math.floor(durationSec / 0.22));
 
                 for (let i = 0; i < count; i++) {
-                    const tStart = now + i * syllableDur;
-                    const tEnd = tStart + syllableDur * 0.82;
-                    const [f1Freq, f2Freq] = vowelFormants[(i + (voiceType === 'female' ? 1 : (voiceType === 'child' ? 2 : 0))) % vowelFormants.length];
-                    const formantScale = voiceType === 'child' ? 1.25 : (voiceType === 'female' ? 1.12 : 1.0);
+                    const t0 = now + i * 0.22;
+                    const t1 = t0 + 0.17;
+                    const osc = ctx.createOscillator();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(baseFreq * (1 + 0.06 * Math.sin(i)), t0);
+                    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.92, t1);
 
-                    const pitchMod = emotion === 'angry'
-                        ? baseFreq * (1.12 + 0.16 * Math.sin(i * 1.4))
-                        : baseFreq * (1.0 + 0.10 * Math.sin(i * 1.1) - (i / count) * 0.10);
+                    const lp = ctx.createBiquadFilter();
+                    lp.type = 'lowpass';
+                    lp.frequency.value = voiceType === 'child' ? 950 : (voiceType === 'female' ? 780 : 540);
 
-                    const glottis = ctx.createOscillator();
-                    glottis.type = 'sawtooth';
-                    glottis.frequency.setValueAtTime(pitchMod, tStart);
-                    glottis.frequency.linearRampToValueAtTime(pitchMod * 0.92, tEnd);
+                    const g = ctx.createGain();
+                    g.gain.setValueAtTime(0.001, t0);
+                    g.gain.linearRampToValueAtTime(0.28, t0 + 0.04);
+                    g.gain.exponentialRampToValueAtTime(0.001, t1);
 
-                    const f1 = ctx.createBiquadFilter();
-                    f1.type = 'bandpass';
-                    f1.frequency.setValueAtTime(f1Freq * formantScale, tStart);
-                    f1.Q.value = 5.5;
-
-                    const f2 = ctx.createBiquadFilter();
-                    f2.type = 'bandpass';
-                    f2.frequency.setValueAtTime(f2Freq * formantScale, tStart);
-                    f2.Q.value = 6.5;
-
-                    const syllGain = ctx.createGain();
-                    syllGain.gain.setValueAtTime(0.001, tStart);
-                    syllGain.gain.linearRampToValueAtTime(emotion === 'angry' ? 0.52 : 0.40, tStart + 0.03);
-                    syllGain.gain.exponentialRampToValueAtTime(0.001, tEnd);
-
-                    glottis.connect(f1);
-                    glottis.connect(f2);
-                    f1.connect(syllGain);
-                    f2.connect(syllGain);
-                    syllGain.connect(voiceAnalyser);
-
-                    glottis.start(tStart);
-                    glottis.stop(tEnd + 0.01);
+                    osc.connect(lp);
+                    lp.connect(g);
+                    g.connect(voiceAnalyser);
+                    osc.start(t0);
+                    osc.stop(t1 + 0.01);
                 }
             };
 
@@ -291,26 +382,25 @@
                 child_cry() {
                     const now = ctx.currentTime;
                     for (let i = 0; i < 4; i++) {
-                        const t0 = now + i * 0.42;
-                        const t1 = t0 + 0.34;
+                        const t0 = now + i * 0.45;
+                        const t1 = t0 + 0.36;
                         const osc = ctx.createOscillator();
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(345, t0);
-                        osc.frequency.linearRampToValueAtTime(440, t0 + 0.10);
-                        osc.frequency.exponentialRampToValueAtTime(265, t1);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(340, t0);
+                        osc.frequency.linearRampToValueAtTime(420, t0 + 0.12);
+                        osc.frequency.exponentialRampToValueAtTime(270, t1);
 
-                        const formant = ctx.createBiquadFilter();
-                        formant.type = 'bandpass';
-                        formant.frequency.setValueAtTime(920, t0);
-                        formant.Q.value = 4.5;
+                        const lp = ctx.createBiquadFilter();
+                        lp.type = 'lowpass';
+                        lp.frequency.value = 950;
 
                         const g = ctx.createGain();
                         g.gain.setValueAtTime(0.001, t0);
-                        g.gain.linearRampToValueAtTime(0.45, t0 + 0.06);
+                        g.gain.linearRampToValueAtTime(0.35, t0 + 0.06);
                         g.gain.exponentialRampToValueAtTime(0.001, t1);
 
-                        osc.connect(formant);
-                        formant.connect(g);
+                        osc.connect(lp);
+                        lp.connect(g);
                         g.connect(voiceAnalyser);
                         osc.start(t0);
                         osc.stop(t1 + 0.01);
@@ -318,20 +408,19 @@
                 },
 
                 laugh() {
-                    [390, 350, 420, 330, 370].forEach((freq, idx) => {
-                        const t0 = ctx.currentTime + idx * 0.11;
+                    [360, 330, 390, 310].forEach((freq, idx) => {
+                        const t0 = ctx.currentTime + idx * 0.12;
                         const o = ctx.createOscillator();
-                        const f = ctx.createBiquadFilter();
-                        f.type = 'bandpass';
-                        f.frequency.value = 780;
-                        f.Q.value = 4;
+                        o.type = 'triangle';
+                        const lp = ctx.createBiquadFilter();
+                        lp.type = 'lowpass';
+                        lp.frequency.value = 820;
                         const g = ctx.createGain();
-                        o.type = 'sawtooth';
                         o.frequency.setValueAtTime(freq, t0);
-                        g.gain.setValueAtTime(0.32, t0);
+                        g.gain.setValueAtTime(0.28, t0);
                         g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.09);
-                        o.connect(f);
-                        f.connect(g);
+                        o.connect(lp);
+                        lp.connect(g);
                         g.connect(voiceAnalyser);
                         o.start(t0);
                         o.stop(t0 + 0.10);
@@ -343,9 +432,9 @@
                     const o = ctx.createOscillator();
                     const g = ctx.createGain();
                     o.type = 'sine';
-                    o.frequency.setValueAtTime(115, now);
+                    o.frequency.setValueAtTime(110, now);
                     o.frequency.exponentialRampToValueAtTime(36, now + 0.09);
-                    g.gain.setValueAtTime(0.32, now);
+                    g.gain.setValueAtTime(0.30, now);
                     g.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
                     o.connect(g);
                     g.connect(masterGain);
@@ -365,7 +454,7 @@
                     src.buffer = buf;
                     const filter = ctx.createBiquadFilter();
                     filter.type = 'lowpass';
-                    filter.frequency.value = 260;
+                    filter.frequency.value = 240;
                     const g = ctx.createGain();
                     g.gain.setValueAtTime(0.75, now);
                     g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
@@ -396,16 +485,12 @@
                         const t0 = ctx.currentTime + idx * 0.24;
                         const o = ctx.createOscillator();
                         const g = ctx.createGain();
-                        o.type = 'sawtooth';
-                        const filter = ctx.createBiquadFilter();
-                        filter.type = 'lowpass';
-                        filter.frequency.value = 620;
+                        o.type = 'sine';
                         o.frequency.setValueAtTime(freq, t0);
                         g.gain.setValueAtTime(0.01, t0);
-                        g.gain.linearRampToValueAtTime(0.16, t0 + 0.08);
+                        g.gain.linearRampToValueAtTime(0.18, t0 + 0.08);
                         g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.25);
-                        o.connect(filter);
-                        filter.connect(g);
+                        o.connect(g);
                         g.connect(masterGain);
                         o.start(t0);
                         o.stop(t0 + 0.26);
@@ -424,7 +509,7 @@
                     src.buffer = buf;
                     const filter = ctx.createBiquadFilter();
                     filter.type = 'lowpass';
-                    filter.frequency.value = 340;
+                    filter.frequency.value = 320;
                     const g = ctx.createGain();
                     g.gain.setValueAtTime(0.75, now);
                     g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
@@ -440,17 +525,21 @@
                 setVoiceBuffers(bufMap) {
                     voiceBuffers = bufMap || {};
                 },
-                speakHumanLine(voiceType, lineText, durationSec = 1.6, bufferKey = null, emotion = 'neutral') {
+                speakHumanLine(voiceType, lineText, durationSec = 1.6, bufferKey = null) {
                     if (bufferKey && voiceBuffers[bufferKey]) {
                         try {
+                            const buf = voiceBuffers[bufferKey];
                             const src = ctx.createBufferSource();
-                            src.buffer = voiceBuffers[bufferKey];
+                            src.buffer = buf;
+                            if (buf.__playbackRate) {
+                                src.playbackRate.value = buf.__playbackRate;
+                            }
                             src.connect(voiceAnalyser);
                             src.start(ctx.currentTime);
                             return;
                         } catch (e) {}
                     }
-                    synthesizeHumanSyllables(voiceType, durationSec, emotion);
+                    playSoftHumanFallback(voiceType, durationSec);
                 },
                 trigger(soundName) {
                     try {
@@ -468,7 +557,7 @@
                             sumSq += v * v;
                         }
                         const rms = Math.sqrt(sumSq / timeDomainData.length);
-                        return Math.min(1, rms * 6.8);
+                        return Math.min(1, rms * 7.2);
                     } catch (e) {
                         return 0;
                     }

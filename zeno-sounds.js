@@ -1,25 +1,31 @@
 /**
- * ZENO-SOUNDS.JS - Human Voice Synthesis, Real Neural TTS Audio & Foley Sound Engine
- * 1. Generates & mixes real human speech (Male, Female, Child) directly into the recorded video stream
- *    using Neural TTS audio buffers + Formant Vocal Tract Synthesis (F1/F2/F3 vowel formants + glottal pitch).
- * 2. Real-time AnalyserNode mouth-aperture metering so character lips, teeth & jaw move in exact sync
- *    with the spoken voice audio.
- * 3. Realistic Foley sounds: Child crying sobs, human laughter, footsteps, door slam, coin chime, explosion.
+ * ZENO-SOUNDS.JS - Real Human TTS Voice Engine (Male, Female, Child) & Foley Audio Studio
+ * 1. Fetches real human TTS speech audio buffers for Male, Female, and Child characters
+ *    (with multi-voice Neural TTS + WebSpeech preview + Formant Vocal fallback).
+ * 2. Mixes real human voices & foley effects directly into the recorded video MediaStream.
+ * 3. Live AnalyserNode waveform metering drives exact character lip-sync mouth movement.
  */
 (function () {
     const ZenoSounds = {
         soundLibrary: [
-            { id: 'male_voice', label: 'Male Voice' },
-            { id: 'female_voice', label: 'Female Voice' },
+            { id: 'male_voice', label: 'Male Voice (TTS)' },
+            { id: 'female_voice', label: 'Female Voice (TTS)' },
+            { id: 'child_voice', label: 'Child Voice (TTS)' },
             { id: 'child_cry', label: 'Child Crying' },
             { id: 'laugh', label: 'Human Laugh' },
             { id: 'footsteps', label: 'Footsteps' },
             { id: 'door_slam', label: 'Door Slam' },
             { id: 'coin_jackpot', label: 'Money & Coin' },
             { id: 'sad_violin', label: 'Emotional Drama' },
-            { id: 'explosion', label: 'Explosion' },
-            { id: 'punch_impact', label: 'Action Impact' }
+            { id: 'explosion', label: 'Explosion' }
         ],
+
+        // Distinct Human TTS Voices mapped to Male, Female, and Child roles
+        ttsVoiceProfiles: {
+            male: ['Brian', 'Matthew', 'Russell'],
+            female: ['Amy', 'Joanna', 'Emma'],
+            child: ['Ivy', 'Justin', 'Kevin']
+        },
 
         init() {
             window.ZenoSounds = this;
@@ -31,7 +37,7 @@
             } else {
                 boot();
             }
-            console.log("Human Voice & Realistic Foley Engine Active.");
+            console.log("ZenoSounds Human TTS & Foley Engine Active.");
         },
 
         injectSoundPreviewBar() {
@@ -45,9 +51,9 @@
                 bar.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">
-                            <i class="fa-solid fa-microphone-lines mr-1"></i>Human Voices & Sound FX (Tap to Hear):
+                            <i class="fa-solid fa-microphone-lines mr-1"></i>Human TTS Voices & Sound FX (Tap to Hear):
                         </span>
-                        <span class="text-[9px] text-gray-400">Lip-Synced</span>
+                        <span class="text-[9px] text-gray-400">Male • Female • Child</span>
                     </div>
                     <div class="flex gap-1.5 overflow-x-auto pb-1">
                         ${this.soundLibrary.map(s => `
@@ -65,64 +71,100 @@
             setTimeout(tryAttach, 600);
         },
 
-        // Pre-fetches real human TTS MP3 audio for each spoken dialogue line so it embeds inside the video
-        async preloadHumanDialogueBuffers(audioCtx, acts) {
+        // Fetches a single real human TTS AudioBuffer for the given voiceType ('male' | 'female' | 'child')
+        async fetchHumanTtsBuffer(audioCtx, voiceType, text) {
+            const cleanText = String(text || '').trim().slice(0, 110);
+            if (!cleanText || !audioCtx) return null;
+
+            const role = (voiceType === 'female' || voiceType === 'child') ? voiceType : 'male';
+            const voices = this.ttsVoiceProfiles[role] || this.ttsVoiceProfiles.male;
+
+            for (const voiceName of voices) {
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 4500);
+                    const url = `https://api.streamelements.com/kappa/v2/speech?voice=${encodeURIComponent(voiceName)}&text=${encodeURIComponent(cleanText)}`;
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timer);
+
+                    if (res.ok) {
+                        const arr = await res.arrayBuffer();
+                        if (arr && arr.byteLength > 800) {
+                            return await audioCtx.decodeAudioData(arr);
+                        }
+                    }
+                } catch (e) {}
+            }
+            return null;
+        },
+
+        // Pre-fetches real human TTS MP3 audio for EVERY dialogue line across all acts (10s, 20s, or 30s)
+        async preloadHumanDialogueBuffers(audioCtx, acts, onProgress) {
             const buffers = {};
             if (!audioCtx || !Array.isArray(acts)) return buffers;
 
-            const voiceMap = {
-                male: 'Brian',
-                female: 'Amy',
-                child: 'Ivy'
-            };
-
-            for (let aIdx = 0; aIdx < acts.length; aIdx++) {
-                const act = acts[aIdx];
-                const speakers = (act.actors || []).filter(a => a.spokenLine && a.spokenLine.trim().length > 0);
-                for (let sIdx = 0; sIdx < speakers.length; sIdx++) {
-                    const actor = speakers[sIdx];
-                    const roleVoice = voiceMap[actor.voiceType || 'male'] || 'Brian';
-                    const lineText = actor.spokenLine.trim().slice(0, 90);
-                    const key = `${aIdx}_${actor.id}`;
-
-                    try {
-                        const controller = new AbortController();
-                        const timer = setTimeout(() => controller.abort(), 3500);
-                        const ttsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${encodeURIComponent(roleVoice)}&text=${encodeURIComponent(lineText)}`;
-                        const res = await fetch(ttsUrl, { signal: controller.signal });
-                        clearTimeout(timer);
-
-                        if (res.ok) {
-                            const arrayBuf = await res.arrayBuffer();
-                            if (arrayBuf && arrayBuf.byteLength > 800) {
-                                const decoded = await audioCtx.decodeAudioData(arrayBuf);
-                                buffers[key] = decoded;
-                            }
-                        }
-                    } catch (e) {
-                        // Formant Human Vocal Synthesizer will seamlessly voice this line if TTS network is blocked
+            const tasks = [];
+            acts.forEach((act, aIdx) => {
+                (act.actors || []).forEach((actor) => {
+                    if (actor.speaking && actor.spokenLine && actor.spokenLine.trim().length > 0) {
+                        tasks.push({
+                            key: `${aIdx}_${actor.id}`,
+                            voiceType: actor.voiceType || 'male',
+                            text: actor.spokenLine.trim()
+                        });
                     }
-                }
+                });
+            });
+
+            // Fetch in parallel batches of 4 for fast startup even on 30-second (9-act) stories
+            let completed = 0;
+            const batchSize = 4;
+            for (let i = 0; i < tasks.length; i += batchSize) {
+                const batch = tasks.slice(i, i + batchSize);
+                await Promise.all(batch.map(async (item) => {
+                    const buf = await this.fetchHumanTtsBuffer(audioCtx, item.voiceType, item.text);
+                    if (buf) {
+                        buffers[item.key] = buf;
+                    }
+                    completed++;
+                    if (onProgress) onProgress(completed, tasks.length);
+                }));
             }
+
             return buffers;
         },
 
-        previewSingleSound(soundId) {
+        async previewSingleSound(soundId) {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 const ctx = new AudioCtx();
-                if (ctx.state === 'suspended') ctx.resume();
+                if (ctx.state === 'suspended') await ctx.resume();
                 const master = ctx.createGain();
-                master.gain.value = 0.42;
+                master.gain.value = 0.45;
                 master.connect(ctx.destination);
 
                 const session = this.createSoundSession(ctx, master, 'dramatic', false, {});
-                if (soundId === 'male_voice') session.speakHumanLine('male', 'Why are you doing this to us?', 1.4, null);
-                else if (soundId === 'female_voice') session.speakHumanLine('female', 'I cannot take this anymore, we are leaving!', 1.6, null);
-                else if (soundId === 'child_cry') session.trigger('child_cry');
-                else session.trigger(soundId);
 
-                setTimeout(() => { try { ctx.close(); } catch (e) {} }, 2200);
+                if (soundId === 'male_voice' || soundId === 'female_voice' || soundId === 'child_voice') {
+                    const role = soundId === 'female_voice' ? 'female' : (soundId === 'child_voice' ? 'child' : 'male');
+                    const sampleLine = role === 'female'
+                        ? 'Please listen to me, we need to talk right now.'
+                        : role === 'child'
+                            ? 'Mommy, daddy, please do not fight anymore!'
+                            : 'I am working hard to make everything better for us.';
+
+                    const buf = await this.fetchHumanTtsBuffer(ctx, role, sampleLine);
+                    if (buf) {
+                        session.setVoiceBuffers({ preview: buf });
+                        session.speakHumanLine(role, sampleLine, 2.5, 'preview', 'neutral');
+                    } else {
+                        session.speakHumanLine(role, sampleLine, 2.2, null, 'neutral');
+                    }
+                    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 3500);
+                } else {
+                    session.trigger(soundId);
+                    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 2200);
+                }
             } catch (e) {}
         },
 
@@ -134,7 +176,7 @@
 
                 const dest = ctx.createMediaStreamDestination();
                 const master = ctx.createGain();
-                master.gain.value = 0.36;
+                master.gain.value = 0.38;
                 master.connect(dest);
                 master.connect(ctx.destination);
 
@@ -148,7 +190,6 @@
         },
 
         createSoundSession(ctx, masterGain, mood, withBackgroundScore, preloadedBuffers = {}) {
-            // Real-time AnalyserNode to measure live voice amplitude -> drives character mouth movement!
             const voiceAnalyser = ctx.createAnalyser();
             voiceAnalyser.fftSize = 256;
             const timeDomainData = new Uint8Array(voiceAnalyser.frequencyBinCount);
@@ -168,19 +209,19 @@
                     bgOsc2.type = 'triangle';
                     bgOsc1.frequency.value = 82.41;
                     bgOsc2.frequency.value = 123.47;
-                    bgGain.gain.value = 0.05;
+                    bgGain.gain.value = 0.04;
                 } else if (mood === 'sad' || mood === 'dramatic') {
                     bgOsc1.type = 'sine';
                     bgOsc2.type = 'triangle';
                     bgOsc1.frequency.value = 130.81;
                     bgOsc2.frequency.value = 155.56;
-                    bgGain.gain.value = 0.07;
+                    bgGain.gain.value = 0.055;
                 } else {
                     bgOsc1.type = 'sine';
                     bgOsc2.type = 'triangle';
                     bgOsc1.frequency.value = 146.83;
                     bgOsc2.frequency.value = 220.00;
-                    bgGain.gain.value = 0.06;
+                    bgGain.gain.value = 0.05;
                 }
 
                 bgOsc1.connect(bgGain);
@@ -190,53 +231,49 @@
                 bgOsc2.start();
             }
 
-            // Formant Human Vocal Tract Synthesizer (Creates realistic voiced syllables with F1/F2/F3 formants)
+            // Formant Human Vocal Synthesizer Fallback (distinct Male 115Hz, Female 220Hz, Child 320Hz)
             const synthesizeHumanSyllables = (voiceType = 'male', durationSec = 1.6, emotion = 'neutral') => {
                 const now = ctx.currentTime;
-                const baseFreq = voiceType === 'female' ? 215 : (voiceType === 'child' ? 310 : 118);
-                const syllableDur = 0.17;
+                const baseFreq = voiceType === 'female' ? 220 : (voiceType === 'child' ? 320 : 115);
+                const syllableDur = 0.16;
                 const count = Math.max(3, Math.floor(durationSec / syllableDur));
 
-                // Vowel Formant Frequencies (F1, F2) for natural human speech cadence
                 const vowelFormants = [
-                    [730, 1090], // /a/
-                    [530, 1840], // /e/
-                    [390, 1990], // /i/
-                    [570, 840],  // /o/
-                    [440, 1020]  // /u/
+                    [730, 1090],
+                    [530, 1840],
+                    [390, 1990],
+                    [570, 840],
+                    [440, 1020]
                 ];
 
                 for (let i = 0; i < count; i++) {
                     const tStart = now + i * syllableDur;
                     const tEnd = tStart + syllableDur * 0.82;
-                    const [f1Freq, f2Freq] = vowelFormants[(i + (voiceType === 'female' ? 1 : 0)) % vowelFormants.length];
+                    const [f1Freq, f2Freq] = vowelFormants[(i + (voiceType === 'female' ? 1 : (voiceType === 'child' ? 2 : 0))) % vowelFormants.length];
+                    const formantScale = voiceType === 'child' ? 1.25 : (voiceType === 'female' ? 1.12 : 1.0);
 
-                    // Pitch contour (rises when angry/arguing, falls at end of sentence)
                     const pitchMod = emotion === 'angry'
-                        ? baseFreq * (1.12 + 0.18 * Math.sin(i * 1.4))
-                        : baseFreq * (1.0 + 0.12 * Math.sin(i * 1.1) - (i / count) * 0.12);
+                        ? baseFreq * (1.12 + 0.16 * Math.sin(i * 1.4))
+                        : baseFreq * (1.0 + 0.10 * Math.sin(i * 1.1) - (i / count) * 0.10);
 
-                    // Glottal Pulse Sawtooth Source
                     const glottis = ctx.createOscillator();
                     glottis.type = 'sawtooth';
                     glottis.frequency.setValueAtTime(pitchMod, tStart);
                     glottis.frequency.linearRampToValueAtTime(pitchMod * 0.92, tEnd);
 
-                    // Formant Filter 1 (Throat/Jaw resonance)
                     const f1 = ctx.createBiquadFilter();
                     f1.type = 'bandpass';
-                    f1.frequency.setValueAtTime(f1Freq, tStart);
+                    f1.frequency.setValueAtTime(f1Freq * formantScale, tStart);
                     f1.Q.value = 5.5;
 
-                    // Formant Filter 2 (Tongue/Mouth resonance)
                     const f2 = ctx.createBiquadFilter();
                     f2.type = 'bandpass';
-                    f2.frequency.setValueAtTime(f2Freq, tStart);
+                    f2.frequency.setValueAtTime(f2Freq * formantScale, tStart);
                     f2.Q.value = 6.5;
 
                     const syllGain = ctx.createGain();
                     syllGain.gain.setValueAtTime(0.001, tStart);
-                    syllGain.gain.linearRampToValueAtTime(emotion === 'angry' ? 0.55 : 0.42, tStart + 0.03);
+                    syllGain.gain.linearRampToValueAtTime(emotion === 'angry' ? 0.52 : 0.40, tStart + 0.03);
                     syllGain.gain.exponentialRampToValueAtTime(0.001, tEnd);
 
                     glottis.connect(f1);
@@ -251,27 +288,25 @@
             };
 
             const foley = {
-                // Realistic Child Crying & Sobbing Vocalization
                 child_cry() {
                     const now = ctx.currentTime;
-                    const sobCount = 4;
-                    for (let i = 0; i < sobCount; i++) {
+                    for (let i = 0; i < 4; i++) {
                         const t0 = now + i * 0.42;
                         const t1 = t0 + 0.34;
                         const osc = ctx.createOscillator();
                         osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(340, t0);
-                        osc.frequency.linearRampToValueAtTime(430, t0 + 0.10);
+                        osc.frequency.setValueAtTime(345, t0);
+                        osc.frequency.linearRampToValueAtTime(440, t0 + 0.10);
                         osc.frequency.exponentialRampToValueAtTime(265, t1);
 
                         const formant = ctx.createBiquadFilter();
                         formant.type = 'bandpass';
-                        formant.frequency.setValueAtTime(880, t0);
+                        formant.frequency.setValueAtTime(920, t0);
                         formant.Q.value = 4.5;
 
                         const g = ctx.createGain();
                         g.gain.setValueAtTime(0.001, t0);
-                        g.gain.linearRampToValueAtTime(0.48, t0 + 0.06);
+                        g.gain.linearRampToValueAtTime(0.45, t0 + 0.06);
                         g.gain.exponentialRampToValueAtTime(0.001, t1);
 
                         osc.connect(formant);
@@ -283,8 +318,7 @@
                 },
 
                 laugh() {
-                    const notes = [380, 340, 410, 320, 360];
-                    notes.forEach((freq, idx) => {
+                    [390, 350, 420, 330, 370].forEach((freq, idx) => {
                         const t0 = ctx.currentTime + idx * 0.11;
                         const o = ctx.createOscillator();
                         const f = ctx.createBiquadFilter();
@@ -294,7 +328,7 @@
                         const g = ctx.createGain();
                         o.type = 'sawtooth';
                         o.frequency.setValueAtTime(freq, t0);
-                        g.gain.setValueAtTime(0.35, t0);
+                        g.gain.setValueAtTime(0.32, t0);
                         g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.09);
                         o.connect(f);
                         f.connect(g);
@@ -311,7 +345,7 @@
                     o.type = 'sine';
                     o.frequency.setValueAtTime(115, now);
                     o.frequency.exponentialRampToValueAtTime(36, now + 0.09);
-                    g.gain.setValueAtTime(0.35, now);
+                    g.gain.setValueAtTime(0.32, now);
                     g.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
                     o.connect(g);
                     g.connect(masterGain);
@@ -333,7 +367,7 @@
                     filter.type = 'lowpass';
                     filter.frequency.value = 260;
                     const g = ctx.createGain();
-                    g.gain.setValueAtTime(0.8, now);
+                    g.gain.setValueAtTime(0.75, now);
                     g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
                     src.connect(filter);
                     filter.connect(g);
@@ -348,7 +382,7 @@
                         const g = ctx.createGain();
                         o.type = 'sine';
                         o.frequency.setValueAtTime(f, t0);
-                        g.gain.setValueAtTime(0.32, t0);
+                        g.gain.setValueAtTime(0.30, t0);
                         g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3);
                         o.connect(g);
                         g.connect(masterGain);
@@ -368,7 +402,7 @@
                         filter.frequency.value = 620;
                         o.frequency.setValueAtTime(freq, t0);
                         g.gain.setValueAtTime(0.01, t0);
-                        g.gain.linearRampToValueAtTime(0.18, t0 + 0.08);
+                        g.gain.linearRampToValueAtTime(0.16, t0 + 0.08);
                         g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.25);
                         o.connect(filter);
                         filter.connect(g);
@@ -398,21 +432,6 @@
                     filter.connect(g);
                     g.connect(masterGain);
                     src.start(now);
-                },
-
-                punch_impact() {
-                    const now = ctx.currentTime;
-                    const o = ctx.createOscillator();
-                    const g = ctx.createGain();
-                    o.type = 'square';
-                    o.frequency.setValueAtTime(185, now);
-                    o.frequency.exponentialRampToValueAtTime(42, now + 0.12);
-                    g.gain.setValueAtTime(0.45, now);
-                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
-                    o.connect(g);
-                    g.connect(masterGain);
-                    o.start(now);
-                    o.stop(now + 0.14);
                 }
             };
 
@@ -421,7 +440,6 @@
                 setVoiceBuffers(bufMap) {
                     voiceBuffers = bufMap || {};
                 },
-                // Plays real decoded human TTS AudioBuffer if available, otherwise runs Formant Human Vocal Synthesizer
                 speakHumanLine(voiceType, lineText, durationSec = 1.6, bufferKey = null, emotion = 'neutral') {
                     if (bufferKey && voiceBuffers[bufferKey]) {
                         try {
@@ -438,12 +456,9 @@
                     try {
                         if (typeof foley[soundName] === 'function') {
                             foley[soundName]();
-                        } else {
-                            synthesizeHumanSyllables('male', 1.2, 'neutral');
                         }
                     } catch (e) {}
                 },
-                // Returns live 0.0 -> 1.0 mouth aperture driven by actual voice waveform volume
                 getLiveVoiceAperture() {
                     try {
                         voiceAnalyser.getByteTimeDomainData(timeDomainData);
@@ -453,7 +468,7 @@
                             sumSq += v * v;
                         }
                         const rms = Math.sqrt(sumSq / timeDomainData.length);
-                        return Math.min(1, rms * 6.5);
+                        return Math.min(1, rms * 6.8);
                     } catch (e) {
                         return 0;
                     }
